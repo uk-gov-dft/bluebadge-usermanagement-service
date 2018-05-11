@@ -1,4 +1,6 @@
 
+apply plugin: 'maven'
+
 dependencies {
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.0.1.RELEASE'
     compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.5'
@@ -12,3 +14,4 @@ sourceSets {
         }
     }
 }
+

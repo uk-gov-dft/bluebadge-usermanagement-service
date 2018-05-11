@@ -28,3 +28,13 @@ createuser -W developer -P
 createdb bb_dev
 psql bb_dev -U developer
 ```
+
+
+## DEPLOYING ARTIFACTS TO LOCAL MAVEN REPOSITORY
+```
+cd model
+gradle install
+cd ..
+cd client
+gradle install
+```
