@@ -22,7 +22,7 @@ public class UserManagementService {
     return repository.retrieveUserById(userId);
   }
 
-  public int createUser(UserEntity user){
+  public int createUser(UserEntity user) {
     return repository.createUser(user);
   }
 }

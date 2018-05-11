@@ -20,26 +20,26 @@ public class UserManagementRepositoryTest {
     UserEntity la = new UserEntity();
     la.setId(-1);
     la.setName("TestCreate");
-//    la.setLocalAuthorityAreaId("Scotland");
-//    int result = userManagementRepository.createLocalAuthority(la);
-//    Assert.assertEquals(result, 1);
+    //    la.setLocalAuthorityAreaId("Scotland");
+    //    int result = userManagementRepository.createLocalAuthority(la);
+    //    Assert.assertEquals(result, 1);
   }
 
   @Test
   public void selectLocalAuthorityById() {
     givenALocalAuthorityExistsWithId(-1L);
     // When local authority selected.
-//    Optional<UserEntity> selected =
-//        userManagementRepository.selectLocalAuthorityById(-1L);
-//    // Then local authority exists.
-//    Assert.assertTrue(selected.isPresent());
+    //    Optional<UserEntity> selected =
+    //        userManagementRepository.selectLocalAuthorityById(-1L);
+    //    // Then local authority exists.
+    //    Assert.assertTrue(selected.isPresent());
   }
 
   @Test
   public void selectLocalAuthorities() {
     givenALocalAuthorityExistsWithId(-1L);
-//    List<UserEntity> las = userManagementRepository.selectLocalAuthorities();
-//    Assert.assertTrue(las.size() > 0);
+    //    List<UserEntity> las = userManagementRepository.selectLocalAuthorities();
+    //    Assert.assertTrue(las.size() > 0);
   }
 
   @Test
@@ -48,23 +48,23 @@ public class UserManagementRepositoryTest {
     UserEntity toUpdate = new UserEntity();
     toUpdate.setName("TestUpdatedName");
     toUpdate.setId(-1);
-//    toUpdate.setLocalAuthorityAreaId("Scotland");
-//    int result = userManagementRepository.updateLocalAuthority(toUpdate);
-//    Assert.assertEquals(result, 1);
+    //    toUpdate.setLocalAuthorityAreaId("Scotland");
+    //    int result = userManagementRepository.updateLocalAuthority(toUpdate);
+    //    Assert.assertEquals(result, 1);
   }
 
   @Test
   public void deleteLocalAuthority() {
     givenALocalAuthorityExistsWithId(-1L);
-//    int result = userManagementRepository.deleteLocalAuthority(-1L);
-//    Assert.assertEquals(result, 1);
-//    Optional<UserEntity> la = userManagementRepository.selectLocalAuthorityById(-1L);
-//    Assert.assertFalse(la.isPresent());
+    //    int result = userManagementRepository.deleteLocalAuthority(-1L);
+    //    Assert.assertEquals(result, 1);
+    //    Optional<UserEntity> la = userManagementRepository.selectLocalAuthorityById(-1L);
+    //    Assert.assertFalse(la.isPresent());
   }
 
   private void givenALocalAuthorityExistsWithId(long id) {
-//    Optional<UserEntity> existing = userManagementRepository.selectLocalAuthorityById(id);
-/*
+    //    Optional<UserEntity> existing = userManagementRepository.selectLocalAuthorityById(id);
+    /*
     if (!existing.isPresent()) {
       UserEntity newLA = new UserEntity();
       newLA.setId(-1);
@@ -76,10 +76,10 @@ public class UserManagementRepositoryTest {
   }
 
   private void givenNoLocalAuthorityWithId(long id) {
-  //  Optional<UserEntity> existing = userManagementRepository.selectLocalAuthorityById(id);
+    //  Optional<UserEntity> existing = userManagementRepository.selectLocalAuthorityById(id);
 
-//    if (existing.isPresent()) {
- //     userManagementRepository.deleteLocalAuthority(id);
- //   }
+    //    if (existing.isPresent()) {
+    //     userManagementRepository.deleteLocalAuthority(id);
+    //   }
   }
 }

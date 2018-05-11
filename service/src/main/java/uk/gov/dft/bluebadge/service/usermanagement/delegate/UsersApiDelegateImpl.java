@@ -1,5 +1,6 @@
 package uk.gov.dft.bluebadge.service.usermanagement.delegate;
 
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,8 +11,6 @@ import uk.gov.dft.bluebadge.service.usermanagement.controller.UsersApiDelegate;
 import uk.gov.dft.bluebadge.service.usermanagement.converter.UserConverter;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.UserManagementService;
-
-import java.util.Optional;
 
 @Component
 public class UsersApiDelegateImpl implements UsersApiDelegate {
@@ -35,7 +34,8 @@ public class UsersApiDelegateImpl implements UsersApiDelegate {
   }
 
   @Override
-  public ResponseEntity<UserResponse> authoritiesAuthorityIdUsersPost(Integer authorityId, User user) {
+  public ResponseEntity<UserResponse> authoritiesAuthorityIdUsersPost(
+      Integer authorityId, User user) {
     UserConverter converter = new UserConverter();
     UserEntity entity = converter.convertToEntity(user);
     int result = service.createUser(entity);

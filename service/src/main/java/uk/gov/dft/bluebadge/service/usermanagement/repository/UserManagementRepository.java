@@ -1,5 +1,7 @@
 package uk.gov.dft.bluebadge.service.usermanagement.repository;
 
+import java.util.List;
+import java.util.Optional;
 import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,12 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 
-import java.util.List;
-import java.util.Optional;
-
-/**
- * Provides CRUD operations on UserEntity entity + user management.
- */
+/** Provides CRUD operations on UserEntity entity + user management. */
 @SuppressWarnings("WeakerAccess")
 @Component
 public class UserManagementRepository {
@@ -31,8 +28,7 @@ public class UserManagementRepository {
    * @return The retrieved UserEntity
    */
   public Optional<UserEntity> retrieveUserById(int id) {
-    UserEntity userEntity =
-        this.sqlSession.selectOne("retrieveUserById", id);
+    UserEntity userEntity = this.sqlSession.selectOne("retrieveUserById", id);
     if (null == userEntity) {
       LOGGER.warn("Attempt to retrieve UserEntity id:{} that does not exist.", id);
     }
