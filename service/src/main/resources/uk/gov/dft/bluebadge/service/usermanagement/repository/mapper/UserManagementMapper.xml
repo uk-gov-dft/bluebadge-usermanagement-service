@@ -35,4 +35,8 @@
         WHERE id = #{id}
     </delete>
 
+    <select id="checkUserExistsForEmail" parameterType="String" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM users WHERE email_address = TRIM(#{emailAddress}))
+    </select>
+
 </mapper>

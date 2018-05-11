@@ -76,4 +76,15 @@ public interface UsersApi {
         return getDelegate().authoritiesAuthorityIdUsersUserIdGet(authorityId, userId);
     }
 
+
+    @ApiOperation(value = "Check user for email address exists.", nickname = "usersGet", notes = "Returns true if user exists ", response = Boolean.class, tags={ "Users", })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "A boolean for user existance.", response = Boolean.class) })
+    @RequestMapping(value = "/users",
+        produces = { "application/json" }, 
+        method = RequestMethod.GET)
+    default ResponseEntity<Boolean> usersGet(@NotNull @ApiParam(value = "User email address to check for.", required = true) @Valid @RequestParam(value = "emailAddress", required = true) String emailAddress) {
+        return getDelegate().usersGet(emailAddress);
+    }
+
 }

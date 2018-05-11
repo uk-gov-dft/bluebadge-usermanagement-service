@@ -109,4 +109,23 @@ public interface UsersApiDelegate {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
+    /**
+     * @see UsersApi#usersGet
+     */
+    default ResponseEntity<Boolean> usersGet(String emailAddress) {
+        if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
+            if (getAcceptHeader().get().contains("application/json")) {
+                try {
+                    return new ResponseEntity<>(getObjectMapper().get().readValue("false", Boolean.class), HttpStatus.NOT_IMPLEMENTED);
+                } catch (IOException e) {
+                    log.error("Couldn't serialize response for content type application/json", e);
+                    return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+            }
+        } else {
+            log.warn("ObjectMapper or HttpServletRequest not configured in default UsersApi interface so no example is generated");
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    }
+
 }
