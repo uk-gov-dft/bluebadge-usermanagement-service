@@ -1,0 +1,252 @@
+{
+  "spec": {
+    "swagger" : "2.0",
+    "info" : {
+      "title" : "UserManagementService API",
+      "description" : "Contains a sample get/create user implementation",
+      "version" : "1.0.0"
+    },
+    "schemes" : [ "https", "http" ],
+    "produces" : [ "application/json" ],
+    "paths" : {
+      "/authorities/{authorityId}/users" : {
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "authorityId",
+          "type" : "integer",
+          "required" : true,
+          "description" : "ID of the authority."
+        } ],
+        "get" : {
+          "summary" : "List of all Users",
+          "description" : "Returns a list of Users\n",
+          "tags" : [ "Users" ],
+          "responses" : {
+            "200" : {
+              "description" : "An array of users",
+              "schema" : {
+                "type" : "array",
+                "items" : {
+                  "$ref" : "#/definitions/User"
+                }
+              }
+            },
+            "default" : {
+              "description" : "Unexpected error",
+              "schema" : {
+                "$ref" : "#/definitions/Error"
+              }
+            }
+          }
+        },
+        "post" : {
+          "summary" : "Create a user",
+          "description" : "Create a user",
+          "tags" : [ "Users" ],
+          "parameters" : [ {
+            "name" : "user",
+            "in" : "body",
+            "schema" : {
+              "$ref" : "#/definitions/User"
+            }
+          } ],
+          "responses" : {
+            "200" : {
+              "description" : "OK",
+              "schema" : {
+                "$ref" : "#/definitions/UserResponse"
+              }
+            }
+          }
+        }
+      },
+      "/authorities/{authorityId}/users/{userId}" : {
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "authorityId",
+          "type" : "integer",
+          "required" : true,
+          "description" : "ID of the authority."
+        } ],
+        "get" : {
+          "tags" : [ "Users" ],
+          "parameters" : [ {
+            "in" : "path",
+            "name" : "userId",
+            "type" : "integer",
+            "required" : true,
+            "description" : "Numeric ID of the user to get."
+          } ],
+          "summary" : "Retrieve a specific user",
+          "description" : "Retrieve a user and their roles",
+          "responses" : {
+            "200" : {
+              "description" : "OK",
+              "schema" : {
+                "$ref" : "#/definitions/UserResponse"
+              }
+            }
+          }
+        },
+        "delete" : {
+          "tags" : [ "Users" ],
+          "parameters" : [ {
+            "in" : "path",
+            "name" : "userId",
+            "type" : "integer",
+            "required" : true,
+            "description" : "Numeric ID of the user to get."
+          } ],
+          "summary" : "Removes a User from a Local Authority",
+          "description" : "Removes a User from a Local Authority",
+          "responses" : {
+            "204" : {
+              "description" : "Resource Successfully Removed"
+            },
+            "404" : {
+              "description" : "Resource Not Found",
+              "schema" : {
+                "$ref" : "#/definitions/CommonResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "definitions" : {
+      "UserResponse" : {
+        "type" : "object",
+        "allOf" : [ {
+          "$ref" : "#/definitions/CommonResponse"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "data" : {
+              "$ref" : "#/definitions/User"
+            }
+          }
+        } ]
+      },
+      "User" : {
+        "allOf" : [ {
+          "$ref" : "#/definitions/Data"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "id" : {
+              "type" : "integer",
+              "description" : "Unique identifier representing a specific user.",
+              "example" : 1
+            },
+            "name" : {
+              "type" : "string",
+              "description" : "Users name.",
+              "example" : "Robert Worthington"
+            },
+            "emailAddress" : {
+              "type" : "string",
+              "description" : "email address.",
+              "example" : "rob.worthington@norealserver.com"
+            },
+            "localAuthorityId" : {
+              "type" : "integer",
+              "description" : "Id of Local Authority user belongs to",
+              "example" : 2
+            }
+          }
+        } ]
+      },
+      "CommonResponse" : {
+        "type" : "object",
+        "properties" : {
+          "apiVersion" : {
+            "type" : "string"
+          },
+          "context" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "method" : {
+            "type" : "string"
+          },
+          "errors" : {
+            "type" : "object"
+          },
+          "data" : {
+            "$ref" : "#/definitions/Data"
+          },
+          "error" : {
+            "$ref" : "#/definitions/Error"
+          }
+        }
+      },
+      "Data" : {
+        "type" : "object",
+        "properties" : {
+          "totalItems" : {
+            "type" : "integer"
+          }
+        }
+      },
+      "Error" : {
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "integer"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "errors" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "field" : {
+                  "type" : "string"
+                },
+                "reason" : {
+                  "type" : "string"
+                },
+                "message" : {
+                  "type" : "string"
+                },
+                "location" : {
+                  "type" : "string"
+                },
+                "locationType" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "host" : "virtserver.swaggerhub.com",
+    "basePath" : "/uk-gov-dft/UserManagementService/1.0.0"
+  },
+  "options": {
+    "java8" : true,
+    "sortParamsByRequiredFlag" : false,
+    "modelPackage" : "uk.gov.dft.bluebadge.model.usermanagement",
+    "apiPackage" : "uk.gov.dft.bluebadge.service.usermanagement.controller",
+    "groupId" : "uk.gov.dft.bluebadge",
+    "artifactId" : "user-management-service",
+    "artifactVersion" : "1.0.0-SNAPSHOT",
+    "sourceFolder" : "generated/src/main/java",
+    "dateLibrary" : "java8-localdatetime",
+    "delegatePattern" : true,
+    "title" : "process-sample",
+    "configPackage" : "uk.gov.dft.bluebadge.service.usermanagement.config.swagger",
+    "basePackage" : "uk.gov.dft.bluebadge.dontneed.usermanagement.application",
+    "useBeanValidation" : false,
+    "performBeanValidation" : false,
+    "useOptional" : true,
+    "useTags" : true,
+    "hideGenerationTimestamp" : true,
+    "appVersion" : "1.0"
+  }
+}
