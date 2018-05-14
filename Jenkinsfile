@@ -1,7 +1,5 @@
 node {
 
-    import jenkins.model.*
-    jenkins = Jenkins.instance
     // Get Artifactory server instance, defined in the Artifactory Plugin administration page.
     def server = Artifactory.server "dftbluebadge"
     // Create an Artifactory Gradle instance.
