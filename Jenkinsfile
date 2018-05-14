@@ -7,7 +7,8 @@ node {
     stage('Clone sources') {
       git(
            url: 'git@github.com:uk-gov-dft/usermanagement-service.git',
-           credentialsId: 'githubsshkey'
+           credentialsId: 'githubsshkey',
+           branch: "${branch}"
         )
     }
 
