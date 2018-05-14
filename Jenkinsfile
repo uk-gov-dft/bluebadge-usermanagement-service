@@ -5,7 +5,11 @@ node {
     def rtGradle = Artifactory.newGradleBuild()
 
     stage 'Clone sources'
-        git url: 'git@github.com:uk-gov-dft/usermanagement-service.git'
+      git(
+           url: 'git@github.com:uk-gov-dft/usermanagement-service.git',
+           credentialsId: 'githubsshkey',
+           branch: "${branch}"
+        )
 
     stage 'Artifactory configuration'
         // Tool name from Jenkins configuration
