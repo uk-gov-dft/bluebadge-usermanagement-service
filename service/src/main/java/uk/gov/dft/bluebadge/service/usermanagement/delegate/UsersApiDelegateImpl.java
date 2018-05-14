@@ -1,7 +1,7 @@
 package uk.gov.dft.bluebadge.service.usermanagement.delegate;
 
-import org.apache.commons.lang3.StringUtils;
 import java.util.Optional;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +25,7 @@ class UsersApiDelegateImpl implements UsersApiDelegate {
 
   @Override
   public ResponseEntity<UserResponse> authoritiesAuthorityIdUsersUserIdGet(
-          Integer authorityId, Integer userId) {
+      Integer authorityId, Integer userId) {
     Optional<UserEntity> userEntity = service.retrieveUserById(userId);
     UserConverter converter = new UserConverter();
     User user = converter.convertToModel(userEntity.get());
