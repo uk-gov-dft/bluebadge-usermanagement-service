@@ -40,18 +40,6 @@ public class UserManagementServiceTest {
     mockServer = MockRestServiceServer.createServer(restTemplateFactory.getInstance());
   }
 
-  @Ignore
-  @org.junit.Test
-  public void createUser() {
-    // TODO add real test.  Used this to invoke client->server in dev.
-    User newUser = new User();
-    newUser.setEmailAddress("ryy65.y@z");
-    newUser.setLocalAuthorityId(2);
-    newUser.setName("Paul");
-    UserResponse response = userManagementService.createUser(2, newUser);
-  }
-
-
   @Test
   public void checkUserExistsByEmail() {
     String requestUrl = serviceConfiguration.getUrlPrefix()

@@ -1,9 +1,8 @@
 package uk.gov.dft.bluebadge.service.usermanagement.repository.mapper;
 
+import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
-
-import java.util.List;
 
 @Mapper
 public interface UserManagementMapper {

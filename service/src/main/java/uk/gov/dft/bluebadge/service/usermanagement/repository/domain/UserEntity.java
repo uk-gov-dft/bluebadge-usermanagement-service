@@ -1,12 +1,9 @@
 package uk.gov.dft.bluebadge.service.usermanagement.repository.domain;
 
+import java.io.Serializable;
 import org.apache.ibatis.type.Alias;
 
-import java.io.Serializable;
-
-/**
- * Bean to hold a UserEntity record.
- */
+/** Bean to hold a UserEntity record. */
 @Alias("UserEntity")
 public class UserEntity implements Serializable {
   private static final long serialVersionUID = 1L;
@@ -50,11 +47,17 @@ public class UserEntity implements Serializable {
 
   @Override
   public String toString() {
-    return "UserEntity{" +
-            "id=" + id +
-            ", localAuthorityId=" + localAuthorityId +
-            ", name='" + name + '\'' +
-            ", emailAddress='" + emailAddress + '\'' +
-            '}';
+    return "UserEntity{"
+        + "id="
+        + id
+        + ", localAuthorityId="
+        + localAuthorityId
+        + ", name='"
+        + name
+        + '\''
+        + ", emailAddress='"
+        + emailAddress
+        + '\''
+        + '}';
   }
 }
