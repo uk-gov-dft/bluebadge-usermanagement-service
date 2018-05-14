@@ -1,10 +1,12 @@
 node {
 
+    import jenkins.model.*
+    jenkins = Jenkins.instance
     // Get Artifactory server instance, defined in the Artifactory Plugin administration page.
     def server = Artifactory.server "dftbluebadge"
     // Create an Artifactory Gradle instance.
     def rtGradle = Artifactory.newGradleBuild()
-    
+    rtGradle.useWrapper = true
 
     stage('Clone sources') {
       git(
@@ -21,8 +23,7 @@ node {
         rtGradle.deployer repo:'gradle-release-local', server: server
 
     stage ('Gradle build') {
-        rtGradle.useWrapper = true
-        def buildInfo = rtGradle.run switches: gradleVersion, tasks: 'clean build artifactoryPublish'
+        def buildInfo = rtGradle.run  tasks: 'clean build artifactoryPublish'
     }
 
     stage 'Publish build info'
