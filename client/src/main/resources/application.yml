@@ -1,7 +1,7 @@
 servicenameclient:
   servicehost:
     host: localhost
-    port: 8080
+    port: 8180
     scheme: http
     connectiontimeout: 6000
     requesttimeout: 6000
