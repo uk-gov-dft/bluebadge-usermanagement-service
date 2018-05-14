@@ -2,6 +2,7 @@ package uk.gov.dft.bluebadge.client.usermanagement.configuration;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Configuration
 public class ServiceConfiguration {
@@ -68,6 +69,7 @@ public class ServiceConfiguration {
     }
 
     public String getUrlPrefix(){
-        return scheme + "://" + host + ":" + port + "/" + contextPath;
+        return UriComponentsBuilder.newInstance().scheme(scheme).host(host)
+                .port(port).path(contextPath).build().toUriString();
     }
 }

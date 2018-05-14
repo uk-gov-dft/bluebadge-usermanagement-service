@@ -9,6 +9,30 @@
     "schemes" : [ "https", "http" ],
     "produces" : [ "application/json" ],
     "paths" : {
+      "/users" : {
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "emailAddress",
+          "type" : "string",
+          "required" : true,
+          "description" : "User email address to check for."
+        } ],
+        "get" : {
+          "summary" : "Check user for email address exists.",
+          "description" : "Returns true if user exists\n",
+          "tags" : [ "Users" ],
+          "responses" : {
+            "200" : {
+              "description" : "A boolean for user existance.",
+              "schema" : {
+                "type" : "boolean",
+                "description" : "true if user exists\n",
+                "example" : false
+              }
+            }
+          }
+        }
+      },
       "/authorities/{authorityId}/users" : {
         "parameters" : [ {
           "in" : "path",

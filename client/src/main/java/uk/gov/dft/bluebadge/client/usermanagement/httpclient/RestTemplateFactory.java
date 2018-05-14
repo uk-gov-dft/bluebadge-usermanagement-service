@@ -3,22 +3,29 @@ package uk.gov.dft.bluebadge.client.usermanagement.httpclient;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 @Component
 public class RestTemplateFactory {
-    private CloseableHttpClient httpClient
-            = HttpClients.custom()
-            .setSSLHostnameVerifier(new NoopHostnameVerifier())
-            .build();
+  private CloseableHttpClient httpClient
+          = HttpClients.custom()
+          .setSSLHostnameVerifier(new NoopHostnameVerifier())
+          .build();
 
-    public RestTemplate getInstance() {
-        HttpComponentsClientHttpRequestFactory requestFactory
-                = new HttpComponentsClientHttpRequestFactory();
-        requestFactory.setHttpClient(httpClient);
-        return new RestTemplate(requestFactory);
-    }
+  private RestTemplate restTemplate;
 
+  public RestTemplateFactory() {
+    this.restTemplate = new RestTemplate();
+    HttpComponentsClientHttpRequestFactory requestFactory
+            = new HttpComponentsClientHttpRequestFactory();
+    requestFactory.setHttpClient(httpClient);
+    this.restTemplate.setRequestFactory(requestFactory);
+  }
+
+  public RestTemplate getInstance() {
+    return restTemplate;
+  }
 }
