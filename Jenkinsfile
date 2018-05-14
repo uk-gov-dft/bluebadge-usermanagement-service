@@ -8,7 +8,7 @@ node {
       git(
            url: 'git@github.com:uk-gov-dft/usermanagement-service.git',
            credentialsId: 'githubsshkey',
-           branch: "${branch}"
+           branch: "${BRANCH_NAME}"
         )
     }
 
