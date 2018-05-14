@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.dft.bluebadge.service.usermanagement.ServiceApplication;
-import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ServiceApplication.class)
@@ -17,9 +16,9 @@ public class UserManagementRepositoryTest {
   @Test
   public void createLocalAuthority() {
     givenNoLocalAuthorityWithId(-1L);
-    UserEntity la = new UserEntity();
+    /*UserEntity la = new UserEntity();
     la.setId(-1);
-    la.setName("TestCreate");
+    la.setName("TestCreate");*/
     //    la.setLocalAuthorityAreaId("Scotland");
     //    int result = userManagementRepository.createLocalAuthority(la);
     //    Assert.assertEquals(result, 1);
@@ -45,9 +44,9 @@ public class UserManagementRepositoryTest {
   @Test
   public void updateLocalAuthority() {
     givenALocalAuthorityExistsWithId(-1L);
-    UserEntity toUpdate = new UserEntity();
+    /*UserEntity toUpdate = new UserEntity();
     toUpdate.setName("TestUpdatedName");
-    toUpdate.setId(-1);
+    toUpdate.setId(-1);*/
     //    toUpdate.setLocalAuthorityAreaId("Scotland");
     //    int result = userManagementRepository.updateLocalAuthority(toUpdate);
     //    Assert.assertEquals(result, 1);

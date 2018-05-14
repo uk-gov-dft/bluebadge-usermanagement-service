@@ -38,7 +38,8 @@ public class UsersApiDelegateImpl implements UsersApiDelegate {
       Integer authorityId, User user) {
     UserConverter converter = new UserConverter();
     UserEntity entity = converter.convertToEntity(user);
-    int result = service.createUser(entity);
+    //int result =
+    service.createUser(entity);
     user = converter.convertToModel(entity);
     UserResponse userResponse = new UserResponse();
     userResponse.setData(user);

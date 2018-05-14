@@ -29,6 +29,7 @@ public class UserManagementServiceTest {
     newUser.setEmailAddress("ryy65.y@z");
     newUser.setLocalAuthorityId(2);
     newUser.setName("Paul");
-    UserResponse response = userManagementService.createUser(2, newUser);
+    //UserResponse response =
+            userManagementService.createUser(2, newUser);
   }
 }
