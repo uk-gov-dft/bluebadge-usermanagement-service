@@ -4,12 +4,12 @@ node {
     // Create an Artifactory Gradle instance.
     def rtGradle = Artifactory.newGradleBuild()
 
-    stage 'Clone sources'
+    stage('Clone sources') {
       git(
            url: 'git@github.com:uk-gov-dft/usermanagement-service.git',
-           credentialsId: 'githubsshkey',
-           branch: "${branch}"
+           credentialsId: 'githubsshkey'
         )
+    }
 
     stage 'Artifactory configuration'
         // Tool name from Jenkins configuration
