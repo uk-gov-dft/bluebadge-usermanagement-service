@@ -4,7 +4,6 @@ node {
     def server = Artifactory.server "dftbluebadge"
     // Create an Artifactory Gradle instance.
     def rtGradle = Artifactory.newGradleBuild()
-    rtGradle.useWrapper = true
 
     stage('Clone sources') {
       git(
