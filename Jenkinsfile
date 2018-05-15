@@ -2,24 +2,28 @@ def version = "${env.BUILD_NUMBER}"
 
 node {
 
-    // Get Artifactory server instance, defined in the Artifactory Plugin administration page.
+        // Get Artifactory server instance, defined in the Artifactory Plugin administration page.
     def server = Artifactory.server "dftbluebadge"
     // Create an Artifactory Gradle instance.
     def rtGradle = Artifactory.newGradleBuild()
-    //rtGradle.useWrapper = true
-    rtGradle.deployer server: server, repo: 'maven'
     
-    def gradleVersion = '-Pversion=' + version
-
-    rtGradle.run switches: gradleVersion, tasks: 'build'
-    
-    stage('Clone sources') {
+     stage('Clone sources') {
       git(
            url: 'git@github.com:uk-gov-dft/usermanagement-service.git',
            credentialsId: 'githubsshkey',
            branch: "${BRANCH_NAME}"
         )
     }
+    
+    stage ('Gradle build Step 1') {
+        //rtGradle.useWrapper = true
+        rtGradle.deployer server: server, repo: 'maven'
+
+        def gradleVersion = '-Pversion=' + version
+
+        rtGradle.run switches: gradleVersion, tasks: 'build'
+    }
+
 
     //stage ('Artifactory configuration') {
         // Tool name from Jenkins configuration
