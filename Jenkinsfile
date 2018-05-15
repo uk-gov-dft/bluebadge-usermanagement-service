@@ -15,15 +15,6 @@ node {
         )
     }
     
-    stage ('Gradle build Step 1') {
-        //rtGradle.useWrapper = true
-        rtGradle.deployer server: server, repo: 'maven'
-
-        def gradleVersion = '-Pversion=' + version
-
-        rtGradle.run switches: gradleVersion, tasks: 'build'
-    }
-
 
     stage ('Artifactory configuration') {
         // Tool name from Jenkins configuration
