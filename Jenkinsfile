@@ -18,7 +18,7 @@ node {
 
     stage ('Artifactory configuration') {
         // Tool name from Jenkins configuration
-        rtGradle.tool = "Gradle-4.7"
+        rtGradle.tool = "Gradle-2.4"
         // Set Artifactory repositories for dependencies resolution and artifacts deployment.
             
         rtGradle.deployer repo:'gradle-release', server: server
