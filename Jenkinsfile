@@ -1,11 +1,17 @@
+def version = "${env.BUILD_NUMBER}"
+
 node {
 
     // Get Artifactory server instance, defined in the Artifactory Plugin administration page.
     def server = Artifactory.server "dftbluebadge"
     // Create an Artifactory Gradle instance.
     def rtGradle = Artifactory.newGradleBuild()
-    rtGradle.useWrapper = true
+    //rtGradle.useWrapper = true
     rtGradle.deployer server: server, repo: 'maven'
+    
+    def gradleVersion = '-Pversion=' + version
+
+    rtGradle.run switches: gradleVersion, tasks: 'build'
     
     stage('Clone sources') {
       git(
