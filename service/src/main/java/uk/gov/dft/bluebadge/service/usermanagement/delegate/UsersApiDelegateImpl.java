@@ -1,5 +1,6 @@
 package uk.gov.dft.bluebadge.service.usermanagement.delegate;
 
+import org.apache.commons.lang3.StringUtils;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,9 +14,9 @@ import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.UserManagementService;
 
 @Component
-public class UsersApiDelegateImpl implements UsersApiDelegate {
+class UsersApiDelegateImpl implements UsersApiDelegate {
 
-  private UserManagementService service;
+  private final UserManagementService service;
 
   @Autowired
   public UsersApiDelegateImpl(UserManagementService service) {
@@ -24,7 +25,7 @@ public class UsersApiDelegateImpl implements UsersApiDelegate {
 
   @Override
   public ResponseEntity<UserResponse> authoritiesAuthorityIdUsersUserIdGet(
-      Integer authorityId, Integer userId) {
+          Integer authorityId, Integer userId) {
     Optional<UserEntity> userEntity = service.retrieveUserById(userId);
     UserConverter converter = new UserConverter();
     User user = converter.convertToModel(userEntity.get());
@@ -43,5 +44,25 @@ public class UsersApiDelegateImpl implements UsersApiDelegate {
     UserResponse userResponse = new UserResponse();
     userResponse.setData(user);
     return new ResponseEntity<>(userResponse, HttpStatus.OK);
+  }
+
+  /**
+   * Existence check for user email address
+   *
+   * @param emailAddress Email address to check for
+   * @return true if exists and request ok else false.
+   */
+  @Override
+  public ResponseEntity<Boolean> usersGet(String emailAddress) {
+    if (StringUtils.isEmpty(emailAddress)) {
+      return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
+    }
+
+    try {
+      boolean exists = service.checkUserExistsForEmail(emailAddress);
+      return new ResponseEntity<>(exists, HttpStatus.OK);
+    } catch (Exception e) {
+      return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

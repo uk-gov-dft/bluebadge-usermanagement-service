@@ -88,4 +88,8 @@ public class UserManagementRepository {
     }
     return result;
   }
+
+  public boolean checkUserExistsForEmail(String emailAddress) {
+    return sqlSession.selectOne("checkUserExistsForEmail", emailAddress);
+  }
 }

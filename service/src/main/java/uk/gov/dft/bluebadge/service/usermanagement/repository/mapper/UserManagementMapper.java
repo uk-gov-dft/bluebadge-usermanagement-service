@@ -10,6 +10,8 @@ public interface UserManagementMapper {
 
   List<UserEntity> retrieveUsersByAuthorityId(int id);
 
+  boolean checkUserExistsForEmail(String emailAddress);
+
   void updateUser(UserEntity userEntity);
 
   void createUser(UserEntity userEntity);
