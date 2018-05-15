@@ -13,14 +13,15 @@ node {
         )
     }
 
-    stage 'Artifactory configuration'
+    stage ('Artifactory configuration') {
         // Tool name from Jenkins configuration
         rtGradle.tool = "Gradle-4.7"
         // Set Artifactory repositories for dependencies resolution and artifacts deployment.
         rtGradle.deployer repo:'gradle-release-local', server: server
-
+    }
+    
     stage ('Gradle build') {
-        def buildInfo = rtGradle.run  tasks: 'clean wrapper build artifactoryPublish'
+        def buildInfo = rtGradle.run  tasks: 'clean'
     }
 
     stage 'Publish build info'
