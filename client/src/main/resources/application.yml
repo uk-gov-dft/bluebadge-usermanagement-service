@@ -5,4 +5,5 @@ servicenameclient:
     scheme: http
     connectiontimeout: 6000
     requesttimeout: 6000
-    contextpath: uk-gov-dft/service-template-api/1.0.0
+    contextpath: /uk-gov-dft/service-template-api/1.0.0
+
