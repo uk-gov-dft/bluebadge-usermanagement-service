@@ -1,5 +1,5 @@
 def version = "${env.BUILD_NUMBER}"
-def reponame = scm.getUserRemoteConfigs()[0].getUrl().tokenize('/.')[-2]
+def REPONAME = "${scm.getUserRemoteConfigs()[0].getUrl()}"
 println reponame
 node {
 
@@ -10,7 +10,7 @@ node {
     
      stage('Clone sources') {
       git(
-           url: 'git@github.com:uk-gov-dft/usermanagement-service.git',
+           url: '${REPONAME}',
            credentialsId: 'githubsshkey',
            branch: "${BRANCH_NAME}"
         )
