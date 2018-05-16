@@ -1,5 +1,6 @@
 def version = "${env.BUILD_NUMBER}"
-
+def reponame = scm.getUserRemoteConfigs()[0].getUrl().tokenize('/.')[-2]
+println reponame
 node {
 
         // Get Artifactory server instance, defined in the Artifactory Plugin administration page.
