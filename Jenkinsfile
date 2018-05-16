@@ -15,25 +15,18 @@ node {
         )
     }
     
-    stage ('Gradle build Step 1') {
-        //rtGradle.useWrapper = true
-        rtGradle.deployer server: server, repo: 'maven'
 
-        def gradleVersion = '-Pversion=' + version
-
-        rtGradle.run switches: gradleVersion, tasks: 'build'
-    }
-
-
-    //stage ('Artifactory configuration') {
+    stage ('Artifactory configuration') {
         // Tool name from Jenkins configuration
-        //rtGradle.tool = "Gradle-4.7"
+        rtGradle.tool = "Gradle-4.7"
         // Set Artifactory repositories for dependencies resolution and artifacts deployment.
-        //rtGradle.deployer repo:'gradle-release-local', server: server
-    //}
+            
+        rtGradle.deployer repo:'gradle-release-local', server: server
+        rtGradle.resolver repo:'gradle-release', server: server
+    }
     
     stage ('Gradle build') {
-        def buildInfo = rtGradle.run  tasks: 'build'
+        def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'build'
     }
 
     stage 'Publish build info'
