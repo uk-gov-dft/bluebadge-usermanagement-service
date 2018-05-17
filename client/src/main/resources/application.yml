@@ -1,10 +1,9 @@
 servicenameclient:
   servicehost:
     host: localhost
-    port: 8080
+    port: 8180
     scheme: http
     connectiontimeout: 6000
     requesttimeout: 6000
     contextpath: /uk-gov-dft/service-template-api/1.0.0
-server:
-  port: 9090
+
