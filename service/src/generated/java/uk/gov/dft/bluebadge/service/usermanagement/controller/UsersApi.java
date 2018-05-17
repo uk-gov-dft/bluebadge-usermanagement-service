@@ -5,7 +5,6 @@
 package uk.gov.dft.bluebadge.service.usermanagement.controller;
 
 import io.swagger.annotations.*;
-import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +17,7 @@ import uk.gov.dft.bluebadge.model.usermanagement.CommonResponse;
 import uk.gov.dft.bluebadge.model.usermanagement.Error;
 import uk.gov.dft.bluebadge.model.usermanagement.User;
 import uk.gov.dft.bluebadge.model.usermanagement.UserResponse;
+import uk.gov.dft.bluebadge.model.usermanagement.UsersResponse;
 
 @Api(value = "Users", description = "the Users API")
 public interface UsersApi {
@@ -28,20 +28,14 @@ public interface UsersApi {
     value = "List of all Users",
     nickname = "authoritiesAuthorityIdUsersGet",
     notes = "Returns a list of Users ",
-    response = User.class,
-    responseContainer = "List",
+    response = UsersResponse.class,
     tags = {
       "Users",
     }
   )
   @ApiResponses(
     value = {
-      @ApiResponse(
-        code = 200,
-        message = "An array of users",
-        response = User.class,
-        responseContainer = "List"
-      ),
+      @ApiResponse(code = 200, message = "An array of users", response = UsersResponse.class),
       @ApiResponse(code = 200, message = "Unexpected error", response = Error.class)
     }
   )
@@ -50,7 +44,7 @@ public interface UsersApi {
     produces = {"application/json"},
     method = RequestMethod.GET
   )
-  default ResponseEntity<List<User>> authoritiesAuthorityIdUsersGet(
+  default ResponseEntity<UsersResponse> authoritiesAuthorityIdUsersGet(
       @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
           Integer authorityId) {
     return getDelegate().authoritiesAuthorityIdUsersGet(authorityId);

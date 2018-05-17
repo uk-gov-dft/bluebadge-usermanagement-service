@@ -3,7 +3,6 @@ package uk.gov.dft.bluebadge.service.usermanagement.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -12,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.dft.bluebadge.model.usermanagement.User;
 import uk.gov.dft.bluebadge.model.usermanagement.UserResponse;
+import uk.gov.dft.bluebadge.model.usermanagement.UsersResponse;
 
 /**
  * A delegate to be called by the {@link UsersApiController}}. Implement this interface with a
@@ -34,12 +34,12 @@ public interface UsersApiDelegate {
   }
 
   /** @see UsersApi#authoritiesAuthorityIdUsersGet */
-  default ResponseEntity<List<User>> authoritiesAuthorityIdUsersGet(Integer authorityId) {
+  default ResponseEntity<UsersResponse> authoritiesAuthorityIdUsersGet(Integer authorityId) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
       if (getAcceptHeader().get().contains("application/json")) {
         try {
           return new ResponseEntity<>(
-              getObjectMapper().get().readValue("[ \"\", \"\" ]", List.class),
+              getObjectMapper().get().readValue("\"\"", UsersResponse.class),
               HttpStatus.NOT_IMPLEMENTED);
         } catch (IOException e) {
           log.error("Couldn't serialize response for content type application/json", e);
