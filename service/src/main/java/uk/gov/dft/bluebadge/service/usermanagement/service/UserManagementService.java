@@ -1,7 +1,7 @@
 package uk.gov.dft.bluebadge.service.usermanagement.service;
 
+import java.util.List;
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,5 +29,9 @@ public class UserManagementService {
 
   public boolean checkUserExistsForEmail(String emailAddress) {
     return repository.checkUserExistsForEmail(emailAddress);
+  }
+
+  public List<UserEntity> retrieveUsersByAuthorityId(int authorityId) {
+    return repository.retrieveUsersByAuthorityId(authorityId);
   }
 }

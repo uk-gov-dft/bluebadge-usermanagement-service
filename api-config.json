@@ -49,10 +49,7 @@
             "200" : {
               "description" : "An array of users",
               "schema" : {
-                "type" : "array",
-                "items" : {
-                  "$ref" : "#/definitions/User"
-                }
+                "$ref" : "#/definitions/UsersResponse"
               }
             },
             "default" : {
@@ -138,6 +135,44 @@
       }
     },
     "definitions" : {
+      "User" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "description" : "Unique identifier representing a specific user.",
+            "example" : 1
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "Users name.",
+            "example" : "Robert Worthington"
+          },
+          "emailAddress" : {
+            "type" : "string",
+            "description" : "email address.",
+            "example" : "rob.worthington@norealserver.com"
+          },
+          "localAuthorityId" : {
+            "type" : "integer",
+            "description" : "Id of Local Authority user belongs to",
+            "example" : 2
+          }
+        }
+      },
+      "UsersResponse" : {
+        "type" : "object",
+        "allOf" : [ {
+          "$ref" : "#/definitions/CommonResponse"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "data" : {
+              "$ref" : "#/definitions/UsersData"
+            }
+          }
+        } ]
+      },
       "UserResponse" : {
         "type" : "object",
         "allOf" : [ {
@@ -146,36 +181,31 @@
           "type" : "object",
           "properties" : {
             "data" : {
-              "$ref" : "#/definitions/User"
+              "$ref" : "#/definitions/UserData"
             }
           }
         } ]
       },
-      "User" : {
+      "UserData" : {
+        "type" : "object",
+        "allOf" : [ {
+          "$ref" : "#/definitions/Data"
+        }, {
+          "$ref" : "#/definitions/User"
+        } ]
+      },
+      "UsersData" : {
+        "type" : "object",
         "allOf" : [ {
           "$ref" : "#/definitions/Data"
         }, {
           "type" : "object",
           "properties" : {
-            "id" : {
-              "type" : "integer",
-              "description" : "Unique identifier representing a specific user.",
-              "example" : 1
-            },
-            "name" : {
-              "type" : "string",
-              "description" : "Users name.",
-              "example" : "Robert Worthington"
-            },
-            "emailAddress" : {
-              "type" : "string",
-              "description" : "email address.",
-              "example" : "rob.worthington@norealserver.com"
-            },
-            "localAuthorityId" : {
-              "type" : "integer",
-              "description" : "Id of Local Authority user belongs to",
-              "example" : 2
+            "users" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/User"
+              }
             }
           }
         } ]
@@ -196,12 +226,6 @@
             "type" : "string"
           },
           "errors" : {
-            "type" : "object"
-          },
-          "data" : {
-            "$ref" : "#/definitions/Data"
-          },
-          "error" : {
             "$ref" : "#/definitions/Error"
           }
         }

@@ -6,9 +6,9 @@ import java.util.Objects;
 import javax.validation.constraints.*;
 import org.springframework.validation.annotation.Validated;
 
-/** User */
+/** UserData */
 @Validated
-public class User {
+public class UserData extends Data {
   @JsonProperty("id")
   private Integer id = null;
 
@@ -21,7 +21,7 @@ public class User {
   @JsonProperty("localAuthorityId")
   private Integer localAuthorityId = null;
 
-  public User id(Integer id) {
+  public UserData id(Integer id) {
     this.id = id;
     return this;
   }
@@ -40,7 +40,7 @@ public class User {
     this.id = id;
   }
 
-  public User name(String name) {
+  public UserData name(String name) {
     this.name = name;
     return this;
   }
@@ -59,7 +59,7 @@ public class User {
     this.name = name;
   }
 
-  public User emailAddress(String emailAddress) {
+  public UserData emailAddress(String emailAddress) {
     this.emailAddress = emailAddress;
     return this;
   }
@@ -78,7 +78,7 @@ public class User {
     this.emailAddress = emailAddress;
   }
 
-  public User localAuthorityId(Integer localAuthorityId) {
+  public UserData localAuthorityId(Integer localAuthorityId) {
     this.localAuthorityId = localAuthorityId;
     return this;
   }
@@ -105,23 +105,24 @@ public class User {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    User user = (User) o;
-    return Objects.equals(this.id, user.id)
-        && Objects.equals(this.name, user.name)
-        && Objects.equals(this.emailAddress, user.emailAddress)
-        && Objects.equals(this.localAuthorityId, user.localAuthorityId);
+    UserData userData = (UserData) o;
+    return Objects.equals(this.id, userData.id)
+        && Objects.equals(this.name, userData.name)
+        && Objects.equals(this.emailAddress, userData.emailAddress)
+        && Objects.equals(this.localAuthorityId, userData.localAuthorityId)
+        && super.equals(o);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, emailAddress, localAuthorityId);
+    return Objects.hash(id, name, emailAddress, localAuthorityId, super.hashCode());
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class User {\n");
-
+    sb.append("class UserData {\n");
+    sb.append("    ").append(toIndentedString(super.toString())).append("\n");
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    emailAddress: ").append(toIndentedString(emailAddress)).append("\n");

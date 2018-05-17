@@ -25,7 +25,7 @@ public class UserManagementRepository {
    * Retrieve a single UserEntity by id.
    *
    * @param id PK of UserEntity to select.
-   * @return The retrieved UserEntity
+   * @return The retrieved UserEntity.
    */
   public Optional<UserEntity> retrieveUserById(int id) {
     UserEntity userEntity = this.sqlSession.selectOne("retrieveUserById", id);
@@ -38,14 +38,14 @@ public class UserManagementRepository {
   /**
    * Retrieve all UserEntity's for a local authority.
    *
-   * @return List of all UserEntity's
+   * @return List of all UserEntity's.
    */
-  public List<UserEntity> retrieveUsersByAuthorityId() {
-    return sqlSession.selectList("retrieveUsersByAuthorityId");
+  public List<UserEntity> retrieveUsersByAuthorityId(int id) {
+    return sqlSession.selectList("retrieveUsersByAuthorityId", id);
   }
 
   /**
-   * Update a UserEntity
+   * Update a UserEntity.
    *
    * @param user UserEntity bean with updated values.
    * @return Update count.
@@ -62,7 +62,7 @@ public class UserManagementRepository {
   }
 
   /**
-   * Update a UserEntity
+   * Create a UserEntity.
    *
    * @param user UserEntity to create.
    * @return Insert count.
@@ -74,7 +74,7 @@ public class UserManagementRepository {
   }
 
   /**
-   * Delete a UserEntity
+   * Delete a UserEntity.
    *
    * @param id PK of UserEntity to delete.
    * @return Delete count
@@ -89,6 +89,12 @@ public class UserManagementRepository {
     return result;
   }
 
+  /**
+   * Temporary method for login validation.
+   *
+   * @param emailAddress Email to confirm.
+   * @return True if exists.
+   */
   public boolean checkUserExistsForEmail(String emailAddress) {
     return sqlSession.selectOne("checkUserExistsForEmail", emailAddress);
   }

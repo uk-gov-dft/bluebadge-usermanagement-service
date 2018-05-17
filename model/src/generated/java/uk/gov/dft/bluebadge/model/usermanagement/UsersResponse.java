@@ -3,32 +3,34 @@ package uk.gov.dft.bluebadge.model.usermanagement;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
+import javax.validation.Valid;
 import javax.validation.constraints.*;
 import org.springframework.validation.annotation.Validated;
 
-/** Data */
+/** UsersResponse */
 @Validated
-public class Data {
-  @JsonProperty("totalItems")
-  private Integer totalItems = null;
+public class UsersResponse extends CommonResponse {
+  @JsonProperty("data")
+  private UsersData data = null;
 
-  public Data totalItems(Integer totalItems) {
-    this.totalItems = totalItems;
+  public UsersResponse data(UsersData data) {
+    this.data = data;
     return this;
   }
 
   /**
-   * Get totalItems
+   * Get data
    *
-   * @return totalItems
+   * @return data
    */
   @ApiModelProperty(value = "")
-  public Integer getTotalItems() {
-    return totalItems;
+  @Valid
+  public UsersData getData() {
+    return data;
   }
 
-  public void setTotalItems(Integer totalItems) {
-    this.totalItems = totalItems;
+  public void setData(UsersData data) {
+    this.data = data;
   }
 
   @Override
@@ -39,21 +41,21 @@ public class Data {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    Data data = (Data) o;
-    return Objects.equals(this.totalItems, data.totalItems);
+    UsersResponse usersResponse = (UsersResponse) o;
+    return Objects.equals(this.data, usersResponse.data) && super.equals(o);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(totalItems);
+    return Objects.hash(data, super.hashCode());
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class Data {\n");
-
-    sb.append("    totalItems: ").append(toIndentedString(totalItems)).append("\n");
+    sb.append("class UsersResponse {\n");
+    sb.append("    ").append(toIndentedString(super.toString())).append("\n");
+    sb.append("    data: ").append(toIndentedString(data)).append("\n");
     sb.append("}");
     return sb.toString();
   }
