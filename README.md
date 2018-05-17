@@ -28,3 +28,24 @@ createuser -W developer -P
 createdb bb_dev
 psql bb_dev -U developer
 ```
+
+You may need to create the database using the (database-schemas project)[https://github.com/uk-gov-dft/database-schemas], please read the 
+[database-schemes Readme](https://github.com/uk-gov-dft/database-schemas/blob/develop/migrations/README.md)
+
+Some useful commands to test things in posgresql
+```
+psql bb_dev -U developer
+\l to show all database
+use database_name --- to change database
+\dt to list tables 
+```
+
+
+## DEPLOYING ARTIFACTS TO LOCAL MAVEN REPOSITORY
+```
+cd model
+gradle install
+cd ..
+cd client
+gradle install
+```
