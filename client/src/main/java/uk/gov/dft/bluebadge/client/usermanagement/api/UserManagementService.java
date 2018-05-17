@@ -1,6 +1,7 @@
 package uk.gov.dft.bluebadge.client.usermanagement.api;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,19 +11,25 @@ import uk.gov.dft.bluebadge.client.usermanagement.configuration.ServiceConfigura
 import uk.gov.dft.bluebadge.client.usermanagement.httpclient.RestTemplateFactory;
 import uk.gov.dft.bluebadge.model.usermanagement.User;
 import uk.gov.dft.bluebadge.model.usermanagement.UserResponse;
+import uk.gov.dft.bluebadge.model.usermanagement.UsersResponse;
+
+import java.util.List;
 
 @Service
 public class UserManagementService {
 
-  private final static String GET_USER_EXISTS_FOR_EMAIL = "/users?emailAddress={emailAddress}";
-  private final static String GET_BY_ID_ENDPOINT = "/authorities/{authorityId}/users/{userId}";
-  private final static String CREATE_ENDPOINT = "/authorities/{authorityId}/users";
+  private class UserTypeRef extends ParameterizedTypeReference<List<User>> {}
+
+  private static final String GET_USER_EXISTS_FOR_EMAIL = "/users?emailAddress={emailAddress}";
+  private static final String GET_BY_ID_ENDPOINT = "/authorities/{authorityId}/users/{userId}";
+  private static final String CREATE_ENDPOINT = "/authorities/{authorityId}/users";
+  private static final String GET_USERS_FOR_AUTHORITY_ENDPOINT = "/authorities/{authorityId}/users";
   private RestTemplateFactory restTemplateFactory;
   private ServiceConfiguration serviceConfiguration;
 
   @Autowired
-  public UserManagementService(ServiceConfiguration serviceConfiguration
-          , RestTemplateFactory restTemplateFactory) {
+  public UserManagementService(
+      ServiceConfiguration serviceConfiguration, RestTemplateFactory restTemplateFactory) {
     this.serviceConfiguration = serviceConfiguration;
     this.restTemplateFactory = restTemplateFactory;
   }
@@ -30,22 +37,51 @@ public class UserManagementService {
   public boolean checkUserExistsForEmail(String emailAddress) {
     Assert.notNull(emailAddress, "emailAddress must be supplied");
 
-    ResponseEntity<Boolean> responseEntity
-            = restTemplateFactory.getInstance().getForEntity(
-            serviceConfiguration.getUrlPrefix() + GET_USER_EXISTS_FOR_EMAIL,
-            Boolean.class, emailAddress);
+    ResponseEntity<Boolean> responseEntity =
+        restTemplateFactory
+            .getInstance()
+            .getForEntity(
+                serviceConfiguration.getUrlPrefix() + GET_USER_EXISTS_FOR_EMAIL,
+                Boolean.class,
+                emailAddress);
 
     return responseEntity.getBody();
+  }
+
+  /**
+   * Retrieve a list of users for a Local Authority wrapped in a UsersResponse.
+   *
+   * @param authorityId The Local Authority to retrieve for.
+   * @return UsersResponse containing list of Users.
+   */
+  public UsersResponse getUsersForAuthority(Integer authorityId) {
+
+    Assert.notNull(authorityId, "Local Authority Id must be provided");
+
+    ResponseEntity<UsersResponse> userListResponse =
+        restTemplateFactory
+            .getInstance()
+            .getForEntity(
+                serviceConfiguration.getUrlPrefix() + GET_USERS_FOR_AUTHORITY_ENDPOINT,
+                UsersResponse.class,
+                authorityId);
+
+    return userListResponse.getBody();
   }
 
   public UserResponse getById(Integer authorityId, Integer userId) {
     Assert.notNull(authorityId, "authorityId must be provided for getById");
     Assert.notNull(userId, "userId must be provided for getById");
 
-    UserResponse response
-            = restTemplateFactory.getInstance().getForEntity(
-            serviceConfiguration.getUrlPrefix() + GET_BY_ID_ENDPOINT,
-            UserResponse.class, authorityId, userId).getBody();
+    UserResponse response =
+        restTemplateFactory
+            .getInstance()
+            .getForEntity(
+                serviceConfiguration.getUrlPrefix() + GET_BY_ID_ENDPOINT,
+                UserResponse.class,
+                authorityId,
+                userId)
+            .getBody();
 
     return response;
   }
@@ -56,11 +92,14 @@ public class UserManagementService {
 
     HttpEntity<User> request = new HttpEntity<>(user);
 
-
-    UserResponse response
-            = restTemplateFactory.getInstance().postForObject(
-            serviceConfiguration.getUrlPrefix() + CREATE_ENDPOINT,
-            request, UserResponse.class, authorityId);
+    UserResponse response =
+        restTemplateFactory
+            .getInstance()
+            .postForObject(
+                serviceConfiguration.getUrlPrefix() + CREATE_ENDPOINT,
+                request,
+                UserResponse.class,
+                authorityId);
     return response;
   }
 }
