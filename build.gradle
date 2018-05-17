@@ -1,5 +1,9 @@
 import groovy.json.JsonSlurper
 
+plugins {
+    id "com.jfrog.artifactory" version "4.5.4"
+}
+
 
 allprojects {
     apply plugin: 'java'
@@ -63,4 +67,5 @@ task generateService(dependsOn: 'unzipGenerated', type: Sync){
     exclude '**/RFC3339DateFormat.java'
     into "service/src/generated/java/uk/gov/dft/bluebadge/service/usermanagement"
 }
+
 
