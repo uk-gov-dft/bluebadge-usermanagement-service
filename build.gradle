@@ -1,6 +1,5 @@
 import groovy.json.JsonSlurper
 
-
 allprojects {
     apply plugin: 'java'
     group = 'uk.gov.dft.bluebadge'
@@ -25,24 +24,29 @@ project(':service') {
 }
 
 task generateSwagger() {
-    new File("generated.zip").delete()
 
-    def linkRequest = "curl -X POST https://generator.swagger.io/api/gen/servers/spring -H  accept:application/json -H  Content-Type:application/json --data @api-config.json -k".execute()
+    doFirst {
+        mkdir(buildDir)
+        new File("${buildDir}/generated.zip").delete()
+    }
+    doLast {
+        def linkRequest = "curl -X POST https://generator.swagger.io/api/gen/servers/spring -H  accept:application/json -H  Content-Type:application/json --data @api-config.json -k".execute()
 
-    linkRequest.waitFor()
+        linkRequest.waitFor()
 
-    def json = new JsonSlurper().parseText(linkRequest.text)
+        def json = new JsonSlurper().parseText(linkRequest.text)
 
-    def fileRequest = "curl -X GET https://generator.swagger.io/api/gen/download/${json.code} -H  accept:application/octet-stream -o generated.zip -k".execute()
-    fileRequest.waitFor()
-    println fileRequest.err.text
-    println fileRequest.text
+        def fileRequest = "curl -X GET https://generator.swagger.io/api/gen/download/${json.code} -H  accept:application/octet-stream -o ${buildDir}/generated.zip -k".execute()
+        fileRequest.waitFor()
+        println fileRequest.err.text
+        println fileRequest.text
+    }
 }
 
 task unzipGenerated(type: Copy) {
     dependsOn tasks.findByName('generateSwagger')
     new File("${buildDir}/unpacked").delete()
-    def zipFile = file("generated.zip")
+    def zipFile = file("${buildDir}/generated.zip")
     def outputDir = file("${buildDir}/unpacked")
 
     from zipTree(zipFile)
@@ -61,6 +65,7 @@ task generateService(dependsOn: 'unzipGenerated', type: Sync){
     from "${buildDir}/unpacked/spring-server/generated/src/main/java/uk/gov/dft/bluebadge/service/usermanagement"
     exclude '**/Swagger2SpringBoot.java'
     exclude '**/RFC3339DateFormat.java'
+    exclude '**/*ApiController.java'
     into "service/src/generated/java/uk/gov/dft/bluebadge/service/usermanagement"
 }
 

@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.dft.bluebadge.client.usermanagement.configuration.ServiceConfiguration;
 import uk.gov.dft.bluebadge.client.usermanagement.httpclient.RestTemplateFactory;
 import uk.gov.dft.bluebadge.model.usermanagement.User;
@@ -23,7 +24,8 @@ public class UserManagementService {
   private static final String GET_USER_EXISTS_FOR_EMAIL = "/users?emailAddress={emailAddress}";
   private static final String GET_BY_ID_ENDPOINT = "/authorities/{authorityId}/users/{userId}";
   private static final String CREATE_ENDPOINT = "/authorities/{authorityId}/users";
-  private static final String GET_USERS_FOR_AUTHORITY_ENDPOINT = "/authorities/{authorityId}/users";
+  private static final String GET_USERS_FOR_AUTHORITY_ENDPOINT =
+      "/authorities/{authorityId}/users?name={name}";
   private RestTemplateFactory restTemplateFactory;
   private ServiceConfiguration serviceConfiguration;
 
@@ -54,18 +56,28 @@ public class UserManagementService {
    * @param authorityId The Local Authority to retrieve for.
    * @return UsersResponse containing list of Users.
    */
-  public UsersResponse getUsersForAuthority(Integer authorityId) {
+  public UsersResponse getUsersForAuthority(Integer authorityId, String nameFilter) {
 
     Assert.notNull(authorityId, "Local Authority Id must be provided");
-
+    /*
+        ResponseEntity<UsersResponse> userListResponse =
+            restTemplateFactory
+                .getInstance()
+                .getForEntity(
+                    UriComponentsBuilder.fromUriString(
+                            serviceConfiguration.getUrlPrefix() + GET_USERS_FOR_AUTHORITY_ENDPOINT)
+                        .queryParam("name", nameFilter)
+                        .build(authorityId),
+                    UsersResponse.class);
+    */
     ResponseEntity<UsersResponse> userListResponse =
         restTemplateFactory
             .getInstance()
             .getForEntity(
                 serviceConfiguration.getUrlPrefix() + GET_USERS_FOR_AUTHORITY_ENDPOINT,
                 UsersResponse.class,
-                authorityId);
-
+                authorityId,
+                nameFilter);
     return userListResponse.getBody();
   }
 

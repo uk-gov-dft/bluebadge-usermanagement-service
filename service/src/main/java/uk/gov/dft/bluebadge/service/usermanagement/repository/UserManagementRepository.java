@@ -40,8 +40,8 @@ public class UserManagementRepository {
    *
    * @return List of all UserEntity's.
    */
-  public List<UserEntity> retrieveUsersByAuthorityId(int id) {
-    return sqlSession.selectList("retrieveUsersByAuthorityId", id);
+  public List<UserEntity> retrieveUsersByAuthorityId(UserEntity userEntity) {
+    return sqlSession.selectList("retrieveUsersByAuthorityId", userEntity);
   }
 
   /**

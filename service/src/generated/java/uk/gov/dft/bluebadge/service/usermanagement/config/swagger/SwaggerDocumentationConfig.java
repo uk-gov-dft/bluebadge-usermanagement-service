@@ -15,7 +15,7 @@ public class SwaggerDocumentationConfig {
   ApiInfo apiInfo() {
     return new ApiInfoBuilder()
         .title("UserManagementService API")
-        .description("Contains a sample get/create user implementation")
+        .description("Manage Users")
         .license("")
         .licenseUrl("http://unlicense.org")
         .termsOfServiceUrl("")
