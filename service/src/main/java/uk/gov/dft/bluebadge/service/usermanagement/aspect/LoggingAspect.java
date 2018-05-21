@@ -1,4 +1,4 @@
-package uk.gov.dft.bluebadge.webapp.la.aspect;
+package uk.gov.dft.bluebadge.service.usermanagement.aspect;
 
 import com.google.common.collect.Lists;
 import java.util.Arrays;

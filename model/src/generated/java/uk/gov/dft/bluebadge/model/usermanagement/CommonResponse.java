@@ -22,8 +22,8 @@ public class CommonResponse {
   @JsonProperty("method")
   private String method = null;
 
-  @JsonProperty("errors")
-  private Error errors = null;
+  @JsonProperty("error")
+  private Error error = null;
 
   public CommonResponse apiVersion(String apiVersion) {
     this.apiVersion = apiVersion;
@@ -101,24 +101,24 @@ public class CommonResponse {
     this.method = method;
   }
 
-  public CommonResponse errors(Error errors) {
-    this.errors = errors;
+  public CommonResponse error(Error error) {
+    this.error = error;
     return this;
   }
 
   /**
-   * Get errors
+   * Get error
    *
-   * @return errors
+   * @return error
    */
   @ApiModelProperty(value = "")
   @Valid
-  public Error getErrors() {
-    return errors;
+  public Error getError() {
+    return error;
   }
 
-  public void setErrors(Error errors) {
-    this.errors = errors;
+  public void setError(Error error) {
+    this.error = error;
   }
 
   @Override
@@ -134,12 +134,12 @@ public class CommonResponse {
         && Objects.equals(this.context, commonResponse.context)
         && Objects.equals(this.id, commonResponse.id)
         && Objects.equals(this.method, commonResponse.method)
-        && Objects.equals(this.errors, commonResponse.errors);
+        && Objects.equals(this.error, commonResponse.error);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiVersion, context, id, method, errors);
+    return Objects.hash(apiVersion, context, id, method, error);
   }
 
   @Override
@@ -151,7 +151,7 @@ public class CommonResponse {
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    method: ").append(toIndentedString(method)).append("\n");
-    sb.append("    errors: ").append(toIndentedString(errors)).append("\n");
+    sb.append("    error: ").append(toIndentedString(error)).append("\n");
     sb.append("}");
     return sb.toString();
   }

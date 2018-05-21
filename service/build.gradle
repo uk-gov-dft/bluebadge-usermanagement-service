@@ -73,11 +73,12 @@ dependencies {
 }
 
 checkstyle {
+
     toolVersion "8.9"
 }
 
 bootRun {
     sourceResources sourceSets.main
 }
-
+archivesBaseName = "usermanagement-service"
 compileJava.dependsOn 'googleJavaFormat'

@@ -4,9 +4,16 @@
  */
 package uk.gov.dft.bluebadge.service.usermanagement.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
+import java.io.IOException;
+import java.util.Optional;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import uk.gov.dft.bluebadge.model.usermanagement.CommonResponse;
-import uk.gov.dft.bluebadge.model.usermanagement.Error;
 import uk.gov.dft.bluebadge.model.usermanagement.User;
 import uk.gov.dft.bluebadge.model.usermanagement.UserResponse;
 import uk.gov.dft.bluebadge.model.usermanagement.UsersResponse;
@@ -22,7 +28,19 @@ import uk.gov.dft.bluebadge.model.usermanagement.UsersResponse;
 @Api(value = "Users", description = "the Users API")
 public interface UsersApi {
 
-  UsersApiDelegate getDelegate();
+  Logger log = LoggerFactory.getLogger(UsersApi.class);
+
+  default Optional<ObjectMapper> getObjectMapper() {
+    return Optional.empty();
+  }
+
+  default Optional<HttpServletRequest> getRequest() {
+    return Optional.empty();
+  }
+
+  default Optional<String> getAcceptHeader() {
+    return getRequest().map(r -> r.getHeader("Accept"));
+  }
 
   @ApiOperation(
     value = "List of all Users",
@@ -36,7 +54,7 @@ public interface UsersApi {
   @ApiResponses(
     value = {
       @ApiResponse(code = 200, message = "An array of users", response = UsersResponse.class),
-      @ApiResponse(code = 200, message = "Unexpected error", response = Error.class)
+      @ApiResponse(code = 200, message = "Unexpected error", response = CommonResponse.class)
     }
   )
   @RequestMapping(
@@ -46,8 +64,27 @@ public interface UsersApi {
   )
   default ResponseEntity<UsersResponse> authoritiesAuthorityIdUsersGet(
       @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
-          Integer authorityId) {
-    return getDelegate().authoritiesAuthorityIdUsersGet(authorityId);
+          Integer authorityId,
+      @ApiParam(value = "Name or email address fragment to filter on.")
+          @Valid
+          @RequestParam(value = "name", required = false)
+          Optional<String> name) {
+    if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
+      if (getAcceptHeader().get().contains("application/json")) {
+        try {
+          return new ResponseEntity<>(
+              getObjectMapper().get().readValue("\"\"", UsersResponse.class),
+              HttpStatus.NOT_IMPLEMENTED);
+        } catch (IOException e) {
+          log.error("Couldn't serialize response for content type application/json", e);
+          return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+      }
+    } else {
+      log.warn(
+          "ObjectMapper or HttpServletRequest not configured in default UsersApi interface so no example is generated");
+    }
+    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
   }
 
   @ApiOperation(
@@ -69,7 +106,22 @@ public interface UsersApi {
       @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
           Integer authorityId,
       @ApiParam(value = "") @Valid @RequestBody User user) {
-    return getDelegate().authoritiesAuthorityIdUsersPost(authorityId, user);
+    if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
+      if (getAcceptHeader().get().contains("application/json")) {
+        try {
+          return new ResponseEntity<>(
+              getObjectMapper().get().readValue("\"\"", UserResponse.class),
+              HttpStatus.NOT_IMPLEMENTED);
+        } catch (IOException e) {
+          log.error("Couldn't serialize response for content type application/json", e);
+          return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+      }
+    } else {
+      log.warn(
+          "ObjectMapper or HttpServletRequest not configured in default UsersApi interface so no example is generated");
+    }
+    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
   }
 
   @ApiOperation(
@@ -96,7 +148,12 @@ public interface UsersApi {
           Integer authorityId,
       @ApiParam(value = "Numeric ID of the user to get.", required = true) @PathVariable("userId")
           Integer userId) {
-    return getDelegate().authoritiesAuthorityIdUsersUserIdDelete(authorityId, userId);
+    if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
+    } else {
+      log.warn(
+          "ObjectMapper or HttpServletRequest not configured in default UsersApi interface so no example is generated");
+    }
+    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
   }
 
   @ApiOperation(
@@ -119,7 +176,22 @@ public interface UsersApi {
           Integer authorityId,
       @ApiParam(value = "Numeric ID of the user to get.", required = true) @PathVariable("userId")
           Integer userId) {
-    return getDelegate().authoritiesAuthorityIdUsersUserIdGet(authorityId, userId);
+    if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
+      if (getAcceptHeader().get().contains("application/json")) {
+        try {
+          return new ResponseEntity<>(
+              getObjectMapper().get().readValue("\"\"", UserResponse.class),
+              HttpStatus.NOT_IMPLEMENTED);
+        } catch (IOException e) {
+          log.error("Couldn't serialize response for content type application/json", e);
+          return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+      }
+    } else {
+      log.warn(
+          "ObjectMapper or HttpServletRequest not configured in default UsersApi interface so no example is generated");
+    }
+    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
   }
 
   @ApiOperation(
@@ -147,6 +219,21 @@ public interface UsersApi {
           @Valid
           @RequestParam(value = "emailAddress", required = true)
           String emailAddress) {
-    return getDelegate().usersGet(emailAddress);
+    if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
+      if (getAcceptHeader().get().contains("application/json")) {
+        try {
+          return new ResponseEntity<>(
+              getObjectMapper().get().readValue("false", Boolean.class),
+              HttpStatus.NOT_IMPLEMENTED);
+        } catch (IOException e) {
+          log.error("Couldn't serialize response for content type application/json", e);
+          return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+      }
+    } else {
+      log.warn(
+          "ObjectMapper or HttpServletRequest not configured in default UsersApi interface so no example is generated");
+    }
+    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
   }
 }

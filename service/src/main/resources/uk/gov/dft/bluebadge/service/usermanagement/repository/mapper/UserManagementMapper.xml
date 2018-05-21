@@ -9,11 +9,14 @@
         WHERE id = #{id}
     </select>
 
-    <select id="retrieveUsersByAuthorityId" resultType="UserEntity">
+    <select id="retrieveUsersByAuthorityId" resultType="UserEntity" parameterType="UserEntity">
         SELECT id, name
             , local_authority_id AS localAuthorityId, email_address AS emailAddress
         FROM users
-        WHERE local_authority_id = #{id}
+        WHERE local_authority_id = #{localAuthorityId}
+        <if test="name != null">
+          AND (name LIKE #{name} OR email_address LIKE #{emailAddress})
+        </if>
     </select>
 
     <update id="updateUser" parameterType="UserEntity">

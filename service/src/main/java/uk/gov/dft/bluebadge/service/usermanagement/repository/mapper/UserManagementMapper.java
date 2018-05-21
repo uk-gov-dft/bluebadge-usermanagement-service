@@ -8,7 +8,7 @@ import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 public interface UserManagementMapper {
   UserEntity retrieveUserById(int id);
 
-  List<UserEntity> retrieveUsersByAuthorityId(int id);
+  List<UserEntity> retrieveUsersByAuthorityId(UserEntity userEntity);
 
   boolean checkUserExistsForEmail(String emailAddress);
 

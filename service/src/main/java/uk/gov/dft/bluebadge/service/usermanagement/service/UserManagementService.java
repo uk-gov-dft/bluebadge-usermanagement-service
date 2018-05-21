@@ -31,7 +31,14 @@ public class UserManagementService {
     return repository.checkUserExistsForEmail(emailAddress);
   }
 
-  public List<UserEntity> retrieveUsersByAuthorityId(int authorityId) {
-    return repository.retrieveUsersByAuthorityId(authorityId);
+  public List<UserEntity> retrieveUsersByAuthorityId(int authorityId, String nameFilter) {
+    if (null != nameFilter) {
+      nameFilter = "%" + nameFilter + "%";
+    }
+    UserEntity queryParams = new UserEntity();
+    queryParams.setLocalAuthorityId(authorityId);
+    queryParams.setName(nameFilter);
+    queryParams.setEmailAddress(nameFilter);
+    return repository.retrieveUsersByAuthorityId(queryParams);
   }
 }

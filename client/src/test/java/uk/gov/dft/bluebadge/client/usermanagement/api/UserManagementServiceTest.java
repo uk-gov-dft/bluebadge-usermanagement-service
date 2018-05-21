@@ -40,10 +40,9 @@ public class UserManagementServiceTest {
   public void setUp() {
     mockServer = MockRestServiceServer.createServer(restTemplateFactory.getInstance());
   }
-
   @Test
   public void getUsersForAuthority() {
-    String requestUrl = serviceConfiguration.getUrlPrefix() + "/authorities/2/users";
+    String requestUrl = serviceConfiguration.getUrlPrefix() + "/authorities/2/users?name=Blah";
     mockServer
         .expect(method(HttpMethod.GET))
         .andExpect(requestTo(requestUrl))
@@ -57,7 +56,7 @@ public class UserManagementServiceTest {
                         "\"blah2@blah.com\",\"localAuthorityId\":2}]}}",
                 MediaType.APPLICATION_JSON));
 
-    UsersResponse userList = userManagementService.getUsersForAuthority(2);
+    UsersResponse userList = userManagementService.getUsersForAuthority(2, "Blah");
     Assert.assertTrue(userList.getData().getTotalItems().equals(2));
     Assert.assertTrue(userList.getData().getUsers().size() == 2);
 
