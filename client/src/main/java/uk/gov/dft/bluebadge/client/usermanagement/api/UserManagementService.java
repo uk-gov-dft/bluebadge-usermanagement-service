@@ -11,6 +11,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.dft.bluebadge.client.usermanagement.configuration.ServiceConfiguration;
 import uk.gov.dft.bluebadge.client.usermanagement.httpclient.RestTemplateFactory;
 import uk.gov.dft.bluebadge.model.usermanagement.User;
+import uk.gov.dft.bluebadge.model.usermanagement.UserData;
 import uk.gov.dft.bluebadge.model.usermanagement.UserResponse;
 import uk.gov.dft.bluebadge.model.usermanagement.UsersResponse;
 
@@ -48,6 +49,13 @@ public class UserManagementService {
                 emailAddress);
 
     return responseEntity.getBody();
+  }
+
+  public UserResponse getUserForEmail(String emailAddress){
+    UserResponse userResponse = new UserResponse();
+    UserData data = new UserData().emailAddress(emailAddress).id(-1).name("Fake User").localAuthorityId(2);
+    userResponse.setData(data);
+    return userResponse;
   }
 
   /**
