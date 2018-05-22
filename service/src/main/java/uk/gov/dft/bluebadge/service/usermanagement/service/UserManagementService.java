@@ -1,5 +1,8 @@
 package uk.gov.dft.bluebadge.service.usermanagement.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,10 +14,6 @@ import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepo
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BlueBadgeBusinessException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.EmailExistsException;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -73,7 +72,7 @@ public class UserManagementService {
    * @return List of errors or null if validation ok.
    */
   public List<ErrorErrors> nonBeanValidation(UserEntity userEntity) {
-    if(StringUtils.isEmpty(userEntity.getEmailAddress())){
+    if (StringUtils.isEmpty(userEntity.getEmailAddress())) {
       // Already sorted in bean validation.
       return null;
     }

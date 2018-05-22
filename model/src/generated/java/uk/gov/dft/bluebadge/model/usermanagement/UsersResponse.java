@@ -1,23 +1,15 @@
 package uk.gov.dft.bluebadge.model.usermanagement;
 
-import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import uk.gov.dft.bluebadge.model.usermanagement.CommonResponse;
-import uk.gov.dft.bluebadge.model.usermanagement.Error;
-import uk.gov.dft.bluebadge.model.usermanagement.UsersData;
-import org.springframework.validation.annotation.Validated;
+import java.util.Objects;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
+import org.springframework.validation.annotation.Validated;
 
-/**
- * UsersResponse
- */
+/** UsersResponse */
 @Validated
-
-public class UsersResponse extends CommonResponse  {
+public class UsersResponse extends CommonResponse {
   @JsonProperty("data")
   private UsersData data = null;
 
@@ -28,12 +20,11 @@ public class UsersResponse extends CommonResponse  {
 
   /**
    * Get data
+   *
    * @return data
-  **/
+   */
   @ApiModelProperty(value = "")
-
   @Valid
-
   public UsersData getData() {
     return data;
   }
@@ -41,7 +32,6 @@ public class UsersResponse extends CommonResponse  {
   public void setData(UsersData data) {
     this.data = data;
   }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -52,8 +42,7 @@ public class UsersResponse extends CommonResponse  {
       return false;
     }
     UsersResponse usersResponse = (UsersResponse) o;
-    return Objects.equals(this.data, usersResponse.data) &&
-        super.equals(o);
+    return Objects.equals(this.data, usersResponse.data) && super.equals(o);
   }
 
   @Override
@@ -72,8 +61,7 @@ public class UsersResponse extends CommonResponse  {
   }
 
   /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
+   * Convert the given object to string with each line indented by 4 spaces (except the first line).
    */
   private String toIndentedString(java.lang.Object o) {
     if (o == null) {
@@ -82,4 +70,3 @@ public class UsersResponse extends CommonResponse  {
     return o.toString().replace("\n", "\n    ");
   }
 }
-

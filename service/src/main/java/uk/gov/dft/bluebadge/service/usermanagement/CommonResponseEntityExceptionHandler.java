@@ -1,5 +1,6 @@
 package uk.gov.dft.bluebadge.service.usermanagement;
 
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,11 +17,8 @@ import uk.gov.dft.bluebadge.model.usermanagement.ErrorErrors;
 import uk.gov.dft.bluebadge.model.usermanagement.User;
 import uk.gov.dft.bluebadge.service.usermanagement.service.UserManagementService;
 
-import java.util.List;
-
 @ControllerAdvice
 public class CommonResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
-
 
   private UserManagementService userManagementService;
 
@@ -66,8 +64,9 @@ public class CommonResponseEntityExceptionHandler extends ResponseEntityExceptio
     }
 
     // Add business validation
-    List<ErrorErrors> businessErrors = userManagementService.nonBeanValidation((User) ex.getBindingResult().getTarget());
-    if(null != businessErrors){
+    List<ErrorErrors> businessErrors =
+        userManagementService.nonBeanValidation((User) ex.getBindingResult().getTarget());
+    if (null != businessErrors) {
       systemError.getErrors().addAll(businessErrors);
     }
     commonResponse.setError(systemError);
