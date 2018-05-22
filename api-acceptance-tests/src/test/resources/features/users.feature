@@ -49,3 +49,40 @@ Feature: Verify users
       When method GET
       Then status 200
       And match $.data.totalItems == 0
+
+  Scenario: Create User Missing email and name
+    Given url 'http://localhost:8180/uk-gov-dft/service-template-api/1.0.0//authorities/2/users'
+    And request { }
+    When method POST
+    Then status 400
+    And match $.error.errors contains {field:"emailAddress", reason:"#notnull", message:"NotNull.user.emailAddress", location:"#null", locationType:"#null"}
+    And match $.error.errors contains {field:"name", reason:"#notnull", message:"NotNull.user.name", location:"#null", locationType:"#null"}
+
+  Scenario: Create User A bean and non bean error
+      Given url 'http://localhost:8180/uk-gov-dft/service-template-api/1.0.0//authorities/2/users'
+      And request { emailAddress:"abcnobody@dft.gov.uk" }
+      When method POST
+      Then status 400
+      And match $.error.errors contains {field:"emailAddress", reason:"#notnull", message:"AlreadyExists.user.emailAddress", location:"#null", locationType:"#null"}
+      And match $.error.errors contains {field:"name", reason:"#notnull", message:"NotNull.user.name", location:"#null", locationType:"#null"}
+
+  Scenario: Create User All valid except email already exists
+      Given url 'http://localhost:8180/uk-gov-dft/service-template-api/1.0.0//authorities/2/users'
+      And request { name:"asdfgh", emailAddress:"abcnobody@dft.gov.uk", localAuthorityId: 2 }
+      When method POST
+      Then status 400
+      And match $.error.errors contains {field:"emailAddress", reason:"#notnull", message:"AlreadyExists.user.emailAddress", location:"#null", locationType:"#null"}
+
+  Scenario: Create User Invalid email format
+      Given url 'http://localhost:8180/uk-gov-dft/service-template-api/1.0.0//authorities/2/users'
+      And request { name:"asdfgh", emailAddress:"@dft.gov.uk", localAuthorityId: 2 }
+      When method POST
+      Then status 400
+      And match $.error.errors contains {field:"emailAddress", reason:"#notnull", message:"Pattern.user.emailAddress", location:"#null", locationType:"#null"}
+
+  Scenario: Create User All valid
+      Given url 'http://localhost:8180/uk-gov-dft/service-template-api/1.0.0//authorities/2/users'
+      And request { name:"DeleteMe", emailAddress:"createuservalid@dft.gov.uk", localAuthorityId: 2 }
+      When method POST
+      Then status 200
+      And match $.data contains {id:"#notnull"}

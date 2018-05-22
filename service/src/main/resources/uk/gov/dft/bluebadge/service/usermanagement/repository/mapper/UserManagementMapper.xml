@@ -15,8 +15,19 @@
         FROM users
         WHERE local_authority_id = #{localAuthorityId}
         <if test="name != null">
-          AND (name LIKE #{name} OR email_address LIKE #{emailAddress})
+          AND (UPPER(name) LIKE UPPER(#{name}) OR UPPER(email_address)
+            LIKE UPPER(#{emailAddress}))
         </if>
+    </select>
+
+    <select id="emailAddressAlreadyUsed" resultType="boolean" parameterType="UserEntity">
+        SELECT EXISTS(
+          SELECT 1 FROM users
+          WHERE email_address = #{emailAddress}
+          <if test="id != null">
+              AND id != #{id}
+          </if>
+        )
     </select>
 
     <update id="updateUser" parameterType="UserEntity">

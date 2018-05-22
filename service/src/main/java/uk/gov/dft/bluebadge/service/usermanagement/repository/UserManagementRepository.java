@@ -98,4 +98,8 @@ public class UserManagementRepository {
   public boolean checkUserExistsForEmail(String emailAddress) {
     return sqlSession.selectOne("checkUserExistsForEmail", emailAddress);
   }
+
+  public boolean emailAddressAlreadyUsed(UserEntity userEntity){
+    return sqlSession.selectOne("emailAddressAlreadyUsed", userEntity);
+  }
 }
