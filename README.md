@@ -60,10 +60,6 @@ curl --header "Content-Type: application/json" \
      --data '{"id": 3, "name": "my user", "emailAddress": "myEmailAddress@email.com", "localAuthorityId": 1}' \
      http://localhost:8180/uk-gov-dft/service-template-api/1.0.0/authorities/1/users
 ```
-You may get a response like this
-```
-{"apiVersion":null,"context":null,"id":null,"method":null,"errors":null,"data":null}
-```  
 
 * Create user for local authority 1 with invalid input (wrong email format):
 ```
