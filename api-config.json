@@ -19,15 +19,13 @@
         } ],
         "get" : {
           "summary" : "Check user for email address exists.",
-          "description" : "Returns true if user exists\n",
+          "description" : "Returns user if user exists\n",
           "tags" : [ "Users" ],
           "responses" : {
             "200" : {
-              "description" : "A boolean for user existance.",
+              "description" : "The user.",
               "schema" : {
-                "type" : "boolean",
-                "description" : "true if user exists\n",
-                "example" : false
+                "$ref" : "#/definitions/UserResponse"
               }
             }
           }
@@ -155,12 +153,12 @@
             "type" : "string",
             "description" : "Users name.",
             "maxLength" : 100,
-            "example" : "Robert Worthington"
+            "example" : "Robert Worthington",
+            "pattern" : "^[\\p{L} \\.'\\-]+$"
           },
           "emailAddress" : {
             "type" : "string",
             "format" : "email",
-            "pattern" : "/^(([^<>()\\[\\]\\\\.,;:\\s@\"]+(\\.[^<>()\\[\\]\\\\.,;:\\s@\"]+)*)|(\".+\"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$/",
             "description" : "email address.",
             "example" : "rob.worthington@norealserver.com"
           },

@@ -9,6 +9,13 @@
         WHERE id = #{id}
     </select>
 
+    <select id="retrieveUserByEmailAddress" resultType="UserEntity">
+        SELECT id, name
+        , local_authority_id AS localAuthorityId, email_address AS emailAddress
+        FROM users
+        WHERE UPPER(email_address) = UPPER(#{emailAddress})
+    </select>
+
     <select id="retrieveUsersByAuthorityId" resultType="UserEntity" parameterType="UserEntity">
         SELECT id, name
             , local_authority_id AS localAuthorityId, email_address AS emailAddress
@@ -23,7 +30,7 @@
     <select id="emailAddressAlreadyUsed" resultType="boolean" parameterType="UserEntity">
         SELECT EXISTS(
           SELECT 1 FROM users
-          WHERE email_address = #{emailAddress}
+          WHERE UPPER(email_address) = UPPER(#{emailAddress})
           <if test="id != null">
               AND id != #{id}
           </if>
@@ -48,9 +55,5 @@
         DELETE FROM users
         WHERE id = #{id}
     </delete>
-
-    <select id="checkUserExistsForEmail" parameterType="String" resultType="boolean">
-        SELECT EXISTS(SELECT 1 FROM users WHERE email_address = TRIM(#{emailAddress}))
-    </select>
 
 </mapper>

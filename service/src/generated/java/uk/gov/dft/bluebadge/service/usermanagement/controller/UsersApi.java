@@ -197,23 +197,21 @@ public interface UsersApi {
   @ApiOperation(
     value = "Check user for email address exists.",
     nickname = "usersGet",
-    notes = "Returns true if user exists ",
-    response = Boolean.class,
+    notes = "Returns user if user exists ",
+    response = UserResponse.class,
     tags = {
       "Users",
     }
   )
   @ApiResponses(
-    value = {
-      @ApiResponse(code = 200, message = "A boolean for user existance.", response = Boolean.class)
-    }
+    value = {@ApiResponse(code = 200, message = "The user.", response = UserResponse.class)}
   )
   @RequestMapping(
     value = "/users",
     produces = {"application/json"},
     method = RequestMethod.GET
   )
-  default ResponseEntity<Boolean> usersGet(
+  default ResponseEntity<UserResponse> usersGet(
       @NotNull
           @ApiParam(value = "User email address to check for.", required = true)
           @Valid
@@ -223,7 +221,7 @@ public interface UsersApi {
       if (getAcceptHeader().get().contains("application/json")) {
         try {
           return new ResponseEntity<>(
-              getObjectMapper().get().readValue("false", Boolean.class),
+              getObjectMapper().get().readValue("\"\"", UserResponse.class),
               HttpStatus.NOT_IMPLEMENTED);
         } catch (IOException e) {
           log.error("Couldn't serialize response for content type application/json", e);

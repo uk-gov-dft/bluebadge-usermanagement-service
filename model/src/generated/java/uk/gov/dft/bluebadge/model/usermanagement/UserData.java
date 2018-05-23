@@ -55,6 +55,7 @@ public class UserData extends Data {
    */
   @ApiModelProperty(example = "Robert Worthington", required = true, value = "Users name.")
   @NotNull
+  @Pattern(regexp = "^[\\p{L} \\.'\\-]+$")
   @Size(max = 100)
   public String getName() {
     return name;
@@ -80,10 +81,6 @@ public class UserData extends Data {
     value = "email address."
   )
   @NotNull
-  @Pattern(
-    regexp =
-        "/^(([^<>()\\[\\]\\\\.,;:\\s@\"]+(\\.[^<>()\\[\\]\\\\.,;:\\s@\"]+)*)|(\".+\"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$/"
-  )
   public String getEmailAddress() {
     return emailAddress;
   }
