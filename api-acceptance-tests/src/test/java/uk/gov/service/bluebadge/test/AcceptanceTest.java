@@ -1,10 +1,11 @@
-package runners;
+package uk.gov.service.bluebadge.test;
 
+import com.intuit.karate.junit4.Karate;
 import cucumber.api.CucumberOptions;
 import org.junit.runner.RunWith;
 
-import com.intuit.karate.junit4.Karate;
-
 @RunWith(Karate.class)
 @CucumberOptions(features = "classpath:features")
-public class ApiRunner {}
+public class AcceptanceTest {
+    // no-op, config class only
+}
