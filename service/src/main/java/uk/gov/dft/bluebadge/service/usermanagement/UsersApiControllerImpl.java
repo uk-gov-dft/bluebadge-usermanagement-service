@@ -15,14 +15,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import uk.gov.dft.bluebadge.model.usermanagement.User;
-import uk.gov.dft.bluebadge.model.usermanagement.UserResponse;
-import uk.gov.dft.bluebadge.model.usermanagement.UsersData;
-import uk.gov.dft.bluebadge.model.usermanagement.UsersResponse;
+import uk.gov.dft.bluebadge.model.usermanagement.*;
+import uk.gov.dft.bluebadge.model.usermanagement.Error;
 import uk.gov.dft.bluebadge.service.usermanagement.controller.UsersApi;
 import uk.gov.dft.bluebadge.service.usermanagement.converter.UserConverter;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.UserManagementService;
+import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BlueBadgeBusinessException;
 
 @Controller
 public class UsersApiControllerImpl implements UsersApi {
@@ -83,10 +82,23 @@ public class UsersApiControllerImpl implements UsersApi {
           Integer authorityId,
       @ApiParam(value = "") @Valid @RequestBody User user) {
     UserEntity entity = userConverter.convertToEntity(user);
-    service.createUser(entity);
     UserResponse userResponse = new UserResponse();
-    userResponse.setData(userConverter.convertToData(entity, 1));
-    return new ResponseEntity<>(userResponse, HttpStatus.OK);
+    HttpStatus status;
+
+    try {
+      service.createUser(entity);
+      userResponse.setData(userConverter.convertToData(entity, 1));
+      status = HttpStatus.OK;
+    } catch (BlueBadgeBusinessException e) {
+      Error error = new Error();
+      for (ErrorErrors errorItem : e.getErrorsList()) {
+        error.addErrorsItem(errorItem);
+      }
+      userResponse.setError(error);
+      status = HttpStatus.BAD_REQUEST;
+    }
+
+    return new ResponseEntity<>(userResponse, status);
   }
 
   /**

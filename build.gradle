@@ -1,5 +1,10 @@
 import groovy.json.JsonSlurper
 
+plugins {
+    id "com.jfrog.artifactory" version "4.5.4"
+}
+
+
 allprojects {
     apply plugin: 'java'
     group = 'uk.gov.dft.bluebadge'
@@ -68,4 +73,5 @@ task generateService(dependsOn: 'unzipGenerated', type: Sync){
     exclude '**/*ApiController.java'
     into "service/src/generated/java/uk/gov/dft/bluebadge/service/usermanagement"
 }
+
 

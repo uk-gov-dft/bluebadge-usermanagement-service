@@ -34,6 +34,6 @@ public class UserConverter implements BiConverter<UserEntity, User, UserData> {
     data.setName(userEntity.getName());
     data.setEmailAddress(userEntity.getEmailAddress());
     data.setTotalItems(totalItems);
-    return null;
+    return data;
   }
 }

@@ -40,6 +40,19 @@ public class UserManagementServiceTest {
   public void setUp() {
     mockServer = MockRestServiceServer.createServer(restTemplateFactory.getInstance());
   }
+
+  /*
+  @Test
+  public void deleteMe(){
+    User user = new User();
+    user.setName("PPPPP");
+    user.setLocalAuthorityId(2);
+    user.setEmailAddress("createuservalidnew@dft.gov.uk");
+    UserResponse ur = userManagementService.createUser(2, user);
+    System.out.println(user);
+  }
+  */
+
   @Test
   public void getUsersForAuthority() {
     String requestUrl = serviceConfiguration.getUrlPrefix() + "/authorities/2/users?name=Blah";

@@ -49,3 +49,22 @@ cd ..
 cd client
 gradle install
 ```
+
+## PLAY WITH THE API
+* [Retrieve users from local authority 1 (GET)](http://localhost:8180/uk-gov-dft/service-template-api/1.0.0/authorities/1/users)
+
+* Create user for local authority 1 with valid input:
+```
+curl --header "Content-Type: application/json" \
+     --request POST \
+     --data '{"id": 3, "name": "my user", "emailAddress": "myEmailAddress@email.com", "localAuthorityId": 1}' \
+     http://localhost:8180/uk-gov-dft/service-template-api/1.0.0/authorities/1/users
+```
+
+* Create user for local authority 1 with invalid input (wrong email format):
+```
+curl --header "Content-Type: application/json" \
+     --request POST \
+     --data '{"id": 3, "name": "my user", "emailAddress": "myEmailAddress", "localAuthorityId": 1}' \
+     http://localhost:8180/uk-gov-dft/service-template-api/1.0.0/authorities/1/users
+```
