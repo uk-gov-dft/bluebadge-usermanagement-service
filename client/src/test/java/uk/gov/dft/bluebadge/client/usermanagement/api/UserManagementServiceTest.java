@@ -41,14 +41,15 @@ public class UserManagementServiceTest {
     mockServer = MockRestServiceServer.createServer(restTemplateFactory.getInstance());
   }
 
+
   /*
   @Test
   public void deleteMe(){
     User user = new User();
-    user.setName("PPPPP");
+    user.setName("Peter");
     user.setLocalAuthorityId(2);
-    user.setEmailAddress("createuservalidnew@dft.gov.uk");
-    UserResponse ur = userManagementService.createUser(2, user);
+    user.setEmailAddress("valid666@dft.gov.uk");
+    UserResponse ur = userManagementService.getUserForEmail("Vaklid666@dft.gov.uk");
     System.out.println(user);
   }
   */
@@ -82,10 +83,10 @@ public class UserManagementServiceTest {
     mockServer
         .expect(method(HttpMethod.GET))
         .andExpect(requestTo(requestUrl))
-        .andRespond(withSuccess("false", MediaType.APPLICATION_JSON));
+        .andRespond(withSuccess("{\"data\":{\"totalItems\":1}}", MediaType.APPLICATION_JSON));
 
     Boolean exists = userManagementService.checkUserExistsForEmail("blah@blah.com");
-    Assert.assertFalse(exists);
+    Assert.assertTrue(exists);
     mockServer.verify();
   }
 }

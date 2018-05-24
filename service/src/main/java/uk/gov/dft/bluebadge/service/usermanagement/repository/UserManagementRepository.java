@@ -36,6 +36,18 @@ public class UserManagementRepository {
   }
 
   /**
+   * Retrieve a single UserEntity by Email Address.
+   *
+   * @param emailAddress Address to filter on.
+   * @return The retrieved UserEntity.
+   */
+  public Optional<UserEntity> retrieveUserByEmail(String emailAddress) {
+    UserEntity userEntity = this.sqlSession.selectOne("retrieveUserByEmailAddress", emailAddress);
+
+    return Optional.ofNullable(userEntity);
+  }
+
+  /**
    * Retrieve all UserEntity's for a local authority.
    *
    * @return List of all UserEntity's.
@@ -87,16 +99,6 @@ public class UserManagementRepository {
       LOGGER.info("Deleted UserEntity id: {}.", id);
     }
     return result;
-  }
-
-  /**
-   * Temporary method for login validation.
-   *
-   * @param emailAddress Email to confirm.
-   * @return True if exists.
-   */
-  public boolean checkUserExistsForEmail(String emailAddress) {
-    return sqlSession.selectOne("checkUserExistsForEmail", emailAddress);
   }
 
   public boolean emailAddressAlreadyUsed(UserEntity userEntity) {

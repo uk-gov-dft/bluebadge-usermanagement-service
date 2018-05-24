@@ -1,5 +1,6 @@
 package uk.gov.dft.bluebadge.client.usermanagement.api;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -9,6 +10,7 @@ import org.springframework.util.Assert;
 import uk.gov.dft.bluebadge.client.usermanagement.configuration.ServiceConfiguration;
 import uk.gov.dft.bluebadge.client.usermanagement.httpclient.RestTemplateFactory;
 import uk.gov.dft.bluebadge.model.usermanagement.User;
+import uk.gov.dft.bluebadge.model.usermanagement.UserData;
 import uk.gov.dft.bluebadge.model.usermanagement.UserResponse;
 import uk.gov.dft.bluebadge.model.usermanagement.UsersResponse;
 
@@ -19,7 +21,7 @@ public class UserManagementService {
 
   private class UserTypeRef extends ParameterizedTypeReference<List<User>> {}
 
-  private static final String GET_USER_EXISTS_FOR_EMAIL = "/users?emailAddress={emailAddress}";
+  private static final String GET_USER_FOR_EMAIL = "/users?emailAddress={emailAddress}";
   private static final String GET_BY_ID_ENDPOINT = "/authorities/{authorityId}/users/{userId}";
   private static final String CREATE_ENDPOINT = "/authorities/{authorityId}/users";
   private static final String GET_USERS_FOR_AUTHORITY_ENDPOINT =
@@ -37,15 +39,25 @@ public class UserManagementService {
   public boolean checkUserExistsForEmail(String emailAddress) {
     Assert.notNull(emailAddress, "emailAddress must be supplied");
 
-    ResponseEntity<Boolean> responseEntity =
+    UserResponse userResponse = getUserForEmail(emailAddress);
+    return 1 == userResponse.getData().getTotalItems();
+  }
+
+  public UserResponse getUserForEmail(String emailAddress) {
+
+    String trimmedAddress = StringUtils.trimToNull(emailAddress);
+    Assert.notNull(trimmedAddress, "emailAddress must be provided for getUserForEmail");
+
+    UserResponse response =
         restTemplateFactory
             .getInstance()
             .getForEntity(
-                serviceConfiguration.getUrlPrefix() + GET_USER_EXISTS_FOR_EMAIL,
-                Boolean.class,
-                emailAddress);
+                serviceConfiguration.getUrlPrefix() + GET_USER_FOR_EMAIL,
+                UserResponse.class,
+                trimmedAddress)
+            .getBody();
 
-    return responseEntity.getBody();
+    return response;
   }
 
   /**

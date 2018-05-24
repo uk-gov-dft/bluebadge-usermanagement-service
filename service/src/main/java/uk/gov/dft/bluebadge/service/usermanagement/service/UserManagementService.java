@@ -3,6 +3,8 @@ package uk.gov.dft.bluebadge.service.usermanagement.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,10 @@ import uk.gov.dft.bluebadge.service.usermanagement.service.exception.EmailExists
 public class UserManagementService {
 
   private final UserManagementRepository repository;
+  private static final Pattern pattern =
+      Pattern.compile(
+          "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])",
+          Pattern.CASE_INSENSITIVE);
 
   @Autowired
   public UserManagementService(UserManagementRepository repository) {
@@ -38,8 +44,8 @@ public class UserManagementService {
     return repository.createUser(user);
   }
 
-  public boolean checkUserExistsForEmail(String emailAddress) {
-    return repository.checkUserExistsForEmail(emailAddress);
+  public Optional<UserEntity> retrieveUserByEmail(String emailAddress) {
+    return repository.retrieveUserByEmail(emailAddress);
   }
 
   public List<UserEntity> retrieveUsersByAuthorityId(int authorityId, String nameFilter) {
@@ -76,8 +82,17 @@ public class UserManagementService {
       // Already sorted in bean validation.
       return null;
     }
-    List<ErrorErrors> errorsList;
-    if (repository.emailAddressAlreadyUsed(userEntity)) {
+    List<ErrorErrors> errorsList = null;
+
+    if (!validEmailFormat(userEntity.getEmailAddress())) {
+      ErrorErrors error = new ErrorErrors();
+      error
+          .field("emailAddress")
+          .message("Pattern.user.emailAddress")
+          .reason("Not a valid email address.");
+      errorsList = new ArrayList<>();
+      errorsList.add(error);
+    } else if (repository.emailAddressAlreadyUsed(userEntity)) {
       ErrorErrors error = new ErrorErrors();
       error
           .field("emailAddress")
@@ -85,9 +100,13 @@ public class UserManagementService {
           .reason("Email Address already used.");
       errorsList = new ArrayList<>();
       errorsList.add(error);
-      return errorsList;
     }
 
-    return null;
+    return errorsList;
+  }
+
+  boolean validEmailFormat(String emailAddress) {
+    Matcher matcher = pattern.matcher(emailAddress);
+    return matcher.find();
   }
 }

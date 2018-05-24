@@ -12,6 +12,8 @@ public class UserEntity implements Serializable {
   private Integer localAuthorityId;
   private String name;
   private String emailAddress;
+  private Integer roleId;
+  private String roleName;
 
   public Integer getId() {
     return id;
@@ -43,6 +45,22 @@ public class UserEntity implements Serializable {
 
   public void setEmailAddress(String emailAddress) {
     this.emailAddress = emailAddress;
+  }
+
+  public Integer getRoleId() {
+    return roleId;
+  }
+
+  public void setRoleId(Integer roleId) {
+    this.roleId = roleId;
+  }
+
+  public String getRoleName() {
+    return roleName;
+  }
+
+  public void setRoleName(String roleName) {
+    this.roleName = roleName;
   }
 
   @Override

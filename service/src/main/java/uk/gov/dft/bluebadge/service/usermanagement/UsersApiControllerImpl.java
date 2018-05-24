@@ -7,7 +7,6 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -63,9 +62,17 @@ public class UsersApiControllerImpl implements UsersApi {
           Integer authorityId,
       @ApiParam(value = "Numeric ID of the user to get.", required = true) @PathVariable("userId")
           Integer userId) {
-    Optional<UserEntity> userEntity = service.retrieveUserById(userId);
     UserResponse userResponse = new UserResponse();
-    userResponse.setData(userConverter.convertToData(userEntity.get(), 1));
+
+    Optional<UserEntity> userEntity = service.retrieveUserById(userId);
+
+    if (userEntity.isPresent()) {
+      userResponse.setData(userConverter.convertToData(userEntity.get(), 1));
+    } else {
+      UserData userData = new UserData();
+      userData.setTotalItems(0);
+      userResponse.setData(userData);
+    }
     return new ResponseEntity<>(userResponse, HttpStatus.OK);
   }
 
@@ -108,18 +115,23 @@ public class UsersApiControllerImpl implements UsersApi {
    * @return true if exists and request ok else false.
    */
   @Override
-  public ResponseEntity<Boolean> usersGet(
+  public ResponseEntity<UserResponse> usersGet(
       @NotNull
           @ApiParam(value = "User email address to check for.", required = true)
           @Valid
           @RequestParam(value = "emailAddress", required = true)
           String emailAddress) {
-    if (StringUtils.isEmpty(emailAddress)) {
-      return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
-    }
 
-    boolean exists = service.checkUserExistsForEmail(emailAddress);
-    return new ResponseEntity<>(exists, HttpStatus.OK);
+    Optional<UserEntity> userEntity = service.retrieveUserByEmail(emailAddress);
+    UserResponse userResponse = new UserResponse();
+    if (userEntity.isPresent()) {
+      userResponse.setData(userConverter.convertToData(userEntity.get(), 1));
+    } else {
+      UserData userData = new UserData();
+      userData.setTotalItems(0);
+      userResponse.setData(userData);
+    }
+    return new ResponseEntity<>(userResponse, HttpStatus.OK);
   }
 
   /**
