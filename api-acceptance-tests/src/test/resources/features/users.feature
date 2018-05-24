@@ -77,7 +77,7 @@ Feature: Verify users
 
   Scenario: Create User All valid
     Given url 'http://localhost:8180/uk-gov-dft/service-template-api/1.0.0//authorities/2/users'
-    And request { name:"Delete Me", emailAddress:"createuservalid@dft.gov.uk", localAuthorityId: 2 }
+    And request { name:"Delete Me", emailAddress:"createuservalid@dft.gov.uk", localAuthorityId: 2, roleId: 2 }
     When method POST
     Then status 200
     And match $.data contains {id:"#notnull"}

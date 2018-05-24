@@ -142,7 +142,7 @@
     "definitions" : {
       "User" : {
         "type" : "object",
-        "required" : [ "name", "emailAddress" ],
+        "required" : [ "name", "emailAddress", "roleId" ],
         "properties" : {
           "id" : {
             "type" : "integer",

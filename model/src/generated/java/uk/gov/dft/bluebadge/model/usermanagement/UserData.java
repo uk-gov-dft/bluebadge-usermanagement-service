@@ -124,7 +124,8 @@ public class UserData extends Data {
    *
    * @return roleId
    */
-  @ApiModelProperty(example = "2", value = "Id of users role")
+  @ApiModelProperty(example = "2", required = true, value = "Id of users role")
+  @NotNull
   public Integer getRoleId() {
     return roleId;
   }
