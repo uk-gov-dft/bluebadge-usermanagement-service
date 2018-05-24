@@ -13,6 +13,8 @@ public class UserConverter implements BiConverter<UserEntity, User, UserData> {
     userEntity.setEmailAddress(model.getEmailAddress());
     userEntity.setLocalAuthorityId(model.getLocalAuthorityId());
     userEntity.setName(model.getName());
+    userEntity.setRoleId(model.getRoleId());
+    userEntity.setRoleName(model.getRoleName());
     return userEntity;
   }
 
@@ -23,6 +25,8 @@ public class UserConverter implements BiConverter<UserEntity, User, UserData> {
     user.setLocalAuthorityId(entity.getLocalAuthorityId());
     user.setName(entity.getName());
     user.setEmailAddress(entity.getEmailAddress());
+    user.setRoleId(entity.getRoleId());
+    user.setRoleName(entity.getRoleName());
     return user;
   }
 
@@ -34,6 +38,8 @@ public class UserConverter implements BiConverter<UserEntity, User, UserData> {
     data.setName(userEntity.getName());
     data.setEmailAddress(userEntity.getEmailAddress());
     data.setTotalItems(totalItems);
+    data.setRoleId(userEntity.getRoleId());
+    data.setRoleName(userEntity.getRoleName());
     return data;
   }
 }

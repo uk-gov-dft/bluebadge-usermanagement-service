@@ -166,6 +166,16 @@
             "type" : "integer",
             "description" : "Id of Local Authority user belongs to",
             "example" : 2
+          },
+          "roleId" : {
+            "type" : "integer",
+            "description" : "Id of users role",
+            "example" : 2
+          },
+          "roleName" : {
+            "type" : "string",
+            "description" : "User role description",
+            "example" : "LA Admin"
           }
         }
       },

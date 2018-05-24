@@ -3,26 +3,38 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="uk.gov.dft.bluebadge.service.usermanagement.repository.mapper.UserManagementMapper">
     <select id="retrieveUserById" resultType="UserEntity">
-        SELECT id, name
-            , local_authority_id AS localAuthorityId, email_address AS emailAddress
-        FROM users
-        WHERE id = #{id}
+        SELECT u.id, u.name
+            , u.local_authority_id AS localAuthorityId
+            , u.email_address AS emailAddress
+            , u.role_id AS roleId
+            , r.description AS roleName
+        FROM users u
+        INNER JOIN roles r ON u.role_id = r.id
+        WHERE u.id = #{id}
     </select>
 
     <select id="retrieveUserByEmailAddress" resultType="UserEntity">
-        SELECT id, name
-        , local_authority_id AS localAuthorityId, email_address AS emailAddress
-        FROM users
+        SELECT u.id, u.name
+            , u.local_authority_id AS localAuthorityId
+            , u.email_address AS emailAddress
+            , u.role_id AS roleId
+            , r.description AS roleName
+        FROM users u
+        INNER JOIN roles r ON u.role_id = r.id
         WHERE UPPER(email_address) = UPPER(#{emailAddress})
     </select>
 
     <select id="retrieveUsersByAuthorityId" resultType="UserEntity" parameterType="UserEntity">
-        SELECT id, name
-            , local_authority_id AS localAuthorityId, email_address AS emailAddress
-        FROM users
-        WHERE local_authority_id = #{localAuthorityId}
+        SELECT u.id, u.name
+            , u.local_authority_id AS localAuthorityId
+            , u.email_address AS emailAddress
+            , u.role_id AS roleId
+            , r.description AS roleName
+        FROM users u
+        INNER JOIN roles r ON u.role_id = r.id
+        WHERE u.local_authority_id = #{localAuthorityId}
         <if test="name != null">
-          AND (UPPER(name) LIKE UPPER(#{name}) OR UPPER(email_address)
+          AND (UPPER(u.name) LIKE UPPER(#{name}) OR UPPER(u.email_address)
             LIKE UPPER(#{emailAddress}))
         </if>
     </select>
@@ -47,8 +59,8 @@
 
     <insert id="createUser" parameterType="UserEntity"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
-        INSERT INTO users (name, local_authority_id, email_address)
-        VALUES (#{name}, #{localAuthorityId}, #{emailAddress})
+        INSERT INTO users (name, local_authority_id, email_address, role_id)
+        VALUES (#{name}, #{localAuthorityId}, #{emailAddress}, #{roleId})
     </insert>
 
     <delete id="deleteUser" parameterType="Integer">

@@ -21,6 +21,12 @@ public class User {
   @JsonProperty("localAuthorityId")
   private Integer localAuthorityId = null;
 
+  @JsonProperty("roleId")
+  private Integer roleId = null;
+
+  @JsonProperty("roleName")
+  private String roleName = null;
+
   public User id(Integer id) {
     this.id = id;
     return this;
@@ -108,6 +114,44 @@ public class User {
     this.localAuthorityId = localAuthorityId;
   }
 
+  public User roleId(Integer roleId) {
+    this.roleId = roleId;
+    return this;
+  }
+
+  /**
+   * Id of users role
+   *
+   * @return roleId
+   */
+  @ApiModelProperty(example = "2", value = "Id of users role")
+  public Integer getRoleId() {
+    return roleId;
+  }
+
+  public void setRoleId(Integer roleId) {
+    this.roleId = roleId;
+  }
+
+  public User roleName(String roleName) {
+    this.roleName = roleName;
+    return this;
+  }
+
+  /**
+   * User role description
+   *
+   * @return roleName
+   */
+  @ApiModelProperty(example = "LA Admin", value = "User role description")
+  public String getRoleName() {
+    return roleName;
+  }
+
+  public void setRoleName(String roleName) {
+    this.roleName = roleName;
+  }
+
   @Override
   public boolean equals(java.lang.Object o) {
     if (this == o) {
@@ -120,12 +164,14 @@ public class User {
     return Objects.equals(this.id, user.id)
         && Objects.equals(this.name, user.name)
         && Objects.equals(this.emailAddress, user.emailAddress)
-        && Objects.equals(this.localAuthorityId, user.localAuthorityId);
+        && Objects.equals(this.localAuthorityId, user.localAuthorityId)
+        && Objects.equals(this.roleId, user.roleId)
+        && Objects.equals(this.roleName, user.roleName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, emailAddress, localAuthorityId);
+    return Objects.hash(id, name, emailAddress, localAuthorityId, roleId, roleName);
   }
 
   @Override
@@ -137,6 +183,8 @@ public class User {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    emailAddress: ").append(toIndentedString(emailAddress)).append("\n");
     sb.append("    localAuthorityId: ").append(toIndentedString(localAuthorityId)).append("\n");
+    sb.append("    roleId: ").append(toIndentedString(roleId)).append("\n");
+    sb.append("    roleName: ").append(toIndentedString(roleName)).append("\n");
     sb.append("}");
     return sb.toString();
   }
