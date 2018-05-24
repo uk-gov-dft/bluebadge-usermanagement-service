@@ -82,6 +82,12 @@
               "schema" : {
                 "$ref" : "#/definitions/UserResponse"
               }
+            },
+            "400" : {
+              "description" : "Bad request",
+              "schema" : {
+                "$ref" : "#/definitions/CommonResponse"
+              }
             }
           }
         }
@@ -121,16 +127,38 @@
             "name" : "userId",
             "type" : "integer",
             "required" : true,
-            "description" : "Numeric ID of the user to get."
+            "description" : "Numeric ID of the user to remove."
           } ],
           "summary" : "Removes a User from a Local Authority",
           "description" : "Removes a User from a Local Authority",
           "responses" : {
-            "204" : {
-              "description" : "Resource Successfully Removed"
+            "200" : {
+              "description" : "Resource Successfully Removed",
+              "schema" : {
+                "$ref" : "#/definitions/UserResponse"
+              }
+            }
+          }
+        },
+        "put" : {
+          "tags" : [ "Users" ],
+          "parameters" : [ {
+            "in" : "path",
+            "name" : "userId",
+            "type" : "integer",
+            "required" : true,
+            "description" : "Id of User to update"
+          } ],
+          "summary" : "Updates User",
+          "responses" : {
+            "200" : {
+              "description" : "Resource valid and updated if exists.",
+              "schema" : {
+                "$ref" : "#/definitions/UserResponse"
+              }
             },
-            "404" : {
-              "description" : "Resource Not Found",
+            "400" : {
+              "description" : "Bad request",
               "schema" : {
                 "$ref" : "#/definitions/CommonResponse"
               }
@@ -252,6 +280,12 @@
       "Data" : {
         "type" : "object",
         "properties" : {
+          "updated" : {
+            "type" : "integer"
+          },
+          "deleted" : {
+            "type" : "integer"
+          },
           "totalItems" : {
             "type" : "integer"
           }

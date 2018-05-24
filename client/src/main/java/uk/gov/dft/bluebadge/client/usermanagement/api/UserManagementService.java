@@ -9,10 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import uk.gov.dft.bluebadge.client.usermanagement.configuration.ServiceConfiguration;
 import uk.gov.dft.bluebadge.client.usermanagement.httpclient.RestTemplateFactory;
-import uk.gov.dft.bluebadge.model.usermanagement.User;
-import uk.gov.dft.bluebadge.model.usermanagement.UserData;
-import uk.gov.dft.bluebadge.model.usermanagement.UserResponse;
-import uk.gov.dft.bluebadge.model.usermanagement.UsersResponse;
+import uk.gov.dft.bluebadge.model.usermanagement.Error;
+import uk.gov.dft.bluebadge.model.usermanagement.*;
 
 import java.util.List;
 
@@ -122,6 +120,60 @@ public class UserManagementService {
                 request,
                 UserResponse.class,
                 authorityId);
+    return response;
+  }
+
+  public UserResponse updateUser(User user) {
+    Assert.notNull(user, "must be set");
+
+    UserResponse response = new UserResponse();
+    // Error response.
+    if (StringUtils.stripToNull(user.getName()) == null) {
+      Error error = new Error();
+      ErrorErrors nameError = new ErrorErrors();
+      nameError.message("NotNull.user.name").field("name");
+      error.addErrorsItem(nameError);
+    } else if (user.getName().toLowerCase().startsWith("notexists")) {
+      // Return a success
+      UserData data = new UserData();
+      data.setUpdated(0);
+      data.setRoleName(user.getRoleName());
+      data.name(user.getName())
+          .id(user.getId())
+          .localAuthorityId(user.getLocalAuthorityId())
+          .roleId(user.getRoleId())
+          .roleName(user.getRoleName());
+      response.setData(data);
+    } else {
+      // Return a success
+      UserData data = new UserData();
+      data.setUpdated(1);
+      data.setRoleName(user.getRoleName());
+      data.name(user.getName())
+          .id(user.getId())
+          .localAuthorityId(user.getLocalAuthorityId())
+          .roleId(user.getRoleId())
+          .roleName(user.getRoleName());
+      response.setData(data);
+    }
+    return response;
+  }
+
+  public UserResponse deleteUser(User user) {
+    Assert.notNull(user, "must be set");
+    Assert.notNull(user.getName(), "must be set");
+
+    UserResponse response = new UserResponse();
+    if (user.getName().toLowerCase().startsWith("notexists")) {
+      UserData data = new UserData();
+      data.setUpdated(0);
+      response.setData(data);
+    } else {
+      // Return a success
+      UserData data = new UserData();
+      data.setUpdated(1);
+      response.setData(data);
+    }
     return response;
   }
 }

@@ -7,17 +7,17 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Configuration
 public class ServiceConfiguration {
 
-    @Value("${servicenameclient.servicehost.scheme}")
+    @Value("${usermanagementservice.servicehost.scheme}")
     private String scheme;
-    @Value("${servicenameclient.servicehost.host}")
+    @Value("${usermanagementservice.servicehost.host}")
     private String host;
-    @Value("${servicenameclient.servicehost.port}")
+    @Value("${usermanagementservice.servicehost.port}")
     private Integer port;
-    @Value("${servicenameclient.servicehost.connectiontimeout}")
+    @Value("${usermanagementservice.servicehost.connectiontimeout}")
     private Integer connectionTimeout;
-    @Value("${servicenameclient.servicehost.requesttimeout}")
+    @Value("${usermanagementservice.servicehost.requesttimeout}")
     private Integer requestTimeout;
-    @Value("${servicenameclient.servicehost.contextpath}")
+    @Value("${usermanagementservice.servicehost.contextpath}")
     private String contextPath;
 
     public String getScheme() {

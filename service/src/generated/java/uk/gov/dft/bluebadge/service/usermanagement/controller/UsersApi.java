@@ -96,7 +96,12 @@ public interface UsersApi {
       "Users",
     }
   )
-  @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = UserResponse.class)})
+  @ApiResponses(
+    value = {
+      @ApiResponse(code = 200, message = "OK", response = UserResponse.class),
+      @ApiResponse(code = 400, message = "Bad request", response = CommonResponse.class)
+    }
+  )
   @RequestMapping(
     value = "/authorities/{authorityId}/users",
     produces = {"application/json"},
@@ -128,14 +133,18 @@ public interface UsersApi {
     value = "Removes a User from a Local Authority",
     nickname = "authoritiesAuthorityIdUsersUserIdDelete",
     notes = "Removes a User from a Local Authority",
+    response = UserResponse.class,
     tags = {
       "Users",
     }
   )
   @ApiResponses(
     value = {
-      @ApiResponse(code = 204, message = "Resource Successfully Removed"),
-      @ApiResponse(code = 404, message = "Resource Not Found", response = CommonResponse.class)
+      @ApiResponse(
+        code = 200,
+        message = "Resource Successfully Removed",
+        response = UserResponse.class
+      )
     }
   )
   @RequestMapping(
@@ -143,12 +152,23 @@ public interface UsersApi {
     produces = {"application/json"},
     method = RequestMethod.DELETE
   )
-  default ResponseEntity<Void> authoritiesAuthorityIdUsersUserIdDelete(
+  default ResponseEntity<UserResponse> authoritiesAuthorityIdUsersUserIdDelete(
       @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
           Integer authorityId,
-      @ApiParam(value = "Numeric ID of the user to get.", required = true) @PathVariable("userId")
+      @ApiParam(value = "Numeric ID of the user to remove.", required = true)
+          @PathVariable("userId")
           Integer userId) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
+      if (getAcceptHeader().get().contains("application/json")) {
+        try {
+          return new ResponseEntity<>(
+              getObjectMapper().get().readValue("\"\"", UserResponse.class),
+              HttpStatus.NOT_IMPLEMENTED);
+        } catch (IOException e) {
+          log.error("Couldn't serialize response for content type application/json", e);
+          return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+      }
     } else {
       log.warn(
           "ObjectMapper or HttpServletRequest not configured in default UsersApi interface so no example is generated");
@@ -175,6 +195,53 @@ public interface UsersApi {
       @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
           Integer authorityId,
       @ApiParam(value = "Numeric ID of the user to get.", required = true) @PathVariable("userId")
+          Integer userId) {
+    if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
+      if (getAcceptHeader().get().contains("application/json")) {
+        try {
+          return new ResponseEntity<>(
+              getObjectMapper().get().readValue("\"\"", UserResponse.class),
+              HttpStatus.NOT_IMPLEMENTED);
+        } catch (IOException e) {
+          log.error("Couldn't serialize response for content type application/json", e);
+          return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+      }
+    } else {
+      log.warn(
+          "ObjectMapper or HttpServletRequest not configured in default UsersApi interface so no example is generated");
+    }
+    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+  }
+
+  @ApiOperation(
+    value = "Updates User",
+    nickname = "authoritiesAuthorityIdUsersUserIdPut",
+    notes = "",
+    response = UserResponse.class,
+    tags = {
+      "Users",
+    }
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        code = 200,
+        message = "Resource valid and updated if exists.",
+        response = UserResponse.class
+      ),
+      @ApiResponse(code = 400, message = "Bad request", response = CommonResponse.class)
+    }
+  )
+  @RequestMapping(
+    value = "/authorities/{authorityId}/users/{userId}",
+    produces = {"application/json"},
+    method = RequestMethod.PUT
+  )
+  default ResponseEntity<UserResponse> authoritiesAuthorityIdUsersUserIdPut(
+      @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
+          Integer authorityId,
+      @ApiParam(value = "Id of User to update", required = true) @PathVariable("userId")
           Integer userId) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
       if (getAcceptHeader().get().contains("application/json")) {

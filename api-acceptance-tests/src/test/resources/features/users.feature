@@ -2,7 +2,7 @@
 Feature: Verify users
 
   Background:
-  * url 'http://localhost:8180/uk-gov-dft/service-template-api/1.0.0'
+  * url 'http://localhost:8180/uk-gov-dft/user-management-service/1.0.0'
 
   Scenario: Verify retrieval of a specific user
     Given path 'authorities/2/users'
