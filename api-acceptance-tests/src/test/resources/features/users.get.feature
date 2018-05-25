@@ -1,4 +1,4 @@
-@users
+@users-get
 Feature: Verify users retrieval
 
   Background:

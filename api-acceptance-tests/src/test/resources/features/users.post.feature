@@ -1,4 +1,4 @@
-@users
+@users-post
 Feature: Verify users create
 
   Background:

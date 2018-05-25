@@ -1,5 +1,5 @@
-@users
-Feature: Verify users retrieval
+@users-delete
+Feature: Verify users Delete
 
   Background:
     * url baseUrl

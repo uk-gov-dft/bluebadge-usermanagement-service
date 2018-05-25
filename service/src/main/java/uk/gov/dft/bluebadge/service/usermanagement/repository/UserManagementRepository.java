@@ -103,6 +103,7 @@ public class UserManagementRepository {
 
   /**
    * Check if email address used by another user.
+   *
    * @param userEntity Entity with email to check.
    * @return true if exists.
    */
