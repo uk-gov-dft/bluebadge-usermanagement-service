@@ -99,16 +99,15 @@
           "type" : "integer",
           "required" : true,
           "description" : "ID of the authority."
+        }, {
+          "in" : "path",
+          "name" : "userId",
+          "type" : "integer",
+          "required" : true,
+          "description" : "Numeric ID of the user."
         } ],
         "get" : {
           "tags" : [ "Users" ],
-          "parameters" : [ {
-            "in" : "path",
-            "name" : "userId",
-            "type" : "integer",
-            "required" : true,
-            "description" : "Numeric ID of the user to get."
-          } ],
           "summary" : "Retrieve a specific user",
           "description" : "Retrieve a user and their roles",
           "responses" : {
@@ -122,13 +121,6 @@
         },
         "delete" : {
           "tags" : [ "Users" ],
-          "parameters" : [ {
-            "in" : "path",
-            "name" : "userId",
-            "type" : "integer",
-            "required" : true,
-            "description" : "Numeric ID of the user to remove."
-          } ],
           "summary" : "Removes a User from a Local Authority",
           "description" : "Removes a User from a Local Authority",
           "responses" : {
@@ -141,15 +133,16 @@
           }
         },
         "put" : {
+          "summary" : "Update a user",
+          "description" : "Update a user",
           "tags" : [ "Users" ],
           "parameters" : [ {
-            "in" : "path",
-            "name" : "userId",
-            "type" : "integer",
-            "required" : true,
-            "description" : "Id of User to update"
+            "name" : "user",
+            "in" : "body",
+            "schema" : {
+              "$ref" : "#/definitions/User"
+            }
           } ],
-          "summary" : "Updates User",
           "responses" : {
             "200" : {
               "description" : "Resource valid and updated if exists.",

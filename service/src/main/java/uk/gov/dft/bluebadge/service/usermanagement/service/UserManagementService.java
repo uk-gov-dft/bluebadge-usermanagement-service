@@ -1,10 +1,5 @@
 package uk.gov.dft.bluebadge.service.usermanagement.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +10,13 @@ import uk.gov.dft.bluebadge.service.usermanagement.converter.UserConverter;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BlueBadgeBusinessException;
-import uk.gov.dft.bluebadge.service.usermanagement.service.exception.EmailExistsException;
+import uk.gov.dft.bluebadge.service.usermanagement.service.exception.UserEntityValidationException;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @Transactional
@@ -28,7 +29,7 @@ public class UserManagementService {
           Pattern.CASE_INSENSITIVE);
 
   @Autowired
-  public UserManagementService(UserManagementRepository repository) {
+  UserManagementService(UserManagementRepository repository) {
     this.repository = repository;
   }
 
@@ -36,12 +37,29 @@ public class UserManagementService {
     return repository.retrieveUserById(userId);
   }
 
-  public int createUser(UserEntity user) throws BlueBadgeBusinessException {
-    List<ErrorErrors> businessErrors = nonBeanValidation(user);
+  /**
+   * Create user entity.
+   *
+   * @param userEntity User to create.
+   * @return Create count.
+   * @throws BlueBadgeBusinessException if validation fails.
+   */
+  public int createUser(UserEntity userEntity) throws BlueBadgeBusinessException {
+    List<ErrorErrors> businessErrors = nonBeanValidation(userEntity);
     if (null != businessErrors) {
-      throw new EmailExistsException(businessErrors);
+      throw new UserEntityValidationException(businessErrors);
     }
-    return repository.createUser(user);
+    return repository.createUser(userEntity);
+  }
+
+  /**
+   * Delete a user.
+   *
+   * @param id PK of user to delete.
+   * @return Delete count
+   */
+  public int deleteUser(int id) {
+    return repository.deleteUser(id);
   }
 
   public Optional<UserEntity> retrieveUserByEmail(String emailAddress) {
@@ -77,7 +95,7 @@ public class UserManagementService {
    * @param userEntity User Entity bean.
    * @return List of errors or null if validation ok.
    */
-  public List<ErrorErrors> nonBeanValidation(UserEntity userEntity) {
+  private List<ErrorErrors> nonBeanValidation(UserEntity userEntity) {
     if (StringUtils.isEmpty(userEntity.getEmailAddress())) {
       // Already sorted in bean validation.
       return null;
@@ -108,5 +126,20 @@ public class UserManagementService {
   boolean validEmailFormat(String emailAddress) {
     Matcher matcher = pattern.matcher(emailAddress);
     return matcher.find();
+  }
+
+  /**
+   * Update user entity.
+   *
+   * @param userEntity Entity to update.
+   * @return Update count.
+   * @throws BlueBadgeBusinessException if validation fails.
+   */
+  public int updateUser(UserEntity userEntity) throws BlueBadgeBusinessException {
+    List<ErrorErrors> businessErrors = nonBeanValidation(userEntity);
+    if (null != businessErrors) {
+      throw new UserEntityValidationException(businessErrors);
+    }
+    return repository.updateUser(userEntity);
   }
 }

@@ -1,15 +1,23 @@
 package uk.gov.dft.bluebadge.model.usermanagement;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import uk.gov.dft.bluebadge.model.usermanagement.CommonResponse;
+import uk.gov.dft.bluebadge.model.usermanagement.Error;
+import uk.gov.dft.bluebadge.model.usermanagement.UserData;
+import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
-import org.springframework.validation.annotation.Validated;
 
-/** UserResponse */
+/**
+ * UserResponse
+ */
 @Validated
-public class UserResponse extends CommonResponse {
+
+public class UserResponse extends CommonResponse  {
   @JsonProperty("data")
   private UserData data = null;
 
@@ -20,11 +28,12 @@ public class UserResponse extends CommonResponse {
 
   /**
    * Get data
-   *
    * @return data
-   */
+  **/
   @ApiModelProperty(value = "")
+
   @Valid
+
   public UserData getData() {
     return data;
   }
@@ -32,6 +41,7 @@ public class UserResponse extends CommonResponse {
   public void setData(UserData data) {
     this.data = data;
   }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -42,7 +52,8 @@ public class UserResponse extends CommonResponse {
       return false;
     }
     UserResponse userResponse = (UserResponse) o;
-    return Objects.equals(this.data, userResponse.data) && super.equals(o);
+    return Objects.equals(this.data, userResponse.data) &&
+        super.equals(o);
   }
 
   @Override
@@ -61,7 +72,8 @@ public class UserResponse extends CommonResponse {
   }
 
   /**
-   * Convert the given object to string with each line indented by 4 spaces (except the first line).
+   * Convert the given object to string with each line indented by 4 spaces
+   * (except the first line).
    */
   private String toIndentedString(java.lang.Object o) {
     if (o == null) {
@@ -70,3 +82,4 @@ public class UserResponse extends CommonResponse {
     return o.toString().replace("\n", "\n    ");
   }
 }
+

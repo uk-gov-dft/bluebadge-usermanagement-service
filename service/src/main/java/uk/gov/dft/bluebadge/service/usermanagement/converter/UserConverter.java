@@ -31,7 +31,7 @@ public class UserConverter implements BiConverter<UserEntity, User, UserData> {
   }
 
   @Override
-  public UserData convertToData(UserEntity userEntity, int totalItems) {
+  public UserData convertToData(UserEntity userEntity, int totalItems, int updates, int deletes) {
     UserData data = new UserData();
     data.setId(userEntity.getId());
     data.setLocalAuthorityId(userEntity.getLocalAuthorityId());

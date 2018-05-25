@@ -1,14 +1,20 @@
 package uk.gov.dft.bluebadge.model.usermanagement;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
-import javax.validation.constraints.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import org.springframework.validation.annotation.Validated;
+import javax.validation.Valid;
+import javax.validation.constraints.*;
 
-/** Data */
+/**
+ * Data
+ */
 @Validated
-public class Data {
+
+public class Data   {
   @JsonProperty("updated")
   private Integer updated = null;
 
@@ -25,10 +31,11 @@ public class Data {
 
   /**
    * Get updated
-   *
    * @return updated
-   */
+  **/
   @ApiModelProperty(value = "")
+
+
   public Integer getUpdated() {
     return updated;
   }
@@ -44,10 +51,11 @@ public class Data {
 
   /**
    * Get deleted
-   *
    * @return deleted
-   */
+  **/
   @ApiModelProperty(value = "")
+
+
   public Integer getDeleted() {
     return deleted;
   }
@@ -63,10 +71,11 @@ public class Data {
 
   /**
    * Get totalItems
-   *
    * @return totalItems
-   */
+  **/
   @ApiModelProperty(value = "")
+
+
   public Integer getTotalItems() {
     return totalItems;
   }
@@ -74,6 +83,7 @@ public class Data {
   public void setTotalItems(Integer totalItems) {
     this.totalItems = totalItems;
   }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -84,9 +94,9 @@ public class Data {
       return false;
     }
     Data data = (Data) o;
-    return Objects.equals(this.updated, data.updated)
-        && Objects.equals(this.deleted, data.deleted)
-        && Objects.equals(this.totalItems, data.totalItems);
+    return Objects.equals(this.updated, data.updated) &&
+        Objects.equals(this.deleted, data.deleted) &&
+        Objects.equals(this.totalItems, data.totalItems);
   }
 
   @Override
@@ -98,7 +108,7 @@ public class Data {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class Data {\n");
-
+    
     sb.append("    updated: ").append(toIndentedString(updated)).append("\n");
     sb.append("    deleted: ").append(toIndentedString(deleted)).append("\n");
     sb.append("    totalItems: ").append(toIndentedString(totalItems)).append("\n");
@@ -107,7 +117,8 @@ public class Data {
   }
 
   /**
-   * Convert the given object to string with each line indented by 4 spaces (except the first line).
+   * Convert the given object to string with each line indented by 4 spaces
+   * (except the first line).
    */
   private String toIndentedString(java.lang.Object o) {
     if (o == null) {
@@ -116,3 +127,4 @@ public class Data {
     return o.toString().replace("\n", "\n    ");
   }
 }
+
