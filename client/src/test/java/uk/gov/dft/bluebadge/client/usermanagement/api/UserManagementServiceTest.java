@@ -43,19 +43,6 @@ public class UserManagementServiceTest {
     mockServer = MockRestServiceServer.createServer(restTemplateFactory.getInstance());
   }
 
-
-  /*
-  @Test
-  public void deleteMe(){
-    User user = new User();
-    user.setName("Peter");
-    user.setLocalAuthorityId(2);
-    user.setEmailAddress("valid666@dft.gov.uk");
-    UserResponse ur = userManagementService.getUserForEmail("Vaklid666@dft.gov.uk");
-    System.out.println(user);
-  }
-  */
-
   @Test
   public void getUsersForAuthority() {
     String requestUrl = serviceConfiguration.getUrlPrefix() + "/authorities/2/users?name=Blah";
@@ -104,6 +91,49 @@ public class UserManagementServiceTest {
     user.setLocalAuthorityId(2);
     UserResponse ur = userManagementService.updateUser(user);
     Assert.assertTrue(ur.getData().getUpdated() == 1);
+    mockServer.verify();
+  }
+
+  @Test
+  public void deleteUser(){
+    String requestUrl = serviceConfiguration.getUrlPrefix() + "/authorities/2/users/-1";
+    mockServer
+            .expect(method(HttpMethod.DELETE))
+            .andExpect(requestTo(requestUrl))
+            .andRespond(withSuccess("{\"data\":{\"deleted\":1}}",MediaType.APPLICATION_JSON));
+    User user = new User();
+    user.setId(-1);
+    user.setLocalAuthorityId(2);
+    UserResponse ur = userManagementService.deleteUser(user);
+    Assert.assertTrue(ur.getData().getDeleted() == 1);
+    mockServer.verify();
+  }
+
+  @Test
+  public void createUser(){
+    String requestUrl = serviceConfiguration.getUrlPrefix() + "/authorities/2/users";
+    mockServer
+            .expect(method(HttpMethod.POST))
+            .andExpect(requestTo(requestUrl))
+            .andRespond(withSuccess("{\"data\":{\"updated\":1}}",MediaType.APPLICATION_JSON));
+    User user = new User();
+    user.setId(-1);
+    user.setLocalAuthorityId(2);
+    UserResponse ur = userManagementService.createUser(2, user);
+    Assert.assertTrue(ur.getData().getUpdated() == 1);
+    mockServer.verify();
+  }
+
+  @Test
+  public void getById(){
+    String requestUrl = serviceConfiguration.getUrlPrefix() + "/authorities/2/users/-1";
+    mockServer
+            .expect(method(HttpMethod.GET))
+            .andExpect(requestTo(requestUrl))
+            .andRespond(withSuccess("{\"data\":{\"updated\":0}}",MediaType.APPLICATION_JSON));
+
+    UserResponse ur = userManagementService.getById(2, -1);
+    Assert.assertTrue(ur.getData().getUpdated() == 0);
     mockServer.verify();
   }
 }

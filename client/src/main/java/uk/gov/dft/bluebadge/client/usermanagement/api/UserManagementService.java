@@ -27,6 +27,7 @@ public class UserManagementService {
     static final String GET_USERS_FOR_AUTHORITY_ENDPOINT =
         "/authorities/{authorityId}/users?name={name}";
     static final String UPDATE_ENDPOINT = "/authorities/{authorityId}/users/{userId}";
+    static final String REMOVE_ENDPOINT = "/authorities/{authorityId}/users/{userId}";
   }
 
   private RestTemplateFactory restTemplateFactory;
@@ -123,38 +124,48 @@ public class UserManagementService {
 
     HttpEntity<User> request = new HttpEntity<>(user);
 
-    String uri = UriComponentsBuilder
-            .fromUriString(serviceConfiguration.getUrlPrefix() + UPDATE_ENDPOINT)
-            .build().toUriString();
+    String uri =
+        UriComponentsBuilder.fromUriString(serviceConfiguration.getUrlPrefix() + UPDATE_ENDPOINT)
+            .build()
+            .toUriString();
 
     UserResponse response =
-            restTemplateFactory
-                    .getInstance()
-                    .exchange(uri,
-                              HttpMethod.PUT,
-                              request, UserResponse.class,
-                              user.getLocalAuthorityId(),
-                              user.getId())
-                    .getBody();
+        restTemplateFactory
+            .getInstance()
+            .exchange(
+                uri,
+                HttpMethod.PUT,
+                request,
+                UserResponse.class,
+                user.getLocalAuthorityId(),
+                user.getId())
+            .getBody();
 
     return response;
   }
 
   public UserResponse deleteUser(User user) {
     Assert.notNull(user, "must be set");
-    Assert.notNull(user.getName(), "must be set");
 
-    UserResponse response = new UserResponse();
-    if (user.getName().toLowerCase().startsWith("notexists")) {
-      UserData data = new UserData();
-      data.setUpdated(0);
-      response.setData(data);
-    } else {
-      // Return a success
-      UserData data = new UserData();
-      data.setUpdated(1);
-      response.setData(data);
-    }
+    HttpEntity<User> request = new HttpEntity<>(user);
+
+    String uri =
+        UriComponentsBuilder.fromUriString(serviceConfiguration.getUrlPrefix() + UPDATE_ENDPOINT)
+            .build()
+            .toUriString();
+
+    UserResponse response =
+        restTemplateFactory
+            .getInstance()
+            .exchange(
+                uri,
+                HttpMethod.DELETE,
+                request,
+                UserResponse.class,
+                user.getLocalAuthorityId(),
+                user.getId())
+            .getBody();
+
     return response;
   }
 }
