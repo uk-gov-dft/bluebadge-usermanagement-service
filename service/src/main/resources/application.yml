@@ -20,6 +20,6 @@ spring:
 server:
   port: 8180
   servlet:
-    context-path: /uk-gov-dft/service-template-api/1.0.0
+    context-path: /uk-gov-dft/user-management-service/1.0.0
 
 springfox.documentation.swagger.v2.path: /api-docs

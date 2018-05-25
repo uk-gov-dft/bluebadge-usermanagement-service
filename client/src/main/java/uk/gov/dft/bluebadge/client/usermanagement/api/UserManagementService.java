@@ -2,11 +2,12 @@ package uk.gov.dft.bluebadge.client.usermanagement.api;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.dft.bluebadge.client.usermanagement.configuration.ServiceConfiguration;
 import uk.gov.dft.bluebadge.client.usermanagement.httpclient.RestTemplateFactory;
 import uk.gov.dft.bluebadge.model.usermanagement.User;
@@ -14,18 +15,20 @@ import uk.gov.dft.bluebadge.model.usermanagement.UserData;
 import uk.gov.dft.bluebadge.model.usermanagement.UserResponse;
 import uk.gov.dft.bluebadge.model.usermanagement.UsersResponse;
 
-import java.util.List;
+import static uk.gov.dft.bluebadge.client.usermanagement.api.UserManagementService.Endpoints.*;
 
 @Service
 public class UserManagementService {
 
-  private class UserTypeRef extends ParameterizedTypeReference<List<User>> {}
+  class Endpoints {
+    static final String GET_USER_BY_EMAIL_ENDPOINT = "/users?emailAddress={emailAddress}";
+    static final String GET_BY_ID_ENDPOINT = "/authorities/{authorityId}/users/{userId}";
+    static final String CREATE_ENDPOINT = "/authorities/{authorityId}/users";
+    static final String GET_USERS_FOR_AUTHORITY_ENDPOINT =
+        "/authorities/{authorityId}/users?name={name}";
+    static final String UPDATE_ENDPOINT = "/authorities/{authorityId}/users/{userId}";
+  }
 
-  private static final String GET_USER_FOR_EMAIL = "/users?emailAddress={emailAddress}";
-  private static final String GET_BY_ID_ENDPOINT = "/authorities/{authorityId}/users/{userId}";
-  private static final String CREATE_ENDPOINT = "/authorities/{authorityId}/users";
-  private static final String GET_USERS_FOR_AUTHORITY_ENDPOINT =
-      "/authorities/{authorityId}/users?name={name}";
   private RestTemplateFactory restTemplateFactory;
   private ServiceConfiguration serviceConfiguration;
 
@@ -52,7 +55,7 @@ public class UserManagementService {
         restTemplateFactory
             .getInstance()
             .getForEntity(
-                serviceConfiguration.getUrlPrefix() + GET_USER_FOR_EMAIL,
+                serviceConfiguration.getUrlPrefix() + GET_USER_BY_EMAIL_ENDPOINT,
                 UserResponse.class,
                 trimmedAddress)
             .getBody();
@@ -69,17 +72,7 @@ public class UserManagementService {
   public UsersResponse getUsersForAuthority(Integer authorityId, String nameFilter) {
 
     Assert.notNull(authorityId, "Local Authority Id must be provided");
-    /*
-        ResponseEntity<UsersResponse> userListResponse =
-            restTemplateFactory
-                .getInstance()
-                .getForEntity(
-                    UriComponentsBuilder.fromUriString(
-                            serviceConfiguration.getUrlPrefix() + GET_USERS_FOR_AUTHORITY_ENDPOINT)
-                        .queryParam("name", nameFilter)
-                        .build(authorityId),
-                    UsersResponse.class);
-    */
+
     ResponseEntity<UsersResponse> userListResponse =
         restTemplateFactory
             .getInstance()
@@ -122,6 +115,46 @@ public class UserManagementService {
                 request,
                 UserResponse.class,
                 authorityId);
+    return response;
+  }
+
+  public UserResponse updateUser(User user) {
+    Assert.notNull(user, "must be set");
+
+    HttpEntity<User> request = new HttpEntity<>(user);
+
+    String uri = UriComponentsBuilder
+            .fromUriString(serviceConfiguration.getUrlPrefix() + UPDATE_ENDPOINT)
+            .build().toUriString();
+
+    UserResponse response =
+            restTemplateFactory
+                    .getInstance()
+                    .exchange(uri,
+                              HttpMethod.PUT,
+                              request, UserResponse.class,
+                              user.getLocalAuthorityId(),
+                              user.getId())
+                    .getBody();
+
+    return response;
+  }
+
+  public UserResponse deleteUser(User user) {
+    Assert.notNull(user, "must be set");
+    Assert.notNull(user.getName(), "must be set");
+
+    UserResponse response = new UserResponse();
+    if (user.getName().toLowerCase().startsWith("notexists")) {
+      UserData data = new UserData();
+      data.setUpdated(0);
+      response.setData(data);
+    } else {
+      // Return a success
+      UserData data = new UserData();
+      data.setUpdated(1);
+      response.setData(data);
+    }
     return response;
   }
 }

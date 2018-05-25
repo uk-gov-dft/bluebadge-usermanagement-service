@@ -80,7 +80,7 @@ public class UserManagementRepository {
    * @return Insert count.
    */
   public int createUser(UserEntity user) {
-    Assert.notNull(user, "createLocalAuthority called with null entity to update");
+    Assert.notNull(user, "createUser called with null entity to update");
     LOGGER.info("Created UserEntity id: {}.", user.getId());
     return sqlSession.insert("createUser", user);
   }
@@ -101,6 +101,12 @@ public class UserManagementRepository {
     return result;
   }
 
+  /**
+   * Check if email address used by another user.
+   *
+   * @param userEntity Entity with email to check.
+   * @return true if exists.
+   */
   public boolean emailAddressAlreadyUsed(UserEntity userEntity) {
     return sqlSession.selectOne("emailAddressAlreadyUsed", userEntity);
   }

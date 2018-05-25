@@ -11,6 +11,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.test.web.client.RequestMatcher;
+import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import uk.gov.dft.bluebadge.client.usermanagement.configuration.ServiceConfiguration;
 import uk.gov.dft.bluebadge.client.usermanagement.httpclient.RestTemplateFactory;
 import uk.gov.dft.bluebadge.model.usermanagement.User;
@@ -87,6 +89,21 @@ public class UserManagementServiceTest {
 
     Boolean exists = userManagementService.checkUserExistsForEmail("blah@blah.com");
     Assert.assertTrue(exists);
+    mockServer.verify();
+  }
+
+  @Test
+  public void updateUser(){
+    String requestUrl = serviceConfiguration.getUrlPrefix() + "/authorities/2/users/-1";
+    mockServer
+            .expect(method(HttpMethod.PUT))
+            .andExpect(requestTo(requestUrl))
+            .andRespond(withSuccess("{\"data\":{\"updated\":1}}",MediaType.APPLICATION_JSON));
+    User user = new User();
+    user.setId(-1);
+    user.setLocalAuthorityId(2);
+    UserResponse ur = userManagementService.updateUser(user);
+    Assert.assertTrue(ur.getData().getUpdated() == 1);
     mockServer.verify();
   }
 }

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -67,13 +68,13 @@ public class UsersApiControllerImpl implements UsersApi {
     Optional<UserEntity> userEntity = service.retrieveUserById(userId);
 
     if (userEntity.isPresent()) {
-      userResponse.setData(userConverter.convertToData(userEntity.get(), 1));
+      userResponse.setData(userConverter.convertToData(userEntity.get(), 1, 0, 0));
     } else {
       UserData userData = new UserData();
       userData.setTotalItems(0);
       userResponse.setData(userData);
     }
-    return new ResponseEntity<>(userResponse, HttpStatus.OK);
+    return ResponseEntity.ok(userResponse);
   }
 
   /**
@@ -93,19 +94,17 @@ public class UsersApiControllerImpl implements UsersApi {
     HttpStatus status;
 
     try {
-      service.createUser(entity);
-      userResponse.setData(userConverter.convertToData(entity, 1));
-      status = HttpStatus.OK;
+      int result = service.createUser(entity);
+      userResponse.setData(userConverter.convertToData(entity, 1, result, 0));
+      return ResponseEntity.ok(userResponse);
     } catch (BlueBadgeBusinessException e) {
       Error error = new Error();
       for (ErrorErrors errorItem : e.getErrorsList()) {
         error.addErrorsItem(errorItem);
       }
       userResponse.setError(error);
-      status = HttpStatus.BAD_REQUEST;
+      return ResponseEntity.badRequest().body(userResponse);
     }
-
-    return new ResponseEntity<>(userResponse, status);
   }
 
   /**
@@ -125,13 +124,13 @@ public class UsersApiControllerImpl implements UsersApi {
     Optional<UserEntity> userEntity = service.retrieveUserByEmail(emailAddress);
     UserResponse userResponse = new UserResponse();
     if (userEntity.isPresent()) {
-      userResponse.setData(userConverter.convertToData(userEntity.get(), 1));
+      userResponse.setData(userConverter.convertToData(userEntity.get(), 1, 0, 0));
     } else {
       UserData userData = new UserData();
       userData.setTotalItems(0);
       userResponse.setData(userData);
     }
-    return new ResponseEntity<>(userResponse, HttpStatus.OK);
+    return ResponseEntity.ok(userResponse);
   }
 
   /**
@@ -157,6 +156,48 @@ public class UsersApiControllerImpl implements UsersApi {
     }
 
     data.setTotalItems(userEntityList.size());
-    return new ResponseEntity<>(new UsersResponse().data(data), HttpStatus.OK);
+    data.setDeleted(0);
+    data.setUpdated(0);
+    return ResponseEntity.ok(new UsersResponse().data(data));
+  }
+
+  @Override
+  public ResponseEntity<UserResponse> authoritiesAuthorityIdUsersUserIdPut(
+      @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
+          Integer authorityId,
+      @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
+          Integer userId,
+      @ApiParam(value = "") @Valid @RequestBody User user) {
+    UserEntity entity = userConverter.convertToEntity(user);
+    UserResponse userResponse = new UserResponse();
+
+    try {
+      int result = service.updateUser(entity);
+      userResponse.setData(userConverter.convertToData(entity, 1, result, 0));
+      return ResponseEntity.ok(userResponse);
+    } catch (BlueBadgeBusinessException e) {
+      Error error = new Error();
+      for (ErrorErrors errorItem : e.getErrorsList()) {
+        error.addErrorsItem(errorItem);
+      }
+      userResponse.setError(error);
+      return ResponseEntity.badRequest().body(userResponse);
+    }
+  }
+
+  @Override
+  public ResponseEntity<UserResponse> authoritiesAuthorityIdUsersUserIdDelete(
+      @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
+          Integer authorityId,
+      @ApiParam(value = "Numeric ID of the user to remove.", required = true)
+          @PathVariable("userId")
+          Integer userId) {
+    Assert.notNull(userId, "User id must be provided for delete.");
+    int result = service.deleteUser(userId);
+    UserResponse userResponse = new UserResponse();
+    UserData userData = new UserData();
+    userData.totalItems(0).updated(0).deleted(result);
+    userResponse.setData(userData);
+    return ResponseEntity.ok(userResponse);
   }
 }

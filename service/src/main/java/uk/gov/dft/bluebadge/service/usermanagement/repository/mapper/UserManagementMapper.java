@@ -4,6 +4,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 
+@SuppressWarnings("unused")
 @Mapper
 public interface UserManagementMapper {
   UserEntity retrieveUserById(int id);

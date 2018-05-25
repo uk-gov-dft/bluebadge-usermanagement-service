@@ -14,5 +14,5 @@ interface BiConverter<ENTITYT, MODELT, DATAT extends Data> {
 
   MODELT convertToModel(ENTITYT entity);
 
-  DATAT convertToData(ENTITYT entity, int totalItems);
+  DATAT convertToData(ENTITYT entity, int totalItems, int updates, int deletes);
 }
