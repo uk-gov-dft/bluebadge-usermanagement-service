@@ -27,7 +27,7 @@ public class UserManagementService {
     static final String GET_USERS_FOR_AUTHORITY_ENDPOINT =
         "/authorities/{authorityId}/users?name={name}";
     static final String UPDATE_ENDPOINT = "/authorities/{authorityId}/users/{userId}";
-    static final String REMOVE_ENDPOINT = "/authorities/{authorityId}/users/{userId}";
+    static final String DELETE_ENDPOINT = "/authorities/{authorityId}/users/{userId}";
   }
 
   private RestTemplateFactory restTemplateFactory;
@@ -150,7 +150,7 @@ public class UserManagementService {
     HttpEntity<User> request = new HttpEntity<>(user);
 
     String uri =
-        UriComponentsBuilder.fromUriString(serviceConfiguration.getUrlPrefix() + UPDATE_ENDPOINT)
+        UriComponentsBuilder.fromUriString(serviceConfiguration.getUrlPrefix() + DELETE_ENDPOINT)
             .build()
             .toUriString();
 
