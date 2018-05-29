@@ -1,6 +1,7 @@
 package uk.gov.dft.bluebadge.model.usermanagement;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.Lists;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,7 @@ import org.springframework.validation.annotation.Validated;
 public class UsersData extends Data {
   @JsonProperty("users")
   @Valid
-  private List<User> users = null;
+  private List<User> users = Lists.newArrayList();
 
   public UsersData users(List<User> users) {
     this.users = users;
