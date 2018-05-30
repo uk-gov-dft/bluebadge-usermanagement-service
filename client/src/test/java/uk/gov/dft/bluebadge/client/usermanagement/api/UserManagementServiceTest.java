@@ -2,7 +2,6 @@ package uk.gov.dft.bluebadge.client.usermanagement.api;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,15 +10,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.test.web.client.RequestMatcher;
-import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import uk.gov.dft.bluebadge.client.usermanagement.configuration.ServiceConfiguration;
 import uk.gov.dft.bluebadge.client.usermanagement.httpclient.RestTemplateFactory;
 import uk.gov.dft.bluebadge.model.usermanagement.User;
 import uk.gov.dft.bluebadge.model.usermanagement.UserResponse;
 import uk.gov.dft.bluebadge.model.usermanagement.UsersResponse;
-
-import java.util.List;
 
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -33,7 +28,7 @@ public class UserManagementServiceTest {
 
   @Autowired private RestTemplateFactory restTemplateFactory;
 
-  MockRestServiceServer mockServer;
+  private MockRestServiceServer mockServer;
 
   @Autowired private ServiceConfiguration serviceConfiguration;
 
@@ -43,19 +38,6 @@ public class UserManagementServiceTest {
     mockServer = MockRestServiceServer.createServer(restTemplateFactory.getInstance());
   }
 
-
-  /*
-  @Test
-  public void deleteMe(){
-    User user = new User();
-    user.setName("Peter");
-    user.setLocalAuthorityId(2);
-    user.setEmailAddress("valid666@dft.gov.uk");
-    UserResponse ur = userManagementService.getUserForEmail("Vaklid666@dft.gov.uk");
-    System.out.println(user);
-  }
-  */
-
   @Test
   public void getUsersForAuthority() {
     String requestUrl = serviceConfiguration.getUrlPrefix() + "/authorities/2/users?name=Blah";
@@ -64,12 +46,12 @@ public class UserManagementServiceTest {
         .andExpect(requestTo(requestUrl))
         .andRespond(
             withSuccess(
-                "{\"apiVersion\":null,\"context\":null,\"id\":null," +
-                        "\"method\":null,\"errors\":null,\"data\":{\"totalItems" +
-                        "\":2,\"users\":[{\"id\":1,\"name\":\"Bob\"," +
-                        "\"emailAddress\":\"blah@blah.com\",\"localAuthorityId\":2}" +
-                        ",{\"id\":3,\"name\":\"Bob2\",\"emailAddress\":" +
-                        "\"blah2@blah.com\",\"localAuthorityId\":2}]}}",
+                "{\"apiVersion\":null,\"context\":null,\"id\":null,"
+                    + "\"method\":null,\"errors\":null,\"data\":{\"totalItems"
+                    + "\":2,\"users\":[{\"id\":1,\"name\":\"Bob\","
+                    + "\"emailAddress\":\"blah@blah.com\",\"localAuthorityId\":2}"
+                    + ",{\"id\":3,\"name\":\"Bob2\",\"emailAddress\":"
+                    + "\"blah2@blah.com\",\"localAuthorityId\":2}]}}",
                 MediaType.APPLICATION_JSON));
 
     UsersResponse userList = userManagementService.getUsersForAuthority(2, "Blah");
@@ -93,17 +75,60 @@ public class UserManagementServiceTest {
   }
 
   @Test
-  public void updateUser(){
+  public void updateUser() {
     String requestUrl = serviceConfiguration.getUrlPrefix() + "/authorities/2/users/-1";
     mockServer
-            .expect(method(HttpMethod.PUT))
-            .andExpect(requestTo(requestUrl))
-            .andRespond(withSuccess("{\"data\":{\"updated\":1}}",MediaType.APPLICATION_JSON));
+        .expect(method(HttpMethod.PUT))
+        .andExpect(requestTo(requestUrl))
+        .andRespond(withSuccess("{\"data\":{\"updated\":1}}", MediaType.APPLICATION_JSON));
     User user = new User();
     user.setId(-1);
     user.setLocalAuthorityId(2);
     UserResponse ur = userManagementService.updateUser(user);
     Assert.assertTrue(ur.getData().getUpdated() == 1);
+    mockServer.verify();
+  }
+
+  @Test
+  public void deleteUser() {
+    String requestUrl = serviceConfiguration.getUrlPrefix() + "/authorities/2/users/-1";
+    mockServer
+        .expect(method(HttpMethod.DELETE))
+        .andExpect(requestTo(requestUrl))
+        .andRespond(withSuccess("{\"data\":{\"deleted\":1}}", MediaType.APPLICATION_JSON));
+    User user = new User();
+    user.setId(-1);
+    user.setLocalAuthorityId(2);
+    UserResponse ur = userManagementService.deleteUser(user);
+    Assert.assertTrue(ur.getData().getDeleted() == 1);
+    mockServer.verify();
+  }
+
+  @Test
+  public void createUser() {
+    String requestUrl = serviceConfiguration.getUrlPrefix() + "/authorities/2/users";
+    mockServer
+        .expect(method(HttpMethod.POST))
+        .andExpect(requestTo(requestUrl))
+        .andRespond(withSuccess("{\"data\":{\"updated\":1}}", MediaType.APPLICATION_JSON));
+    User user = new User();
+    user.setId(-1);
+    user.setLocalAuthorityId(2);
+    UserResponse ur = userManagementService.createUser(2, user);
+    Assert.assertTrue(ur.getData().getUpdated() == 1);
+    mockServer.verify();
+  }
+
+  @Test
+  public void getById() {
+    String requestUrl = serviceConfiguration.getUrlPrefix() + "/authorities/2/users/-1";
+    mockServer
+        .expect(method(HttpMethod.GET))
+        .andExpect(requestTo(requestUrl))
+        .andRespond(withSuccess("{\"data\":{\"updated\":0}}", MediaType.APPLICATION_JSON));
+
+    UserResponse ur = userManagementService.getById(2, -1);
+    Assert.assertTrue(ur.getData().getUpdated() == 0);
     mockServer.verify();
   }
 }
