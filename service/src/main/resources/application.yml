@@ -3,6 +3,9 @@ logging:
   level:
     root: INFO
     sample.mybatis.mapper: WARN
+    uk.gov.dft.bluebadge.service: DEBUG
+
+
 
 mybatis:
   type-aliases-package: uk.gov.dft.bluebadge.service.usermanagement.repository.domain

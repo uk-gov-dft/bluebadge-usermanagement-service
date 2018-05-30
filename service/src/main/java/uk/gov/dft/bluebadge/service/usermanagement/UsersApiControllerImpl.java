@@ -1,6 +1,7 @@
 package uk.gov.dft.bluebadge.service.usermanagement;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import io.swagger.annotations.ApiParam;
 import java.util.List;
 import java.util.Optional;
@@ -150,7 +151,7 @@ public class UsersApiControllerImpl implements UsersApi {
 
     List<UserEntity> userEntityList =
         service.retrieveUsersByAuthorityId(authorityId, name.orElse(null));
-    UsersData data = new UsersData();
+    UsersData data = new UsersData().users(Lists.newArrayList());
     for (UserEntity userEntity : userEntityList) {
       data.addUsersItem(userConverter.convertToModel(userEntity));
     }

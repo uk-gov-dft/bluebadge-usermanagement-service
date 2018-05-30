@@ -1,5 +1,6 @@
 package uk.gov.dft.bluebadge.service.usermanagement.repository;
 
+import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Optional;
 import org.apache.ibatis.session.SqlSession;
@@ -53,7 +54,11 @@ public class UserManagementRepository {
    * @return List of all UserEntity's.
    */
   public List<UserEntity> retrieveUsersByAuthorityId(UserEntity userEntity) {
-    return sqlSession.selectList("retrieveUsersByAuthorityId", userEntity);
+    List<UserEntity> result = sqlSession.selectList("retrieveUsersByAuthorityId", userEntity);
+    if (result == null) {
+      result = Lists.newArrayList();
+    }
+    return result;
   }
 
   /**
