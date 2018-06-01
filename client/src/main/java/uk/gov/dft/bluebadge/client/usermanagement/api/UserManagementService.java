@@ -1,5 +1,12 @@
 package uk.gov.dft.bluebadge.client.usermanagement.api;
 
+import static uk.gov.dft.bluebadge.client.usermanagement.api.UserManagementService.Endpoints.CREATE_ENDPOINT;
+import static uk.gov.dft.bluebadge.client.usermanagement.api.UserManagementService.Endpoints.DELETE_ENDPOINT;
+import static uk.gov.dft.bluebadge.client.usermanagement.api.UserManagementService.Endpoints.GET_BY_ID_ENDPOINT;
+import static uk.gov.dft.bluebadge.client.usermanagement.api.UserManagementService.Endpoints.GET_USERS_FOR_AUTHORITY_ENDPOINT;
+import static uk.gov.dft.bluebadge.client.usermanagement.api.UserManagementService.Endpoints.GET_USER_BY_EMAIL_ENDPOINT;
+import static uk.gov.dft.bluebadge.client.usermanagement.api.UserManagementService.Endpoints.UPDATE_ENDPOINT;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -11,11 +18,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.dft.bluebadge.client.usermanagement.configuration.ServiceConfiguration;
 import uk.gov.dft.bluebadge.client.usermanagement.httpclient.RestTemplateFactory;
 import uk.gov.dft.bluebadge.model.usermanagement.User;
-import uk.gov.dft.bluebadge.model.usermanagement.UserData;
 import uk.gov.dft.bluebadge.model.usermanagement.UserResponse;
 import uk.gov.dft.bluebadge.model.usermanagement.UsersResponse;
-
-import static uk.gov.dft.bluebadge.client.usermanagement.api.UserManagementService.Endpoints.*;
 
 @Service
 public class UserManagementService {
@@ -144,28 +148,20 @@ public class UserManagementService {
     return response;
   }
 
-  public UserResponse deleteUser(User user) {
-    Assert.notNull(user, "must be set");
-
-    HttpEntity<User> request = new HttpEntity<>(user);
+  public void deleteUser(Integer localAuthorityId, Integer userId) {
+    Assert.notNull(localAuthorityId, "must be set");
+    Assert.notNull(userId, "must be set");
 
     String uri =
         UriComponentsBuilder.fromUriString(serviceConfiguration.getUrlPrefix() + DELETE_ENDPOINT)
             .build()
             .toUriString();
 
-    UserResponse response =
-        restTemplateFactory
-            .getInstance()
-            .exchange(
-                uri,
-                HttpMethod.DELETE,
-                request,
-                UserResponse.class,
-                user.getLocalAuthorityId(),
-                user.getId())
-            .getBody();
-
-    return response;
+    restTemplateFactory
+        .getInstance()
+        .delete(
+            uri,
+            localAuthorityId,
+            userId);
   }
 }

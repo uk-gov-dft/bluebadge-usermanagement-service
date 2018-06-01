@@ -187,18 +187,14 @@ public class UsersApiControllerImpl implements UsersApi {
   }
 
   @Override
-  public ResponseEntity<UserResponse> authoritiesAuthorityIdUsersUserIdDelete(
+  public ResponseEntity<Void> authoritiesAuthorityIdUsersUserIdDelete(
       @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
           Integer authorityId,
       @ApiParam(value = "Numeric ID of the user to remove.", required = true)
           @PathVariable("userId")
           Integer userId) {
     Assert.notNull(userId, "User id must be provided for delete.");
-    int result = service.deleteUser(userId);
-    UserResponse userResponse = new UserResponse();
-    UserData userData = new UserData();
-    userData.totalItems(0).updated(0).deleted(result);
-    userResponse.setData(userData);
-    return ResponseEntity.ok(userResponse);
+    service.deleteUser(userId);
+    return ResponseEntity.noContent().build();
   }
 }
