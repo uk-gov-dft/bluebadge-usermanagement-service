@@ -133,41 +133,22 @@ public interface UsersApi {
     value = "Removes a User from a Local Authority",
     nickname = "authoritiesAuthorityIdUsersUserIdDelete",
     notes = "Removes a User from a Local Authority",
-    response = UserResponse.class,
     tags = {
       "Users",
     }
   )
-  @ApiResponses(
-    value = {
-      @ApiResponse(
-        code = 200,
-        message = "Resource Successfully Removed",
-        response = UserResponse.class
-      )
-    }
-  )
+  @ApiResponses(value = {@ApiResponse(code = 204, message = "Resource Successfully Removed")})
   @RequestMapping(
     value = "/authorities/{authorityId}/users/{userId}",
     produces = {"application/json"},
     method = RequestMethod.DELETE
   )
-  default ResponseEntity<UserResponse> authoritiesAuthorityIdUsersUserIdDelete(
+  default ResponseEntity<Void> authoritiesAuthorityIdUsersUserIdDelete(
       @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
           Integer authorityId,
       @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
           Integer userId) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
-      if (getAcceptHeader().get().contains("application/json")) {
-        try {
-          return new ResponseEntity<>(
-              getObjectMapper().get().readValue("\"\"", UserResponse.class),
-              HttpStatus.NOT_IMPLEMENTED);
-        } catch (IOException e) {
-          log.error("Couldn't serialize response for content type application/json", e);
-          return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-      }
     } else {
       log.warn(
           "ObjectMapper or HttpServletRequest not configured in default UsersApi interface so no example is generated");

@@ -1,5 +1,6 @@
 package uk.gov.dft.bluebadge.client.usermanagement.httpclient;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 
@@ -9,13 +10,10 @@ public class CustomResponseErrorHandler extends DefaultResponseErrorHandler {
 
   @Override
   public boolean hasError(ClientHttpResponse response) throws IOException {
-    switch (response.getStatusCode()) {
-      case OK:
-        // Validation errors treated as ok.  Error mapped into CommonResponse.error
-      case BAD_REQUEST:
-        {
-          return false;
-        }
+    HttpStatus statusCode = response.getStatusCode();
+    if(HttpStatus.Series.SUCCESSFUL == statusCode.series() ||
+        HttpStatus.BAD_REQUEST == statusCode) {
+      return false;
     }
     return true;
   }

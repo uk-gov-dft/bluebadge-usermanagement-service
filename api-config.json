@@ -124,11 +124,8 @@
           "summary" : "Removes a User from a Local Authority",
           "description" : "Removes a User from a Local Authority",
           "responses" : {
-            "200" : {
-              "description" : "Resource Successfully Removed",
-              "schema" : {
-                "$ref" : "#/definitions/UserResponse"
-              }
+            "204" : {
+              "description" : "Resource Successfully Removed"
             }
           }
         },
