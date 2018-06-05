@@ -18,6 +18,7 @@ import uk.gov.dft.bluebadge.model.usermanagement.UsersResponse;
 
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withNoContent;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 @SpringBootTest
@@ -95,12 +96,8 @@ public class UserManagementServiceTest {
     mockServer
         .expect(method(HttpMethod.DELETE))
         .andExpect(requestTo(requestUrl))
-        .andRespond(withSuccess("{\"data\":{\"deleted\":1}}", MediaType.APPLICATION_JSON));
-    User user = new User();
-    user.setId(-1);
-    user.setLocalAuthorityId(2);
-    UserResponse ur = userManagementService.deleteUser(user);
-    Assert.assertTrue(ur.getData().getDeleted() == 1);
+        .andRespond(withNoContent());
+    userManagementService.deleteUser(2, -1);
     mockServer.verify();
   }
 

@@ -4,16 +4,20 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.dft.bluebadge.client.usermanagement.configuration.ServiceConfiguration;
 import uk.gov.dft.bluebadge.client.usermanagement.httpclient.RestTemplateFactory;
-import uk.gov.dft.bluebadge.model.usermanagement.*;
+import uk.gov.dft.bluebadge.model.usermanagement.Authority;
+import uk.gov.dft.bluebadge.model.usermanagement.User;
+import uk.gov.dft.bluebadge.model.usermanagement.UserResponse;
+import uk.gov.dft.bluebadge.model.usermanagement.UsersResponse;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static uk.gov.dft.bluebadge.client.usermanagement.api.UserManagementService.Endpoints.*;
@@ -21,7 +25,7 @@ import static uk.gov.dft.bluebadge.client.usermanagement.api.UserManagementServi
 @Service
 public class UserManagementService {
 
-  Logger logger = LoggerFactory.getLogger(UserManagementService.class);
+  private final static Logger logger = LoggerFactory.getLogger(UserManagementService.class);
 
   class Endpoints {
     static final String GET_USER_BY_EMAIL_ENDPOINT = "/users?emailAddress={emailAddress}";
@@ -147,29 +151,21 @@ public class UserManagementService {
     return response;
   }
 
-  public UserResponse deleteUser(User user) {
-    Assert.notNull(user, "must be set");
-
-    HttpEntity<User> request = new HttpEntity<>(user);
+  public void deleteUser(Integer localAuthorityId, Integer userId) {
+    Assert.notNull(localAuthorityId, "must be set");
+    Assert.notNull(userId, "must be set");
 
     String uri =
         UriComponentsBuilder.fromUriString(serviceConfiguration.getUrlPrefix() + DELETE_ENDPOINT)
             .build()
             .toUriString();
 
-    UserResponse response =
-        restTemplateFactory
-            .getInstance()
-            .exchange(
-                uri,
-                HttpMethod.DELETE,
-                request,
-                UserResponse.class,
-                user.getLocalAuthorityId(),
-                user.getId())
-            .getBody();
-
-    return response;
+    restTemplateFactory
+        .getInstance()
+        .delete(
+            uri,
+            localAuthorityId,
+            userId);
   }
 
   public void resetPassword(Integer authorityId, Integer userId){
