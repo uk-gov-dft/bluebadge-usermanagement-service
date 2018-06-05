@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -185,7 +184,7 @@ public class UsersApiControllerImpl implements UsersApi {
       return ResponseEntity.badRequest().body(userResponse);
     }
   }
-
+  /*
   @Override
   public ResponseEntity<UserResponse> authoritiesAuthorityIdUsersUserIdDelete(
       @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
@@ -201,4 +200,5 @@ public class UsersApiControllerImpl implements UsersApi {
     userResponse.setData(userData);
     return ResponseEntity.ok(userResponse);
   }
+  */
 }
