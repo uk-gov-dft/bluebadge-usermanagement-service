@@ -1,13 +1,8 @@
 package uk.gov.dft.bluebadge.client.usermanagement.api;
 
-import static uk.gov.dft.bluebadge.client.usermanagement.api.UserManagementService.Endpoints.CREATE_ENDPOINT;
-import static uk.gov.dft.bluebadge.client.usermanagement.api.UserManagementService.Endpoints.DELETE_ENDPOINT;
-import static uk.gov.dft.bluebadge.client.usermanagement.api.UserManagementService.Endpoints.GET_BY_ID_ENDPOINT;
-import static uk.gov.dft.bluebadge.client.usermanagement.api.UserManagementService.Endpoints.GET_USERS_FOR_AUTHORITY_ENDPOINT;
-import static uk.gov.dft.bluebadge.client.usermanagement.api.UserManagementService.Endpoints.GET_USER_BY_EMAIL_ENDPOINT;
-import static uk.gov.dft.bluebadge.client.usermanagement.api.UserManagementService.Endpoints.UPDATE_ENDPOINT;
-
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -17,12 +12,20 @@ import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.dft.bluebadge.client.usermanagement.configuration.ServiceConfiguration;
 import uk.gov.dft.bluebadge.client.usermanagement.httpclient.RestTemplateFactory;
+import uk.gov.dft.bluebadge.model.usermanagement.Authority;
 import uk.gov.dft.bluebadge.model.usermanagement.User;
 import uk.gov.dft.bluebadge.model.usermanagement.UserResponse;
 import uk.gov.dft.bluebadge.model.usermanagement.UsersResponse;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static uk.gov.dft.bluebadge.client.usermanagement.api.UserManagementService.Endpoints.*;
+
 @Service
 public class UserManagementService {
+
+  private final static Logger logger = LoggerFactory.getLogger(UserManagementService.class);
 
   class Endpoints {
     static final String GET_USER_BY_EMAIL_ENDPOINT = "/users?emailAddress={emailAddress}";
@@ -163,5 +166,32 @@ public class UserManagementService {
             uri,
             localAuthorityId,
             userId);
+  }
+
+  public void resetPassword(Integer authorityId, Integer userId){
+    // TODO mocked out API.  To be replaced.
+    logger.warn("Using mock resetPassword api.  To be implemented.");
+  }
+
+  public List<Authority> getAuthorities(){
+    // TODO mocked out API.  To be replaced.
+    logger.warn("Using mocked out getAuthorities.  To be implemented.");
+    List<Authority> response = new ArrayList<>();
+    response.add(new Authority().id(-1).name("Test Authority 1"));
+    response.add(new Authority().id(-2).name("Test Authority 2"));
+    response.add(new Authority().id(-3).name("Test Authority 3"));
+    return response;
+  }
+
+  public Authority createAuthority(Authority authority){
+    // TODO mocked out API.  To be replaced.
+    logger.warn("Using mocked out createAuthority.  To be implemented.");
+    authority.setId(-1);
+    return authority;
+  }
+
+  public void updateAuthority(Authority authority){
+    // TODO mocked out API.  To be replaced.
+    logger.warn("Using mocked out updateAuthority.  To be implemented.");
   }
 }

@@ -195,6 +195,38 @@ public interface UsersApi {
   }
 
   @ApiOperation(
+    value = "Request password reset for user.",
+    nickname = "authoritiesAuthorityIdUsersUserIdPasswordResetGet",
+    notes = "Email user with password reset link.",
+    tags = {
+      "Users",
+    }
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(code = 200, message = "OK"),
+      @ApiResponse(code = 400, message = "Bad request.", response = CommonResponse.class)
+    }
+  )
+  @RequestMapping(
+    value = "/authorities/{authorityId}/users/{userId}/passwordReset",
+    produces = {"application/json"},
+    method = RequestMethod.GET
+  )
+  default ResponseEntity<Void> authoritiesAuthorityIdUsersUserIdPasswordResetGet(
+      @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
+          Integer authorityId,
+      @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
+          Integer userId) {
+    if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
+    } else {
+      log.warn(
+          "ObjectMapper or HttpServletRequest not configured in default UsersApi interface so no example is generated");
+    }
+    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+  }
+
+  @ApiOperation(
     value = "Update a user",
     nickname = "authoritiesAuthorityIdUsersUserIdPut",
     notes = "Update a user",
