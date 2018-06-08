@@ -63,7 +63,7 @@ node {
         def gradleVersion = readFile "${env.WORKSPACE}/VERSION"
         echo "Building version:${gradleVersion}"
 
-        def buildInfo1  = rtGradle.run buildFile: 'build.gradle', tasks: 'clean wrapper build', switches: gradleVersion
+        def buildInfo1  = rtGradle.run buildFile: 'build.gradle', tasks: 'clean wrapper build', switches: '${gradleVersion}'
         def buildInfo2 = server.upload(uploadSpec)
 
 
