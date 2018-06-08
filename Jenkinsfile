@@ -58,8 +58,14 @@ node {
         }
         ]
         }"""
-        def buildInfo1  = rtGradle.run buildFile: 'build.gradle', tasks: 'clear wrapper build'
+
+        def buildVersion = new File('./VERSION').getText('UTF-8')
+        def gradleVersion = '-Pversion=' + version
+
+        def buildInfo1  = rtGradle.run buildFile: 'build.gradle', tasks: 'clear wrapper build', switches: gradleVersion
         def buildInfo2 = server.upload(uploadSpec)
+
+
         buildInfo1.append buildInfo2
         server.publishBuildInfo buildInfo1
     }
