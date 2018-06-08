@@ -79,6 +79,23 @@ public class UserManagementRepository {
   }
 
   /**
+   * Update Password a UserEntity.
+   *
+   * @param user UserEntity bean with updated values.
+   * @return Update count.
+   */
+  public int updatePassword(UserEntity user) {
+    Assert.notNull(user, "updatePassword called with null entity to update");
+    int result = sqlSession.update("updatePassword", user);
+    if (0 == result) {
+      LOGGER.warn("Attempt to update UserEntity id: {} that does not exist.", user.getId());
+    } else {
+      LOGGER.info("Updated UserEntity id: {}.", user.getId());
+    }
+    return result;
+  }
+
+  /**
    * Create a UserEntity.
    *
    * @param user UserEntity to create.

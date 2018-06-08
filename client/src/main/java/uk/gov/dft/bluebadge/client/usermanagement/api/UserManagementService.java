@@ -194,4 +194,8 @@ public class UserManagementService {
     // TODO mocked out API.  To be replaced.
     logger.warn("Using mocked out updateAuthority.  To be implemented.");
   }
+
+  public void updatePassword(int userId, String password) {
+    Assert.notNull(password);
+  }
 }

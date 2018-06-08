@@ -7,6 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.dft.bluebadge.model.usermanagement.ErrorErrors;
@@ -22,10 +23,12 @@ import uk.gov.dft.bluebadge.service.usermanagement.service.exception.UserEntityV
 public class UserManagementService {
 
   private final UserManagementRepository repository;
-  private static final Pattern pattern =
+  private static final Pattern emailPattern =
       Pattern.compile(
           "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])",
           Pattern.CASE_INSENSITIVE);
+  private static final Pattern passwordPattern =
+      Pattern.compile("^[^\\s-]{8,}$", Pattern.CASE_INSENSITIVE);
 
   @Autowired
   UserManagementService(UserManagementRepository repository) {
@@ -123,7 +126,12 @@ public class UserManagementService {
   }
 
   boolean validEmailFormat(String emailAddress) {
-    Matcher matcher = pattern.matcher(emailAddress);
+    Matcher matcher = emailPattern.matcher(emailAddress);
+    return matcher.find();
+  }
+
+  public boolean validPasswordFormat(String password) {
+    Matcher matcher = passwordPattern.matcher(password);
     return matcher.find();
   }
 
@@ -140,5 +148,19 @@ public class UserManagementService {
       throw new UserEntityValidationException(businessErrors);
     }
     return repository.updateUser(userEntity);
+  }
+
+  /**
+   * Update user password.
+   *
+   * @param userEntity Entity to update.
+   * @return Update count.
+   */
+  public int updatePassword(UserEntity userEntity) {
+
+    String hash = BCrypt.hashpw(userEntity.getPassword(), BCrypt.gensalt());
+    userEntity.setPassword(hash);
+
+    return repository.updatePassword(userEntity);
   }
 }

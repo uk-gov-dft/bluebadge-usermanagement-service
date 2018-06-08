@@ -59,6 +59,13 @@
         WHERE id = #{id}
     </update>
 
+    <update id="updatePassword" parameterType="UserEntity">
+        UPDATE users
+        SET
+        password = #{password}
+        WHERE id = #{id}
+    </update>
+
     <insert id="createUser" parameterType="UserEntity"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO users (name, local_authority_id, email_address, role_id)

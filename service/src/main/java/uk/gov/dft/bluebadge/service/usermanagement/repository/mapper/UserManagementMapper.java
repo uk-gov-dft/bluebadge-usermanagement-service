@@ -17,6 +17,8 @@ public interface UserManagementMapper {
 
   void createUser(UserEntity userEntity);
 
+  void updatePassword(UserEntity userEntity);
+
   void deleteUser(int id);
 
   boolean emailAddressAlreadyUsed(UserEntity userEntity);

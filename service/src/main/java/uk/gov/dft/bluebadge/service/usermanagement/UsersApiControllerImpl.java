@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,6 +24,16 @@ import uk.gov.dft.bluebadge.service.usermanagement.converter.UserConverter;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.UserManagementService;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BlueBadgeBusinessException;
+
+class MyBadException extends RuntimeException {
+  public Integer code;
+  public String message;
+
+  MyBadException(Integer code, String message) {
+    this.code = code;
+    this.message = message;
+  }
+}
 
 @Controller
 public class UsersApiControllerImpl implements UsersApi {
@@ -39,6 +50,46 @@ public class UsersApiControllerImpl implements UsersApi {
     this.objectMapper = objectMapper;
     this.request = request;
     this.service = service;
+  }
+
+  @ExceptionHandler({MyBadException.class})
+  public ResponseEntity<CommonResponse> handleException() {
+
+    CommonResponse response = new CommonResponse();
+
+    Error e = new Error();
+    e.setCode(400);
+    e.setMessage("Password is in invalid format");
+    response.setError(e);
+
+    return ResponseEntity.badRequest().body(response);
+  }
+
+  @Override
+  public ResponseEntity<Void> updatePassword(
+      @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
+          Integer authorityId,
+      @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
+          Integer userId,
+      @ApiParam(value = "") @Valid @RequestBody Password password) {
+
+    boolean isPasswordValid = service.validPasswordFormat(password.getPassword());
+
+    if (!isPasswordValid) {
+      throw new MyBadException(400, "bad password");
+    }
+
+    UserEntity user = new UserEntity();
+    user.setId(userId);
+    user.setPassword(password.getPassword());
+
+    int result = service.updatePassword(user);
+
+    if (result == 1) {
+      return ResponseEntity.ok().build();
+    }
+
+    return ResponseEntity.notFound().build();
   }
 
   @Override

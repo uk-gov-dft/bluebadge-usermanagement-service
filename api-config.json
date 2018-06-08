@@ -123,6 +123,49 @@
           }
         }
       },
+      "/authorities/{authorityId}/users/{userId}/password" : {
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "authorityId",
+          "type" : "integer",
+          "required" : true,
+          "description" : "ID of the authority."
+        }, {
+          "in" : "path",
+          "name" : "userId",
+          "type" : "integer",
+          "required" : true,
+          "description" : "Numeric ID of the user."
+        }, {
+          "name" : "password",
+          "in" : "body",
+          "schema" : {
+            "type" : "object",
+            "properties" : {
+              "password" : {
+                "type" : "string"
+              }
+            }
+          }
+        } ],
+        "patch" : {
+          "operationId" : "updatePassword",
+          "tags" : [ "Users" ],
+          "summary" : "Update password reset for user.",
+          "description" : "Update password reset for user.",
+          "responses" : {
+            "200" : {
+              "description" : "OK"
+            },
+            "400" : {
+              "description" : "Bad request.",
+              "schema" : {
+                "$ref" : "#/definitions/CommonResponse"
+              }
+            }
+          }
+        }
+      },
       "/authorities" : {
         "get" : {
           "tags" : [ "Authorities" ],

@@ -14,6 +14,7 @@ public class UserEntity implements Serializable {
   private String emailAddress;
   private Integer roleId;
   private String roleName;
+  private String password;
 
   public Integer getId() {
     return id;
@@ -77,5 +78,13 @@ public class UserEntity implements Serializable {
         + emailAddress
         + '\''
         + '}';
+  }
+
+  public String getPassword() {
+    return password;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
   }
 }
