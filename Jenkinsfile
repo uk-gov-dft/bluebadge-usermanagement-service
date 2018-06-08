@@ -59,8 +59,8 @@ node {
         ]
         }"""
 
-        def buildVersion = new File('./VERSION').getText('UTF-8')
-        def gradleVersion = '-Pversion=' + version
+        env.WORKSPACE = pwd()
+        def gradleVersion = readFile "${env.WORKSPACE}/VERSION"
 
         def buildInfo1  = rtGradle.run buildFile: 'build.gradle', tasks: 'clear wrapper build', switches: gradleVersion
         def buildInfo2 = server.upload(uploadSpec)
