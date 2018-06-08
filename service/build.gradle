@@ -78,5 +78,6 @@ checkstyle {
 bootRun {
     sourceResources sourceSets.main
 }
+
 archivesBaseName = "usermanagement-service"
 compileJava.dependsOn 'googleJavaFormat'
