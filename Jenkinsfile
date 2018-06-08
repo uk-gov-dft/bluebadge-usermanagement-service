@@ -45,13 +45,7 @@ node {
           "recursive": "false"
         },
         {
-          "pattern": "server/build/libs/*.jar",
-          "target": "gradle-release-local/",
-          "regexp": "false",
-          "recursive": "false"
-        },
-        {
-          "pattern": "build/libs/*.jar",
+          "pattern": "service/build/libs/*.jar",
           "target": "gradle-release-local/",
           "regexp": "false",
           "recursive": "false"
@@ -59,9 +53,8 @@ node {
         ]
         }"""
 
-        def buildInfo1  = rtGradle.run buildFile: 'build.gradle', tasks: 'clean wrapper bootJar'
+        def buildInfo1  = rtGradle.run buildFile: 'build.gradle', tasks: 'clean wrapper build bootJar'
         def buildInfo2 = server.upload(uploadSpec)
-
         buildInfo1.append buildInfo2
         server.publishBuildInfo buildInfo1
     }
