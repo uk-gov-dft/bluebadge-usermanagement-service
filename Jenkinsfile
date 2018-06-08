@@ -59,13 +59,8 @@ node {
         ]
         }"""
 
-        env.WORKSPACE = pwd()
-        def gradleVersion = readFile "${env.WORKSPACE}/VERSION"
-        echo "Building version:${gradleVersion}"
-
-        def buildInfo1  = rtGradle.run buildFile: 'build.gradle', tasks: 'clean wrapper bootJar', switches: '-Pversion=${gradleVersion}'
+        def buildInfo1  = rtGradle.run buildFile: 'build.gradle', tasks: 'clean wrapper bootJar'
         def buildInfo2 = server.upload(uploadSpec)
-
 
         buildInfo1.append buildInfo2
         server.publishBuildInfo buildInfo1
