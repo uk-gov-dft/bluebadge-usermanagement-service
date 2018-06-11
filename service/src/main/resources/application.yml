@@ -5,7 +5,16 @@ logging:
     sample.mybatis.mapper: WARN
     uk.gov.dft.bluebadge.service: DEBUG
 
-
+management:
+  server:
+    port: 8181
+    address: localhost
+    servlet:
+      context-path: /manage
+  endpoints:
+    web:
+      exposure:
+        include: '*'
 
 mybatis:
   type-aliases-package: uk.gov.dft.bluebadge.service.usermanagement.repository.domain
