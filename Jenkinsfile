@@ -16,19 +16,28 @@ node {
         )
      }
 
-    stage ('Artifactory configuration') {
-        // Tool name from Jenkins configuration
-        rtGradle.tool = "Gradle-4.7"
-        // Set Artifactory repositories for dependencies resolution and artifacts deployment.
+//    stage ('Artifactory configuration') {
+//        // Tool name from Jenkins configuration
+//        rtGradle.tool = "Gradle-4.7"
+//        // Set Artifactory repositories for dependencies resolution and artifacts deployment.
 
-        rtGradle.deployer repo:'gradle-release-local', server: server
-        rtGradle.resolver repo:'gradle-release', server: server
-    }
+//        rtGradle.deployer repo:'gradle-release-local', server: server
+//        rtGradle.resolver repo:'gradle-release', server: server
+//    }
     
     stage ('Gradle build') {
 
+        gradle {
+            tasks('clean')
+            tasks('wrapper')
+            tasks('build')
+            tasks('bootJar')
+            tasks('artifactoryPublish')
+            tasks('artifactoryDeploy')
+        }
+
       // Just run the build
-      rtGradle.run buildFile: 'build.gradle', tasks: 'clean wrapper build bootJar artifactoryPublish artifactoryDeploy'
+//      rtGradle.run buildFile: 'build.gradle', tasks: 'clean wrapper build bootJar artifactoryPublish artifactoryDeploy'
 
 //      def uploadSpec = """{
 //        "files": [
