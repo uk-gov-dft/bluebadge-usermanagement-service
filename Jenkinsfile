@@ -17,14 +17,14 @@ node {
      }
     
 
-//    stage ('Artifactory configuration') {
-//        // Tool name from Jenkins configuration
-//        rtGradle.tool = "Gradle-4.6"
-//        // Set Artifactory repositories for dependencies resolution and artifacts deployment.
-//
-//        rtGradle.deployer repo:'gradle-release-local', server: server
-//        rtGradle.resolver repo:'gradle-release', server: server
-//    }
+    stage ('Artifactory configuration') {
+        // Tool name from Jenkins configuration
+        rtGradle.tool = "Gradle-4.6"
+        // Set Artifactory repositories for dependencies resolution and artifacts deployment.
+
+        rtGradle.deployer repo:'gradle-release-local', server: server
+        rtGradle.resolver repo:'gradle-release', server: server
+    }
     
     stage ('Gradle build') {
 
