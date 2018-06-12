@@ -24,8 +24,6 @@ apply plugin: 'checkstyle'
 apply plugin: 'pmd'
 apply plugin: 'maven'
 
-//apply plugin: 'findbugs'
-
 sourceCompatibility = 1.8
 
 repositories {
@@ -73,7 +71,6 @@ dependencies {
 }
 
 checkstyle {
-
     toolVersion "8.9"
 }
 
@@ -83,3 +80,12 @@ bootRun {
 
 archivesBaseName = "usermanagement-service"
 compileJava.dependsOn 'googleJavaFormat'
+
+publishing {
+    publications {
+        project_service(MavenPublication) {
+            from components.java
+            artifactId "${archivesBaseName}"
+        }
+    }
+}
