@@ -23,17 +23,8 @@ import uk.gov.dft.bluebadge.service.usermanagement.controller.UsersApi;
 import uk.gov.dft.bluebadge.service.usermanagement.converter.UserConverter;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.UserManagementService;
+import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadResponseException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BlueBadgeBusinessException;
-
-class MyBadException extends RuntimeException {
-  public Integer code;
-  public String message;
-
-  MyBadException(Integer code, String message) {
-    this.code = code;
-    this.message = message;
-  }
-}
 
 @Controller
 public class UsersApiControllerImpl implements UsersApi {
@@ -52,16 +43,18 @@ public class UsersApiControllerImpl implements UsersApi {
     this.service = service;
   }
 
-  @ExceptionHandler({MyBadException.class})
-  public ResponseEntity<CommonResponse> handleException() {
+  @ExceptionHandler({BadResponseException.class})
+  public ResponseEntity<CommonResponse> handleException(BadResponseException e) {
 
     CommonResponse response = new CommonResponse();
 
-    Error e = new Error();
-    e.setCode(400);
-    e.setMessage("Password is in invalid format");
-    response.setError(e);
+    Error error = new Error();
 
+    for (ErrorErrors errorItem : e.getErrorsList()) {
+      error.addErrorsItem(errorItem);
+    }
+
+    response.setError(error);
     return ResponseEntity.badRequest().body(response);
   }
 
@@ -71,19 +64,12 @@ public class UsersApiControllerImpl implements UsersApi {
           Integer authorityId,
       @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
           Integer userId,
-      @ApiParam(value = "") @Valid @RequestBody Password password) {
+      @ApiParam(value = "") @Valid @RequestBody Password passwords) {
 
-    boolean isPasswordValid = service.validPasswordFormat(password.getPassword());
+    String password = passwords.getPassword();
+    String passwordConfirm = passwords.getPasswordConfirm();
 
-    if (!isPasswordValid) {
-      throw new MyBadException(400, "bad password");
-    }
-
-    UserEntity user = new UserEntity();
-    user.setId(userId);
-    user.setPassword(password.getPassword());
-
-    int result = service.updatePassword(user);
+    int result = service.updatePassword(userId, password, passwordConfirm);
 
     if (result == 1) {
       return ResponseEntity.ok().build();
@@ -223,18 +209,9 @@ public class UsersApiControllerImpl implements UsersApi {
     UserEntity entity = userConverter.convertToEntity(user);
     UserResponse userResponse = new UserResponse();
 
-    try {
-      int result = service.updateUser(entity);
-      userResponse.setData(userConverter.convertToData(entity, 1, result, 0));
-      return ResponseEntity.ok(userResponse);
-    } catch (BlueBadgeBusinessException e) {
-      Error error = new Error();
-      for (ErrorErrors errorItem : e.getErrorsList()) {
-        error.addErrorsItem(errorItem);
-      }
-      userResponse.setError(error);
-      return ResponseEntity.badRequest().body(userResponse);
-    }
+    int result = service.updateUser(entity);
+    userResponse.setData(userConverter.convertToData(entity, 1, result, 0));
+    return ResponseEntity.ok(userResponse);
   }
 
   @Override

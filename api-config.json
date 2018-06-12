@@ -144,6 +144,9 @@
             "properties" : {
               "password" : {
                 "type" : "string"
+              },
+              "passwordConfirm" : {
+                "type" : "string"
               }
             }
           }

@@ -12,11 +12,9 @@ import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.dft.bluebadge.client.usermanagement.configuration.ServiceConfiguration;
 import uk.gov.dft.bluebadge.client.usermanagement.httpclient.RestTemplateFactory;
-import uk.gov.dft.bluebadge.model.usermanagement.Authority;
-import uk.gov.dft.bluebadge.model.usermanagement.User;
-import uk.gov.dft.bluebadge.model.usermanagement.UserResponse;
-import uk.gov.dft.bluebadge.model.usermanagement.UsersResponse;
+import uk.gov.dft.bluebadge.model.usermanagement.*;
 
+import javax.xml.ws.Response;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +33,7 @@ public class UserManagementService {
         "/authorities/{authorityId}/users?name={name}";
     static final String UPDATE_ENDPOINT = "/authorities/{authorityId}/users/{userId}";
     static final String DELETE_ENDPOINT = "/authorities/{authorityId}/users/{userId}";
+    static final String UPDATE_PASSWORD_ENDPOINT = "/authorities/{authorityId}/users/{userId}/password";
   }
 
   private RestTemplateFactory restTemplateFactory;
@@ -195,7 +194,20 @@ public class UserManagementService {
     logger.warn("Using mocked out updateAuthority.  To be implemented.");
   }
 
-  public void updatePassword(int userId, String password) {
-    Assert.notNull(password);
+  public UserResponse updatePassword(int authorityId, int userId, String password, String passwordConfirm) {
+      Assert.notNull(authorityId, "must be set");
+      Assert.notNull( ***REMOVED***);
+      Assert.notNull(userId, "must be set");
+      Assert.notNull( ***REMOVED***);
+
+      String uri = serviceConfiguration.getUrlPrefix() + UPDATE_PASSWORD_ENDPOINT;
+      Password passwords = new Password();
+      passwords.setPassword(password);
+      passwords.setPasswordConfirm(passwordConfirm);
+
+      HttpEntity<Password> requestBody = new HttpEntity<>(passwords);
+
+      return this.restTemplateFactory.getInstance()
+              .patchForObject(uri, requestBody, UserResponse.class, authorityId, userId);
   }
 }

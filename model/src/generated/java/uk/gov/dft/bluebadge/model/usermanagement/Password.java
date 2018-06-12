@@ -12,6 +12,9 @@ public class Password {
   @JsonProperty("password")
   private String password = null;
 
+  @JsonProperty("passwordConfirm")
+  private String passwordConfirm = null;
+
   public Password password(String password) {
     this.password = password;
     return this;
@@ -31,6 +34,25 @@ public class Password {
     this.password = password;
   }
 
+  public Password passwordConfirm(String passwordConfirm) {
+    this.passwordConfirm = passwordConfirm;
+    return this;
+  }
+
+  /**
+   * Get passwordConfirm
+   *
+   * @return passwordConfirm
+   */
+  @ApiModelProperty(value = "")
+  public String getPasswordConfirm() {
+    return passwordConfirm;
+  }
+
+  public void setPasswordConfirm(String passwordConfirm) {
+    this.passwordConfirm = passwordConfirm;
+  }
+
   @Override
   public boolean equals(java.lang.Object o) {
     if (this == o) {
@@ -40,12 +62,13 @@ public class Password {
       return false;
     }
     Password password = (Password) o;
-    return Objects.equals(this.password, password.password);
+    return Objects.equals(this.password, password.password)
+        && Objects.equals(this.passwordConfirm, password.passwordConfirm);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(password);
+    return Objects.hash(password, passwordConfirm);
   }
 
   @Override
@@ -53,6 +76,7 @@ public class Password {
     StringBuilder sb = new StringBuilder();
     sb.append("class Password {\n");
 
+    sb.append("     ***REMOVED***);
     sb.append("     ***REMOVED***);
     sb.append("}");
     return sb.toString();

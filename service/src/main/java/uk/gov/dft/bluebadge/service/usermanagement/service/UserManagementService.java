@@ -15,6 +15,7 @@ import uk.gov.dft.bluebadge.model.usermanagement.User;
 import uk.gov.dft.bluebadge.service.usermanagement.converter.UserConverter;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
+import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadResponseException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BlueBadgeBusinessException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.UserEntityValidationException;
 
@@ -142,10 +143,10 @@ public class UserManagementService {
    * @return Update count.
    * @throws BlueBadgeBusinessException if validation fails.
    */
-  public int updateUser(UserEntity userEntity) throws BlueBadgeBusinessException {
+  public int updateUser(UserEntity userEntity) {
     List<ErrorErrors> businessErrors = nonBeanValidation(userEntity);
     if (null != businessErrors) {
-      throw new UserEntityValidationException(businessErrors);
+      throw new BadResponseException(businessErrors);
     }
     return repository.updateUser(userEntity);
   }
@@ -153,14 +154,41 @@ public class UserManagementService {
   /**
    * Update user password.
    *
-   * @param userEntity Entity to update.
+   * @param userId
+   * @param password
+   * @param passwordConfirm
    * @return Update count.
    */
-  public int updatePassword(UserEntity userEntity) {
+  public int updatePassword(Integer userId, String password, String passwordConfirm) {
 
-    String hash = BCrypt.hashpw(userEntity.getPassword(), BCrypt.gensalt());
-    userEntity.setPassword(hash);
+    boolean isPasswordValid = this.validPasswordFormat(password);
+    boolean isPasswordConfirmValid = this.validPasswordFormat(passwordConfirm);
 
-    return repository.updatePassword(userEntity);
+    BadResponseException exception = new BadResponseException();
+
+    if (!isPasswordValid || !isPasswordConfirmValid) {
+      ErrorErrors error = new ErrorErrors();
+      error.setField("password or passwordConfirm");
+      error.setMessage("Pattern.user.password");
+      error.setReason("Invalid password format.");
+      exception.addError(error);
+    }
+
+    if (!password.equals(passwordConfirm)) {
+      ErrorErrors error = new ErrorErrors();
+      error.setField("passwordConfirm");
+      error.setMessage("Pattern.user.password.confirm");
+      error.setReason("Passwords do not match");
+      exception.addError(error);
+    }
+
+    if (exception.getErrorsList().size() > 0) throw exception;
+
+    String hash = BCrypt.hashpw(password, BCrypt.gensalt());
+    UserEntity user = new UserEntity();
+    user.setId(userId);
+    user.setPassword(hash);
+
+    return repository.updatePassword(user);
   }
 }
