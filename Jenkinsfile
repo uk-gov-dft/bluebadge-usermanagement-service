@@ -15,7 +15,6 @@ node {
            branch: "${BRANCH_NAME}"
         )
      }
-    
 
     stage ('Artifactory configuration') {
         // Tool name from Jenkins configuration
@@ -29,35 +28,35 @@ node {
     stage ('Gradle build') {
 
       // Just run the build
-      //rtGradle.run buildFile: 'build.gradle', tasks: 'clean wrapper build bootJar artifactoryPublish artifactoryDeploy'
+      rtGradle.run buildFile: 'build.gradle', tasks: 'clean wrapper build bootJar artifactoryPublish artifactoryDeploy'
 
-      def uploadSpec = """{
-        "files": [
-        {
-          "pattern": "client/build/libs/*.jar",
-          "target": "gradle-release-local/",
-          "regexp": "false",
-          "recursive": "false"
-        },
-        {
-          "pattern": "model/build/libs/*.jar",
-          "target": "gradle-release-local/",
-          "regexp": "false",
-          "recursive": "false"
-        },
-        {
-          "pattern": "service/build/libs/*.jar",
-          "target": "gradle-release-local/",
-          "regexp": "false",
-          "recursive": "false"
-        }
-        ]
-        }"""
+//      def uploadSpec = """{
+//        "files": [
+//        {
+//          "pattern": "client/build/libs/*.jar",
+//          "target": "gradle-release-local/",
+//          "regexp": "false",
+//          "recursive": "false"
+//        },
+//        {
+//          "pattern": "model/build/libs/*.jar",
+//          "target": "gradle-release-local/",
+//          "regexp": "false",
+//          "recursive": "false"
+//        },
+//        {
+//          "pattern": "service/build/libs/*.jar",
+ //         "target": "gradle-release-local/",
+//          "regexp": "false",
+//          "recursive": "false"
+//        }
+//        ]
+//        }"""
 
-        def buildInfo1  = rtGradle.run buildFile: 'build.gradle', tasks: 'clean wrapper build bootJar'
-        def buildInfo2 = server.upload(uploadSpec)
-        buildInfo1.append buildInfo2
-        server.publishBuildInfo buildInfo1
+//        def buildInfo1  = rtGradle.run buildFile: 'build.gradle', tasks: 'clean wrapper build bootJar'
+//        def buildInfo2 = server.upload(uploadSpec)
+//        buildInfo1.append buildInfo2
+//        server.publishBuildInfo buildInfo1
     }
        stage('SonarQube analysis') {
         withSonarQubeEnv('sonarqube') {
