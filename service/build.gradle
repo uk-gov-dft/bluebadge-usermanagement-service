@@ -22,7 +22,7 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'checkstyle'
 apply plugin: 'pmd'
-//apply plugin: 'findbugs'
+apply plugin: 'maven'
 
 group 'uk.gov.dft.bluebadge'
 version '0.0.3-SNAPSHOT'
@@ -74,12 +74,21 @@ dependencies {
 }
 
 checkstyle {
-
     toolVersion "8.9"
 }
 
 bootRun {
     sourceResources sourceSets.main
 }
+
 archivesBaseName = "usermanagement-service"
 compileJava.dependsOn 'googleJavaFormat'
+
+publishing {
+    publications {
+        project_service(MavenPublication) {
+            from components.java
+            artifactId "${archivesBaseName}"
+        }
+    }
+}

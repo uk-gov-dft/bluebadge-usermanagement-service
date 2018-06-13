@@ -2,6 +2,7 @@
 plugins {
     id 'com.github.sherter.google-java-format' version '0.6'
 }
+
 apply plugin: 'maven'
 
 dependencies {
@@ -26,3 +27,12 @@ sourceSets {
 }
 archivesBaseName = "usermanagement-service-model"
 compileJava.dependsOn 'googleJavaFormat'
+
+publishing {
+    publications {
+        project_model(MavenPublication) {
+            from components.java
+            artifactId "${archivesBaseName}"
+        }
+    }
+}
