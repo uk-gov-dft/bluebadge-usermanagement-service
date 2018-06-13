@@ -23,9 +23,9 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-public class UserManagementServiceTest {
+public class UserManagementClientTest {
 
-  @Autowired private UserManagementService userManagementService;
+  @Autowired private UserManagementClient userManagementClient;
 
   @Autowired private RestTemplateFactory restTemplateFactory;
 
@@ -55,7 +55,7 @@ public class UserManagementServiceTest {
                     + "\"blah2@blah.com\",\"localAuthorityId\":2}]}}",
                 MediaType.APPLICATION_JSON));
 
-    UsersResponse userList = userManagementService.getUsersForAuthority(2, "Blah");
+    UsersResponse userList = userManagementClient.getUsersForAuthority(2, "Blah");
     Assert.assertTrue(userList.getData().getTotalItems().equals(2));
     Assert.assertTrue(userList.getData().getUsers().size() == 2);
 
@@ -70,7 +70,7 @@ public class UserManagementServiceTest {
         .andExpect(requestTo(requestUrl))
         .andRespond(withSuccess("{\"data\":{\"totalItems\":1}}", MediaType.APPLICATION_JSON));
 
-    Boolean exists = userManagementService.checkUserExistsForEmail("blah@blah.com");
+    Boolean exists = userManagementClient.checkUserExistsForEmail("blah@blah.com");
     Assert.assertTrue(exists);
     mockServer.verify();
   }
@@ -85,7 +85,7 @@ public class UserManagementServiceTest {
     User user = new User();
     user.setId(-1);
     user.setLocalAuthorityId(2);
-    UserResponse ur = userManagementService.updateUser(user);
+    UserResponse ur = userManagementClient.updateUser(user);
     Assert.assertTrue(ur.getData().getUpdated() == 1);
     mockServer.verify();
   }
@@ -97,7 +97,7 @@ public class UserManagementServiceTest {
         .expect(method(HttpMethod.DELETE))
         .andExpect(requestTo(requestUrl))
         .andRespond(withNoContent());
-    userManagementService.deleteUser(2, -1);
+    userManagementClient.deleteUser(2, -1);
     mockServer.verify();
   }
 
@@ -111,7 +111,7 @@ public class UserManagementServiceTest {
     User user = new User();
     user.setId(-1);
     user.setLocalAuthorityId(2);
-    UserResponse ur = userManagementService.createUser(2, user);
+    UserResponse ur = userManagementClient.createUser(2, user);
     Assert.assertTrue(ur.getData().getUpdated() == 1);
     mockServer.verify();
   }
@@ -124,7 +124,7 @@ public class UserManagementServiceTest {
         .andExpect(requestTo(requestUrl))
         .andRespond(withSuccess("{\"data\":{\"updated\":0}}", MediaType.APPLICATION_JSON));
 
-    UserResponse ur = userManagementService.getById(2, -1);
+    UserResponse ur = userManagementClient.getById(2, -1);
     Assert.assertTrue(ur.getData().getUpdated() == 0);
     mockServer.verify();
   }

@@ -36,4 +36,8 @@ public class BadResponseException extends RuntimeException {
   public void setErrorsList(List<ErrorErrors> errorsList) {
     this.errorsList = errorsList;
   }
+
+  public Boolean hasErrors() {
+    return this.errorsList.size() > 0;
+  }
 }

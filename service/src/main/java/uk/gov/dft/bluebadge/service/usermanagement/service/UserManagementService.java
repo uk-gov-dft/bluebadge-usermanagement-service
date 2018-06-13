@@ -11,9 +11,11 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.dft.bluebadge.model.usermanagement.ErrorErrors;
+import uk.gov.dft.bluebadge.model.usermanagement.Password;
 import uk.gov.dft.bluebadge.model.usermanagement.User;
 import uk.gov.dft.bluebadge.service.usermanagement.converter.UserConverter;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepository;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadResponseException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BlueBadgeBusinessException;
@@ -154,24 +156,26 @@ public class UserManagementService {
   /**
    * Update user password.
    *
-   * @param userId
-   * @param password
-   * @param passwordConfirm
    * @return Update count.
    */
-  public int updatePassword(Integer userId, String password, String passwordConfirm) {
+  @Transactional
+  public int updatePassword(Password passwords) {
+
+    String password = passwords.getPassword();
+    String uuid = passwords.getUuid();
+    String passwordConfirm = passwords.getPasswordConfirm();
 
     boolean isPasswordValid = this.validPasswordFormat(password);
     boolean isPasswordConfirmValid = this.validPasswordFormat(passwordConfirm);
 
-    BadResponseException exception = new BadResponseException();
+    BadResponseException badResponseException = new BadResponseException();
 
     if (!isPasswordValid || !isPasswordConfirmValid) {
       ErrorErrors error = new ErrorErrors();
       error.setField("password or passwordConfirm");
       error.setMessage("Pattern.user.password");
       error.setReason("Invalid password format.");
-      exception.addError(error);
+      badResponseException.addError(error);
     }
 
     if (!password.equals(passwordConfirm)) {
@@ -179,16 +183,35 @@ public class UserManagementService {
       error.setField("passwordConfirm");
       error.setMessage("Pattern.user.password.confirm");
       error.setReason("Passwords do not match");
-      exception.addError(error);
+      badResponseException.addError(error);
     }
 
-    if (exception.getErrorsList().size() > 0) throw exception;
+    if (badResponseException.hasErrors()) {
+      throw badResponseException;
+    }
+
+    EmailLink link = this.repository.retrieveEmailLinkWithUuid(uuid);
+
+    if (link == null || !link.getActive()) {
+      ErrorErrors error = new ErrorErrors();
+      error.setField("uuid");
+      if (link == null) {
+        error.setMessage("Invalid.uuid");
+      } else {
+        error.setMessage("Inactive.uuid");
+      }
+      error.setReason("uuid is not valid");
+      badResponseException.addError(error);
+
+      throw badResponseException;
+    }
 
     String hash = BCrypt.hashpw(password, BCrypt.gensalt());
     UserEntity user = new UserEntity();
-    user.setId(userId);
+    user.setId(link.getUserId());
     user.setPassword(hash);
 
+    repository.updateEmailLinkToInvalid(uuid);
     return repository.updatePassword(user);
   }
 }

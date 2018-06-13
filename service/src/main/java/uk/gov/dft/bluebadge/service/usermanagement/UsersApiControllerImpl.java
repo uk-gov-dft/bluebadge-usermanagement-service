@@ -66,10 +66,7 @@ public class UsersApiControllerImpl implements UsersApi {
           Integer userId,
       @ApiParam(value = "") @Valid @RequestBody Password passwords) {
 
-    String password = passwords.getPassword();
-    String passwordConfirm = passwords.getPasswordConfirm();
-
-    int result = service.updatePassword(userId, password, passwordConfirm);
+    int result = service.updatePassword(passwords);
 
     if (result == 1) {
       return ResponseEntity.ok().build();

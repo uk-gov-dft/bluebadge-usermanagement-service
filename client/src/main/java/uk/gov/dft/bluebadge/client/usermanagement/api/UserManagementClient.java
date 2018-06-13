@@ -14,16 +14,15 @@ import uk.gov.dft.bluebadge.client.usermanagement.configuration.ServiceConfigura
 import uk.gov.dft.bluebadge.client.usermanagement.httpclient.RestTemplateFactory;
 import uk.gov.dft.bluebadge.model.usermanagement.*;
 
-import javax.xml.ws.Response;
 import java.util.ArrayList;
 import java.util.List;
 
-import static uk.gov.dft.bluebadge.client.usermanagement.api.UserManagementService.Endpoints.*;
+import static uk.gov.dft.bluebadge.client.usermanagement.api.UserManagementClient.Endpoints.*;
 
 @Service
-public class UserManagementService {
+public class UserManagementClient {
 
-  private final static Logger logger = LoggerFactory.getLogger(UserManagementService.class);
+  private final static Logger logger = LoggerFactory.getLogger(UserManagementClient.class);
 
   class Endpoints {
     static final String GET_USER_BY_EMAIL_ENDPOINT = "/users?emailAddress={emailAddress}";
@@ -40,7 +39,7 @@ public class UserManagementService {
   private ServiceConfiguration serviceConfiguration;
 
   @Autowired
-  public UserManagementService(
+  public UserManagementClient(
       ServiceConfiguration serviceConfiguration, RestTemplateFactory restTemplateFactory) {
     this.serviceConfiguration = serviceConfiguration;
     this.restTemplateFactory = restTemplateFactory;
