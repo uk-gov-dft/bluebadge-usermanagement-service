@@ -64,9 +64,9 @@ public class CommonResponseEntityExceptionHandler extends ResponseEntityExceptio
     }
 
     // Add business validation
-    if(ex.getBindingResult().getTarget() instanceof User) {
+    if (ex.getBindingResult().getTarget() instanceof User) {
       List<ErrorErrors> businessErrors =
-              userManagementService.nonBeanValidation((User) ex.getBindingResult().getTarget());
+          userManagementService.nonBeanValidation((User) ex.getBindingResult().getTarget());
       if (null != businessErrors) {
         systemError.getErrors().addAll(businessErrors);
       }

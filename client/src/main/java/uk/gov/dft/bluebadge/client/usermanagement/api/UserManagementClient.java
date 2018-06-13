@@ -193,20 +193,20 @@ public class UserManagementClient {
     logger.warn("Using mocked out updateAuthority.  To be implemented.");
   }
 
-  public UserResponse updatePassword(int authorityId, int userId, String password, String passwordConfirm) {
-      Assert.notNull(authorityId, "must be set");
+  public UserResponse updatePassword(String uuid, String password, String passwordConfirm) {
+      Assert.notNull(uuid, "must be provided");
       Assert.notNull( ***REMOVED***);
-      Assert.notNull(userId, "must be set");
       Assert.notNull( ***REMOVED***);
 
       String uri = serviceConfiguration.getUrlPrefix() + UPDATE_PASSWORD_ENDPOINT;
       Password passwords = new Password();
+      passwords.setUuid(uuid);
       passwords.setPassword(password);
       passwords.setPasswordConfirm(passwordConfirm);
 
       HttpEntity<Password> requestBody = new HttpEntity<>(passwords);
 
       return this.restTemplateFactory.getInstance()
-              .patchForObject(uri, requestBody, UserResponse.class, authorityId, userId);
+              .patchForObject(uri, requestBody, UserResponse.class);
   }
 }

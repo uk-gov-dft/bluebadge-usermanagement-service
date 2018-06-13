@@ -196,9 +196,9 @@ public class UserManagementService {
       ErrorErrors error = new ErrorErrors();
       error.setField("uuid");
       if (link == null) {
-        error.setMessage("Invalid.uuid");
+        error.setMessage("Invalid.password.uuid");
       } else {
-        error.setMessage("Inactive.uuid");
+        error.setMessage("Inactive.password.uuid");
       }
       error.setReason("uuid is not valid");
       badResponseException.addError(error);
