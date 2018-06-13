@@ -8,8 +8,8 @@ buildscript {
         maven {
             url 'https://artifactory.does.not.exist/artifactory/gradle-release'
             credentials {
-                username = "rob"
-                 ***REMOVED***
+                username = artifactory_username
+                password = artifactory_password
             }
         }
     }
@@ -38,8 +38,8 @@ allprojects {
         maven {
             url 'https://artifactory.does.not.exist/artifactory/gradle-release-dev'
             credentials {
-                username = "rob"
-                 ***REMOVED***
+                username = artifactory_username
+                password = artifactory_password
             }
         }
     }
@@ -62,8 +62,8 @@ artifactory {
     publish {
         repository {
             repoKey = 'gradle-dev-local'
-            username = "rob"
-             ***REMOVED***
+                username = artifactory_username
+                password = artifactory_password
             maven = true
         }
 
@@ -79,8 +79,8 @@ artifactory {
     resolve {
         repository {
             repoKey = 'gradle-release'
-            username = "rob"
-             ***REMOVED***
+                username = artifactory_username
+                password = artifactory_password
             maven = true
 
         }
@@ -145,5 +145,3 @@ task generateService(dependsOn: 'unzipGenerated', type: Sync){
     exclude '**/*ApiController.java'
     into "service/src/generated/java/uk/gov/dft/bluebadge/service/usermanagement"
 }
-
-
