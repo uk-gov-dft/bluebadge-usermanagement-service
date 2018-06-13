@@ -27,7 +27,6 @@ allprojects {
     apply plugin: 'maven'
     apply plugin: 'maven-publish'
     apply plugin: 'com.jfrog.artifactory'
-
     group = 'uk.gov.dft.bluebadge'
     version = rootProject.file('VERSION').text.trim()
     sourceCompatibility = 1.8

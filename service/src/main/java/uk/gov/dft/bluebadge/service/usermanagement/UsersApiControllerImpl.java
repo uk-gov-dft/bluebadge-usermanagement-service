@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,6 +23,7 @@ import uk.gov.dft.bluebadge.service.usermanagement.controller.UsersApi;
 import uk.gov.dft.bluebadge.service.usermanagement.converter.UserConverter;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.UserManagementService;
+import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadResponseException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BlueBadgeBusinessException;
 
 @Controller
@@ -39,6 +41,38 @@ public class UsersApiControllerImpl implements UsersApi {
     this.objectMapper = objectMapper;
     this.request = request;
     this.service = service;
+  }
+
+  @ExceptionHandler({BadResponseException.class})
+  public ResponseEntity<CommonResponse> handleException(BadResponseException e) {
+
+    CommonResponse response = new CommonResponse();
+
+    Error error = new Error();
+
+    for (ErrorErrors errorItem : e.getErrorsList()) {
+      error.addErrorsItem(errorItem);
+    }
+
+    response.setError(error);
+    return ResponseEntity.badRequest().body(response);
+  }
+
+  @Override
+  public ResponseEntity<Void> updatePassword(
+      @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
+          Integer authorityId,
+      @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
+          Integer userId,
+      @ApiParam(value = "") @Valid @RequestBody Password passwords) {
+
+    int result = service.updatePassword(passwords);
+
+    if (result == 1) {
+      return ResponseEntity.ok().build();
+    }
+
+    return ResponseEntity.notFound().build();
   }
 
   @Override
@@ -172,18 +206,9 @@ public class UsersApiControllerImpl implements UsersApi {
     UserEntity entity = userConverter.convertToEntity(user);
     UserResponse userResponse = new UserResponse();
 
-    try {
-      int result = service.updateUser(entity);
-      userResponse.setData(userConverter.convertToData(entity, 1, result, 0));
-      return ResponseEntity.ok(userResponse);
-    } catch (BlueBadgeBusinessException e) {
-      Error error = new Error();
-      for (ErrorErrors errorItem : e.getErrorsList()) {
-        error.addErrorsItem(errorItem);
-      }
-      userResponse.setError(error);
-      return ResponseEntity.badRequest().body(userResponse);
-    }
+    int result = service.updateUser(entity);
+    userResponse.setData(userConverter.convertToData(entity, 1, result, 0));
+    return ResponseEntity.ok(userResponse);
   }
 
   @Override

@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 
 /** Provides CRUD operations on UserEntity entity + user management. */
@@ -76,6 +77,33 @@ public class UserManagementRepository {
       LOGGER.info("Updated UserEntity id: {}.", user.getId());
     }
     return result;
+  }
+
+  public int updateEmailLinkToInvalid(String uuid) {
+    return sqlSession.update("updateEmailLinkToInvalid", uuid);
+  }
+  /**
+   * Update Password a UserEntity.
+   *
+   * @param user UserEntity bean with updated values.
+   * @return Update count.
+   */
+  public int updatePassword(UserEntity user) {
+    Assert.notNull(user, "updatePassword called with null entity to update");
+    int result = sqlSession.update("updatePassword", user);
+    if (0 == result) {
+      LOGGER.warn("Attempt to update UserEntity id: {} that does not exist.", user.getId());
+    } else {
+      LOGGER.info("Updated UserEntity id: {}.", user.getId());
+    }
+    return result;
+  }
+
+  public EmailLink retrieveEmailLinkWithUuid(String uuid) {
+
+    Assert.notNull(uuid, "No uuid is present");
+
+    return sqlSession.selectOne("retrieveEmailLinkWithUuid", uuid);
   }
 
   /**

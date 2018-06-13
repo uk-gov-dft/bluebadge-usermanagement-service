@@ -12,20 +12,17 @@ import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.dft.bluebadge.client.usermanagement.configuration.ServiceConfiguration;
 import uk.gov.dft.bluebadge.client.usermanagement.httpclient.RestTemplateFactory;
-import uk.gov.dft.bluebadge.model.usermanagement.Authority;
-import uk.gov.dft.bluebadge.model.usermanagement.User;
-import uk.gov.dft.bluebadge.model.usermanagement.UserResponse;
-import uk.gov.dft.bluebadge.model.usermanagement.UsersResponse;
+import uk.gov.dft.bluebadge.model.usermanagement.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static uk.gov.dft.bluebadge.client.usermanagement.api.UserManagementService.Endpoints.*;
+import static uk.gov.dft.bluebadge.client.usermanagement.api.UserManagementClient.Endpoints.*;
 
 @Service
-public class UserManagementService {
+public class UserManagementClient {
 
-  private final static Logger logger = LoggerFactory.getLogger(UserManagementService.class);
+  private final static Logger logger = LoggerFactory.getLogger(UserManagementClient.class);
 
   class Endpoints {
     static final String GET_USER_BY_EMAIL_ENDPOINT = "/users?emailAddress={emailAddress}";
@@ -35,13 +32,14 @@ public class UserManagementService {
         "/authorities/{authorityId}/users?name={name}";
     static final String UPDATE_ENDPOINT = "/authorities/{authorityId}/users/{userId}";
     static final String DELETE_ENDPOINT = "/authorities/{authorityId}/users/{userId}";
+    static final String UPDATE_PASSWORD_ENDPOINT = "/authorities/{authorityId}/users/{userId}/password";
   }
 
   private RestTemplateFactory restTemplateFactory;
   private ServiceConfiguration serviceConfiguration;
 
   @Autowired
-  public UserManagementService(
+  public UserManagementClient(
       ServiceConfiguration serviceConfiguration, RestTemplateFactory restTemplateFactory) {
     this.serviceConfiguration = serviceConfiguration;
     this.restTemplateFactory = restTemplateFactory;
@@ -193,5 +191,22 @@ public class UserManagementService {
   public void updateAuthority(Authority authority){
     // TODO mocked out API.  To be replaced.
     logger.warn("Using mocked out updateAuthority.  To be implemented.");
+  }
+
+  public UserResponse updatePassword(String uuid, String password, String passwordConfirm) {
+      Assert.notNull(uuid, "must be provided");
+      Assert.notNull( ***REMOVED***);
+      Assert.notNull( ***REMOVED***);
+
+      String uri = serviceConfiguration.getUrlPrefix() + UPDATE_PASSWORD_ENDPOINT;
+      Password passwords = new Password();
+      passwords.setUuid(uuid);
+      passwords.setPassword(password);
+      passwords.setPasswordConfirm(passwordConfirm);
+
+      HttpEntity<Password> requestBody = new HttpEntity<>(passwords);
+
+      return this.restTemplateFactory.getInstance()
+              .patchForObject(uri, requestBody, UserResponse.class);
   }
 }

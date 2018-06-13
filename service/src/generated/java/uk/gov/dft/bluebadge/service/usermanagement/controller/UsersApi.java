@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import uk.gov.dft.bluebadge.model.usermanagement.CommonResponse;
+import uk.gov.dft.bluebadge.model.usermanagement.Password;
 import uk.gov.dft.bluebadge.model.usermanagement.User;
 import uk.gov.dft.bluebadge.model.usermanagement.UserResponse;
 import uk.gov.dft.bluebadge.model.usermanagement.UsersResponse;
@@ -267,6 +268,39 @@ public interface UsersApi {
           return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
       }
+    } else {
+      log.warn(
+          "ObjectMapper or HttpServletRequest not configured in default UsersApi interface so no example is generated");
+    }
+    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+  }
+
+  @ApiOperation(
+    value = "Update password reset for user.",
+    nickname = "updatePassword",
+    notes = "Update password reset for user.",
+    tags = {
+      "Users",
+    }
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(code = 200, message = "OK"),
+      @ApiResponse(code = 400, message = "Bad request.", response = CommonResponse.class)
+    }
+  )
+  @RequestMapping(
+    value = "/authorities/{authorityId}/users/{userId}/password",
+    produces = {"application/json"},
+    method = RequestMethod.PATCH
+  )
+  default ResponseEntity<Void> updatePassword(
+      @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
+          Integer authorityId,
+      @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
+          Integer userId,
+      @ApiParam(value = "") @Valid @RequestBody Password password) {
+    if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
     } else {
       log.warn(
           "ObjectMapper or HttpServletRequest not configured in default UsersApi interface so no example is generated");

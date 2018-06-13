@@ -1,463 +1,513 @@
 {
-  "spec": {
-    "swagger" : "2.0",
-    "info" : {
-      "title" : "UserManagementService API",
-      "description" : "Manage Users",
-      "version" : "1.0.0"
-    },
-    "schemes" : [ "https", "http" ],
-    "produces" : [ "application/json" ],
-    "paths" : {
-      "/users" : {
-        "parameters" : [ {
-          "in" : "query",
-          "name" : "emailAddress",
-          "type" : "string",
-          "required" : true,
-          "description" : "User email address to check for."
-        } ],
-        "get" : {
-          "summary" : "Check user for email address exists.",
-          "description" : "Returns user if user exists\n",
-          "tags" : [ "Users" ],
-          "responses" : {
-            "200" : {
-              "description" : "The user.",
-              "schema" : {
-                "$ref" : "#/definitions/UserResponse"
-              }
-            }
-          }
-        }
-      },
-      "/authorities/{authorityId}/users" : {
-        "parameters" : [ {
-          "in" : "path",
-          "name" : "authorityId",
-          "type" : "integer",
-          "required" : true,
-          "description" : "ID of the authority."
-        } ],
-        "get" : {
-          "parameters" : [ {
-            "in" : "query",
-            "name" : "name",
-            "type" : "string",
-            "required" : false,
-            "description" : "Name or email address fragment to filter on."
-          } ],
-          "summary" : "List of all Users",
-          "description" : "Returns a list of Users\n",
-          "tags" : [ "Users" ],
-          "responses" : {
-            "200" : {
-              "description" : "An array of users",
-              "schema" : {
-                "$ref" : "#/definitions/UsersResponse"
-              }
-            },
-            "default" : {
-              "description" : "Unexpected error",
-              "schema" : {
-                "$ref" : "#/definitions/CommonResponse"
-              }
-            }
-          }
-        },
-        "post" : {
-          "summary" : "Create a user",
-          "description" : "Create a user",
-          "tags" : [ "Users" ],
-          "parameters" : [ {
-            "name" : "user",
-            "in" : "body",
+"spec": {
+  "swagger" : "2.0",
+  "info" : {
+    "title" : "UserManagementService API",
+    "description" : "Manage Users",
+    "version" : "1.0.0"
+  },
+  "schemes" : [ "https", "http" ],
+  "produces" : [ "application/json" ],
+  "paths" : {
+    "/users" : {
+      "parameters" : [ {
+        "in" : "query",
+        "name" : "emailAddress",
+        "type" : "string",
+        "required" : true,
+        "description" : "User email address to check for."
+      } ],
+      "get" : {
+        "summary" : "Check user for email address exists.",
+        "description" : "Returns user if user exists\n",
+        "tags" : [ "Users" ],
+        "responses" : {
+          "200" : {
+            "description" : "The user.",
             "schema" : {
-              "$ref" : "#/definitions/User"
-            }
-          } ],
-          "responses" : {
-            "200" : {
-              "description" : "OK",
-              "schema" : {
-                "$ref" : "#/definitions/UserResponse"
-              }
-            },
-            "400" : {
-              "description" : "Bad request",
-              "schema" : {
-                "$ref" : "#/definitions/CommonResponse"
-              }
-            }
-          }
-        }
-      },
-      "/authorities/{authorityId}/users/{userId}/passwordReset" : {
-        "parameters" : [ {
-          "in" : "path",
-          "name" : "authorityId",
-          "type" : "integer",
-          "required" : true,
-          "description" : "ID of the authority."
-        }, {
-          "in" : "path",
-          "name" : "userId",
-          "type" : "integer",
-          "required" : true,
-          "description" : "Numeric ID of the user."
-        } ],
-        "get" : {
-          "tags" : [ "Users" ],
-          "summary" : "Request password reset for user.",
-          "description" : "Email user with password reset link.",
-          "responses" : {
-            "200" : {
-              "description" : "OK"
-            },
-            "400" : {
-              "description" : "Bad request.",
-              "schema" : {
-                "$ref" : "#/definitions/CommonResponse"
-              }
-            }
-          }
-        }
-      },
-      "/authorities" : {
-        "get" : {
-          "tags" : [ "Authorities" ],
-          "summary" : "Get list of Local Authorities",
-          "description" : "List of local authorities for users with cross authority roles.",
-          "responses" : {
-            "200" : {
-              "description" : "OK",
-              "schema" : {
-                "$ref" : "#/definitions/AuthoritiesResponse"
-              }
-            }
-          }
-        },
-        "post" : {
-          "tags" : [ "Authorities" ],
-          "summary" : "Create an authority.",
-          "description" : "Create a Local Authority",
-          "responses" : {
-            "200" : {
-              "description" : "OK",
-              "schema" : {
-                "$ref" : "#/definitions/AuthorityResponse"
-              }
-            },
-            "400" : {
-              "description" : "Bad request",
-              "schema" : {
-                "$ref" : "#/definitions/CommonResponse"
-              }
-            }
-          }
-        }
-      },
-      "/authorities/{authorityId}" : {
-        "parameters" : [ {
-          "in" : "path",
-          "name" : "authorityId",
-          "type" : "integer",
-          "required" : true,
-          "description" : "ID of the authority."
-        } ],
-        "put" : {
-          "tags" : [ "Authorities" ],
-          "summary" : "Update an authority.",
-          "description" : "Update an authority.",
-          "responses" : {
-            "200" : {
-              "description" : "OK"
-            },
-            "400" : {
-              "description" : "Bad request.",
-              "schema" : {
-                "$ref" : "#/definitions/CommonResponse"
-              }
-            }
-          }
-        }
-      },
-      "/authorities/{authorityId}/users/{userId}" : {
-        "parameters" : [ {
-          "in" : "path",
-          "name" : "authorityId",
-          "type" : "integer",
-          "required" : true,
-          "description" : "ID of the authority."
-        }, {
-          "in" : "path",
-          "name" : "userId",
-          "type" : "integer",
-          "required" : true,
-          "description" : "Numeric ID of the user."
-        } ],
-        "get" : {
-          "tags" : [ "Users" ],
-          "summary" : "Retrieve a specific user",
-          "description" : "Retrieve a user and their roles",
-          "responses" : {
-            "200" : {
-              "description" : "OK",
-              "schema" : {
-                "$ref" : "#/definitions/UserResponse"
-              }
-            }
-          }
-        },
-        "delete" : {
-          "tags" : [ "Users" ],
-          "summary" : "Removes a User from a Local Authority",
-          "description" : "Removes a User from a Local Authority",
-          "responses" : {
-            "204" : {
-              "description" : "Resource Successfully Removed"
-            }
-          }
-        },
-        "put" : {
-          "summary" : "Update a user",
-          "description" : "Update a user",
-          "tags" : [ "Users" ],
-          "parameters" : [ {
-            "name" : "user",
-            "in" : "body",
-            "schema" : {
-              "$ref" : "#/definitions/User"
-            }
-          } ],
-          "responses" : {
-            "200" : {
-              "description" : "Resource valid and updated if exists.",
-              "schema" : {
-                "$ref" : "#/definitions/UserResponse"
-              }
-            },
-            "400" : {
-              "description" : "Bad request",
-              "schema" : {
-                "$ref" : "#/definitions/CommonResponse"
-              }
+              "$ref" : "#/definitions/UserResponse"
             }
           }
         }
       }
     },
-    "definitions" : {
-      "Authority" : {
-        "type" : "object",
-        "required" : [ "id", "name", "shortCode" ],
-        "properties" : {
-          "id" : {
-            "type" : "integer",
-            "example" : 1
+    "/authorities/{authorityId}/users" : {
+      "parameters" : [ {
+        "in" : "path",
+        "name" : "authorityId",
+        "type" : "integer",
+        "required" : true,
+        "description" : "ID of the authority."
+      } ],
+      "get" : {
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "name",
+          "type" : "string",
+          "required" : false,
+          "description" : "Name or email address fragment to filter on."
+        } ],
+        "summary" : "List of all Users",
+        "description" : "Returns a list of Users\n",
+        "tags" : [ "Users" ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of users",
+            "schema" : {
+              "$ref" : "#/definitions/UsersResponse"
+            }
           },
-          "name" : {
-            "type" : "string",
-            "example" : "Shropshire County Council",
-            "description" : "Display name of local authority"
-          },
-          "shortCode" : {
-            "type" : "string",
-            "example" : "SCC",
-            "description" : "Short identifier of LA"
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/CommonResponse"
+            }
           }
         }
       },
-      "User" : {
-        "type" : "object",
-        "required" : [ "name", "emailAddress", "roleId" ],
-        "properties" : {
-          "id" : {
-            "type" : "integer",
-            "description" : "Unique identifier representing a specific user. Autogenerated on create.",
-            "example" : 1
+      "post" : {
+        "summary" : "Create a user",
+        "description" : "Create a user",
+        "tags" : [ "Users" ],
+        "parameters" : [ {
+          "name" : "user",
+          "in" : "body",
+          "schema" : {
+            "$ref" : "#/definitions/User"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "schema" : {
+              "$ref" : "#/definitions/UserResponse"
+            }
           },
-          "name" : {
-            "type" : "string",
-            "description" : "Users name.",
-            "maxLength" : 100,
-            "example" : "Robert Worthington",
-            "pattern" : "^[\\p{L} \\.'\\-]+$"
+          "400" : {
+            "description" : "Bad request",
+            "schema" : {
+              "$ref" : "#/definitions/CommonResponse"
+            }
+          }
+        }
+      }
+    },
+    "/authorities/{authorityId}/users/{userId}/passwordReset" : {
+      "parameters" : [ {
+        "in" : "path",
+        "name" : "authorityId",
+        "type" : "integer",
+        "required" : true,
+        "description" : "ID of the authority."
+      }, {
+        "in" : "path",
+        "name" : "userId",
+        "type" : "integer",
+        "required" : true,
+        "description" : "Numeric ID of the user."
+      } ],
+      "get" : {
+        "tags" : [ "Users" ],
+        "summary" : "Request password reset for user.",
+        "description" : "Email user with password reset link.",
+        "responses" : {
+          "200" : {
+            "description" : "OK"
           },
-          "emailAddress" : {
-            "type" : "string",
-            "format" : "email",
-            "description" : "email address.",
-            "example" : "rob.worthington@norealserver.com"
+          "400" : {
+            "description" : "Bad request.",
+            "schema" : {
+              "$ref" : "#/definitions/CommonResponse"
+            }
+          }
+        }
+      }
+    },
+    "/authorities/{authorityId}/users/{userId}/password" : {
+      "parameters" : [ {
+        "in" : "path",
+        "name" : "authorityId",
+        "type" : "integer",
+        "required" : true,
+        "description" : "ID of the authority."
+      }, {
+        "in" : "path",
+        "name" : "userId",
+        "type" : "integer",
+        "required" : true,
+        "description" : "Numeric ID of the user."
+      }, {
+        "name" : "password",
+        "in" : "body",
+        "schema" : {
+          "type" : "object",
+          "required" : [ " ***REMOVED*** ],
+          "properties" : {
+            "password" : {
+              "type" : "string"
+            },
+            "passwordConfirm" : {
+              "type" : "string"
+            },
+            "uuid" : {
+              "type" : "string"
+            }
+          }
+        }
+      } ],
+      "patch" : {
+        "operationId" : "updatePassword",
+        "tags" : [ "Users" ],
+        "summary" : "Update password reset for user.",
+        "description" : "Update password reset for user.",
+        "responses" : {
+          "200" : {
+            "description" : "OK"
           },
-          "localAuthorityId" : {
-            "type" : "integer",
-            "description" : "Id of Local Authority user belongs to",
-            "example" : 2
-          },
-          "roleId" : {
-            "type" : "integer",
-            "description" : "Id of users role",
-            "example" : 2
-          },
-          "roleName" : {
-            "type" : "string",
-            "description" : "User role description",
-            "example" : "LA Admin"
+          "400" : {
+            "description" : "Bad request.",
+            "schema" : {
+              "$ref" : "#/definitions/CommonResponse"
+            }
+          }
+        }
+      }
+    },
+    "/authorities" : {
+      "get" : {
+        "tags" : [ "Authorities" ],
+        "summary" : "Get list of Local Authorities",
+        "description" : "List of local authorities for users with cross authority roles.",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "schema" : {
+              "$ref" : "#/definitions/AuthoritiesResponse"
+            }
           }
         }
       },
-      "UsersResponse" : {
-        "type" : "object",
-        "allOf" : [ {
-          "$ref" : "#/definitions/CommonResponse"
-        }, {
-          "type" : "object",
-          "properties" : {
-            "data" : {
-              "$ref" : "#/definitions/UsersData"
+      "post" : {
+        "tags" : [ "Authorities" ],
+        "summary" : "Create an authority.",
+        "description" : "Create a Local Authority",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "schema" : {
+              "$ref" : "#/definitions/AuthorityResponse"
+            }
+          },
+          "400" : {
+            "description" : "Bad request",
+            "schema" : {
+              "$ref" : "#/definitions/CommonResponse"
             }
           }
-        } ]
-      },
-      "UserResponse" : {
-        "type" : "object",
-        "allOf" : [ {
-          "$ref" : "#/definitions/CommonResponse"
-        }, {
-          "type" : "object",
-          "properties" : {
-            "data" : {
-              "$ref" : "#/definitions/UserData"
+        }
+      }
+    },
+    "/authorities/{authorityId}" : {
+      "parameters" : [ {
+        "in" : "path",
+        "name" : "authorityId",
+        "type" : "integer",
+        "required" : true,
+        "description" : "ID of the authority."
+      } ],
+      "put" : {
+        "tags" : [ "Authorities" ],
+        "summary" : "Update an authority.",
+        "description" : "Update an authority.",
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request.",
+            "schema" : {
+              "$ref" : "#/definitions/CommonResponse"
             }
           }
-        } ]
-      },
-      "AuthoritiesResponse" : {
-        "type" : "object",
-        "allOf" : [ {
-          "$ref" : "#/definitions/CommonResponse"
-        }, {
-          "type" : "object",
-          "properties" : {
-            "data" : {
-              "type" : "array",
-              "items" : {
-                "$ref" : "#/definitions/Authority"
-              }
+        }
+      }
+    },
+    "/authorities/{authorityId}/users/{userId}" : {
+      "parameters" : [ {
+        "in" : "path",
+        "name" : "authorityId",
+        "type" : "integer",
+        "required" : true,
+        "description" : "ID of the authority."
+      }, {
+        "in" : "path",
+        "name" : "userId",
+        "type" : "integer",
+        "required" : true,
+        "description" : "Numeric ID of the user."
+      } ],
+      "get" : {
+        "tags" : [ "Users" ],
+        "summary" : "Retrieve a specific user",
+        "description" : "Retrieve a user and their roles",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "schema" : {
+              "$ref" : "#/definitions/UserResponse"
             }
           }
-        } ]
+        }
       },
-      "AuthorityResponse" : {
+      "delete" : {
+        "tags" : [ "Users" ],
+        "summary" : "Removes a User from a Local Authority",
+        "description" : "Removes a User from a Local Authority",
+        "responses" : {
+          "204" : {
+            "description" : "Resource Successfully Removed"
+          }
+        }
+      },
+      "put" : {
+        "summary" : "Update a user",
+        "description" : "Update a user",
+        "tags" : [ "Users" ],
+        "parameters" : [ {
+          "name" : "user",
+          "in" : "body",
+          "schema" : {
+            "$ref" : "#/definitions/User"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Resource valid and updated if exists.",
+            "schema" : {
+              "$ref" : "#/definitions/UserResponse"
+            }
+          },
+          "400" : {
+            "description" : "Bad request",
+            "schema" : {
+              "$ref" : "#/definitions/CommonResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions" : {
+    "Authority" : {
+      "type" : "object",
+      "required" : [ "id", "name", "shortCode" ],
+      "properties" : {
+        "id" : {
+          "type" : "integer",
+          "example" : 1
+        },
+        "name" : {
+          "type" : "string",
+          "example" : "Shropshire County Council",
+          "description" : "Display name of local authority"
+        },
+        "shortCode" : {
+          "type" : "string",
+          "example" : "SCC",
+          "description" : "Short identifier of LA"
+        }
+      }
+    },
+    "User" : {
+      "type" : "object",
+      "required" : [ "name", "emailAddress", "roleId" ],
+      "properties" : {
+        "id" : {
+          "type" : "integer",
+          "description" : "Unique identifier representing a specific user. Autogenerated on create.",
+          "example" : 1
+        },
+        "name" : {
+          "type" : "string",
+          "description" : "Users name.",
+          "maxLength" : 100,
+          "example" : "Robert Worthington",
+          "pattern" : "^[\\p{L} \\.'\\-]+$"
+        },
+        "emailAddress" : {
+          "type" : "string",
+          "format" : "email",
+          "description" : "email address.",
+          "example" : "rob.worthington@norealserver.com"
+        },
+        "localAuthorityId" : {
+          "type" : "integer",
+          "description" : "Id of Local Authority user belongs to",
+          "example" : 2
+        },
+        "roleId" : {
+          "type" : "integer",
+          "description" : "Id of users role",
+          "example" : 2
+        },
+        "roleName" : {
+          "type" : "string",
+          "description" : "User role description",
+          "example" : "LA Admin"
+        }
+      }
+    },
+    "UsersResponse" : {
+      "type" : "object",
+      "allOf" : [ {
+        "$ref" : "#/definitions/CommonResponse"
+      }, {
         "type" : "object",
-        "allOf" : [ {
-          "$ref" : "#/definitions/CommonResponse"
-        }, {
-          "type" : "object",
-          "properties" : {
-            "data" : {
+        "properties" : {
+          "data" : {
+            "$ref" : "#/definitions/UsersData"
+          }
+        }
+      } ]
+    },
+    "UserResponse" : {
+      "type" : "object",
+      "allOf" : [ {
+        "$ref" : "#/definitions/CommonResponse"
+      }, {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "$ref" : "#/definitions/UserData"
+          }
+        }
+      } ]
+    },
+    "AuthoritiesResponse" : {
+      "type" : "object",
+      "allOf" : [ {
+        "$ref" : "#/definitions/CommonResponse"
+      }, {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "type" : "array",
+            "items" : {
               "$ref" : "#/definitions/Authority"
             }
           }
-        } ]
-      },
-      "UserData" : {
-        "type" : "object",
-        "allOf" : [ {
-          "$ref" : "#/definitions/Data"
-        }, {
-          "$ref" : "#/definitions/User"
-        } ]
-      },
-      "UsersData" : {
-        "type" : "object",
-        "allOf" : [ {
-          "$ref" : "#/definitions/Data"
-        }, {
-          "type" : "object",
-          "properties" : {
-            "users" : {
-              "type" : "array",
-              "items" : {
-                "$ref" : "#/definitions/User"
-              }
-            }
-          }
-        } ]
-      },
-      "CommonResponse" : {
+        }
+      } ]
+    },
+    "AuthorityResponse" : {
+      "type" : "object",
+      "allOf" : [ {
+        "$ref" : "#/definitions/CommonResponse"
+      }, {
         "type" : "object",
         "properties" : {
-          "apiVersion" : {
-            "type" : "string"
-          },
-          "context" : {
-            "type" : "string"
-          },
-          "id" : {
-            "type" : "string"
-          },
-          "method" : {
-            "type" : "string"
-          },
-          "error" : {
-            "$ref" : "#/definitions/Error"
+          "data" : {
+            "$ref" : "#/definitions/Authority"
           }
         }
-      },
-      "Data" : {
+      } ]
+    },
+    "UserData" : {
+      "type" : "object",
+      "allOf" : [ {
+        "$ref" : "#/definitions/Data"
+      }, {
+        "$ref" : "#/definitions/User"
+      } ]
+    },
+    "UsersData" : {
+      "type" : "object",
+      "allOf" : [ {
+        "$ref" : "#/definitions/Data"
+      }, {
         "type" : "object",
         "properties" : {
-          "updated" : {
-            "type" : "integer"
-          },
-          "deleted" : {
-            "type" : "integer"
-          },
-          "totalItems" : {
-            "type" : "integer"
-          }
-        }
-      },
-      "Error" : {
-        "type" : "object",
-        "properties" : {
-          "code" : {
-            "type" : "integer"
-          },
-          "message" : {
-            "type" : "string"
-          },
-          "errors" : {
+          "users" : {
             "type" : "array",
             "items" : {
-              "type" : "object",
-              "properties" : {
-                "field" : {
-                  "type" : "string"
-                },
-                "reason" : {
-                  "type" : "string"
-                },
-                "message" : {
-                  "type" : "string"
-                },
-                "location" : {
-                  "type" : "string"
-                },
-                "locationType" : {
-                  "type" : "string"
-                }
+              "$ref" : "#/definitions/User"
+            }
+          }
+        }
+      } ]
+    },
+    "CommonResponse" : {
+      "type" : "object",
+      "properties" : {
+        "apiVersion" : {
+          "type" : "string"
+        },
+        "context" : {
+          "type" : "string"
+        },
+        "id" : {
+          "type" : "string"
+        },
+        "method" : {
+          "type" : "string"
+        },
+        "error" : {
+          "$ref" : "#/definitions/Error"
+        }
+      }
+    },
+    "Data" : {
+      "type" : "object",
+      "properties" : {
+        "updated" : {
+          "type" : "integer"
+        },
+        "deleted" : {
+          "type" : "integer"
+        },
+        "totalItems" : {
+          "type" : "integer"
+        }
+      }
+    },
+    "Error" : {
+      "type" : "object",
+      "properties" : {
+        "code" : {
+          "type" : "integer"
+        },
+        "message" : {
+          "type" : "string"
+        },
+        "errors" : {
+          "type" : "array",
+          "items" : {
+            "type" : "object",
+            "properties" : {
+              "field" : {
+                "type" : "string"
+              },
+              "reason" : {
+                "type" : "string"
+              },
+              "message" : {
+                "type" : "string"
+              },
+              "location" : {
+                "type" : "string"
+              },
+              "locationType" : {
+                "type" : "string"
               }
             }
           }
         }
       }
-    },
-    "host" : "virtserver.swaggerhub.com",
-    "basePath" : "/uk-gov-dft/UserManagementService/1.0.0"
+    }
   },
+  "host" : "virtserver.swaggerhub.com",
+  "basePath" : "/uk-gov-dft/UserManagementService/1.0.0"
+},
   "options": {
     "java8" : true,
     "sortParamsByRequiredFlag" : false,

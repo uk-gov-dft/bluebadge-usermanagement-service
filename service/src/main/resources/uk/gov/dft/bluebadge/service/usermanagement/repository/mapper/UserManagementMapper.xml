@@ -59,6 +59,25 @@
         WHERE id = #{id}
     </update>
 
+    <select id="retrieveEmailLinkWithUuid" parameterType="String" resultType="EmailLink">
+        SELECT user_id AS userId,
+        is_active AS isActive,
+        uuid
+        FROM email_link
+        WHERE uuid = #{uuid}
+    </select>
+
+    <update id="updateEmailLinkToInvalid" parameterType="String">
+        UPDATE email_link SET is_active = false WHERE uuid = #{uuid};
+    </update>
+
+    <update id="updatePassword" parameterType="UserEntity">
+        UPDATE users
+        SET
+        password = #{password}
+        WHERE id = #{id}
+    </update>
+
     <insert id="createUser" parameterType="UserEntity"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO users (name, local_authority_id, email_address, role_id)
