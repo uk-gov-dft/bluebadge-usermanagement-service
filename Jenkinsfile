@@ -2,7 +2,8 @@ def build_number  = "${env.BUILD_NUMBER}"
 def REPONAME      = "${scm.getUserRemoteConfigs()[0].getUrl()}"
 
 node {
-    def version = readFile('VERSION').trim()
+    
+
     
     // Get Artifactory server instance, defined in the Artifactory Plugin administration page.
     def server = Artifactory.server "dftbluebadge"
@@ -17,6 +18,9 @@ node {
         )
      }
     
+    stage('Get Version') {
+         def version = readFile('VERSION').trim()
+    }
     stage ('Gradle build') {
         sh './gradlew clean build bootJar artifactoryPublish artifactoryDeploy'
     }
