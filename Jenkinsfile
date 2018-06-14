@@ -2,7 +2,7 @@ def build_number  = "${env.BUILD_NUMBER}"
 def REPONAME      = "${scm.getUserRemoteConfigs()[0].getUrl()}"
 
 node {
-    def branch = readFile('VERSION').trim()
+    def version = readFile('VERSION').trim()
     
     // Get Artifactory server instance, defined in the Artifactory Plugin administration page.
     def server = Artifactory.server "dftbluebadge"
