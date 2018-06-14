@@ -1,5 +1,7 @@
-def version = "${env.BUILD_NUMBER}"
-def REPONAME = "${scm.getUserRemoteConfigs()[0].getUrl()}"
+def build_number  = "${env.BUILD_NUMBER}"
+def REPONAME      = "${scm.getUserRemoteConfigs()[0].getUrl()}"
+env.WORKSPACE     = pwd()
+def version = readFile "${env.WORKSPACE}/VERSION"
 
 node {
 
