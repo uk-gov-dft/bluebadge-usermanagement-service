@@ -1,10 +1,9 @@
 def build_number  = "${env.BUILD_NUMBER}"
 def REPONAME      = "${scm.getUserRemoteConfigs()[0].getUrl()}"
-env.WORKSPACE     = pwd()
-def version = readFile "${env.WORKSPACE}/VERSION"
 
 node {
-
+    def branch = readFile('VERSION').trim()
+    
     // Get Artifactory server instance, defined in the Artifactory Plugin administration page.
     def server = Artifactory.server "dftbluebadge"
     // Create an Artifactory Gradle instance.
