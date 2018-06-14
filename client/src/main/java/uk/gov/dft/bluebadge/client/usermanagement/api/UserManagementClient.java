@@ -32,7 +32,7 @@ public class UserManagementClient {
         "/authorities/{authorityId}/users?name={name}";
     static final String UPDATE_ENDPOINT = "/authorities/{authorityId}/users/{userId}";
     static final String DELETE_ENDPOINT = "/authorities/{authorityId}/users/{userId}";
-    static final String UPDATE_PASSWORD_ENDPOINT = "/authorities/{authorityId}/users/{userId}/password";
+    static final String UPDATE_PASSWORD_ENDPOINT = "/user/password/{uuid}";
   }
 
   private RestTemplateFactory restTemplateFactory;
@@ -200,13 +200,12 @@ public class UserManagementClient {
 
       String uri = serviceConfiguration.getUrlPrefix() + UPDATE_PASSWORD_ENDPOINT;
       Password passwords = new Password();
-      passwords.setUuid(uuid);
       passwords.setPassword(password);
       passwords.setPasswordConfirm(passwordConfirm);
 
       HttpEntity<Password> requestBody = new HttpEntity<>(passwords);
 
       return this.restTemplateFactory.getInstance()
-              .patchForObject(uri, requestBody, UserResponse.class);
+              .patchForObject(uri, requestBody, UserResponse.class, uuid);
   }
 }
