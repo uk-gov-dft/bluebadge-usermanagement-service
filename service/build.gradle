@@ -74,7 +74,6 @@ dependencies {
     testCompile('org.springframework.boot:spring-boot-starter-test')
 
     runtime('org.springframework.boot:spring-boot-devtools')
-    compile group: 'org.springframework.security', name: 'spring-security-core', version: '3.1.0.RELEASE'
 }
 
 checkstyle {
