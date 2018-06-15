@@ -48,6 +48,7 @@
           "description" : "Name or email address fragment to filter on."
         } ],
         "summary" : "List of all Users",
+        "operationId" : "findUsers",
         "description" : "Returns a list of Users\n",
         "tags" : [ "Users" ],
         "responses" : {
@@ -68,6 +69,7 @@
       "post" : {
         "summary" : "Create a user",
         "description" : "Create a user",
+        "operationId" : "createUser",
         "tags" : [ "Users" ],
         "parameters" : [ {
           "name" : "user",
@@ -109,6 +111,7 @@
       "get" : {
         "tags" : [ "Users" ],
         "summary" : "Request password reset for user.",
+        "operationId" : "requestPasswordReset",
         "description" : "Email user with password reset link.",
         "responses" : {
           "200" : {
@@ -168,6 +171,7 @@
       "get" : {
         "tags" : [ "Authorities" ],
         "summary" : "Get list of Local Authorities",
+        "operationId" : "retrieveAuthorities",
         "description" : "List of local authorities for users with cross authority roles.",
         "responses" : {
           "200" : {
@@ -181,6 +185,7 @@
       "post" : {
         "tags" : [ "Authorities" ],
         "summary" : "Create an authority.",
+        "operationId" : "createAuthority",
         "description" : "Create a Local Authority",
         "responses" : {
           "200" : {
@@ -208,6 +213,7 @@
       } ],
       "put" : {
         "tags" : [ "Authorities" ],
+        "operationId" : "updateAuthority",
         "summary" : "Update an authority.",
         "description" : "Update an authority.",
         "responses" : {
@@ -239,6 +245,7 @@
       } ],
       "get" : {
         "tags" : [ "Users" ],
+        "operationId" : "retrieveUser",
         "summary" : "Retrieve a specific user",
         "description" : "Retrieve a user and their roles",
         "responses" : {
@@ -252,6 +259,7 @@
       },
       "delete" : {
         "tags" : [ "Users" ],
+        "operationId" : "deleteUser",
         "summary" : "Removes a User from a Local Authority",
         "description" : "Removes a User from a Local Authority",
         "responses" : {
@@ -262,6 +270,7 @@
       },
       "put" : {
         "summary" : "Update a user",
+        "operationId" : "updateUser",
         "description" : "Update a user",
         "tags" : [ "Users" ],
         "parameters" : [ {

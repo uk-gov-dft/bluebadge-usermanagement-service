@@ -49,12 +49,12 @@ public class UserManagementService {
    *
    * @param userEntity User to create.
    * @return Create count.
-   * @throws BlueBadgeBusinessException if validation fails.
+   * @throws BadResponseException if validation fails.
    */
-  public int createUser(UserEntity userEntity) throws BlueBadgeBusinessException {
+  public int createUser(UserEntity userEntity) {
     List<ErrorErrors> businessErrors = nonBeanValidation(userEntity);
     if (null != businessErrors) {
-      throw new UserEntityValidationException(businessErrors);
+      throw new BadResponseException(businessErrors);
     }
     return repository.createUser(userEntity);
   }
@@ -135,7 +135,7 @@ public class UserManagementService {
     return matcher.find();
   }
 
-  public boolean validPasswordFormat(String password) {
+  private boolean validPasswordFormat(String password) {
     Matcher matcher = passwordPattern.matcher(password);
     return matcher.find();
   }
@@ -145,7 +145,7 @@ public class UserManagementService {
    *
    * @param userEntity Entity to update.
    * @return Update count.
-   * @throws BlueBadgeBusinessException if validation fails.
+   * @throws BadResponseException if validation fails.
    */
   public int updateUser(UserEntity userEntity) {
     List<ErrorErrors> businessErrors = nonBeanValidation(userEntity);

@@ -3,11 +3,6 @@ package uk.gov.dft.bluebadge.service.usermanagement;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.ApiParam;
-import java.util.List;
-import java.util.Optional;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +19,12 @@ import uk.gov.dft.bluebadge.service.usermanagement.converter.UserConverter;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.UserManagementService;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadResponseException;
-import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BlueBadgeBusinessException;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class UsersApiControllerImpl implements UsersApi {
@@ -131,20 +131,10 @@ public class UsersApiControllerImpl implements UsersApi {
       @ApiParam(value = "") @Valid @RequestBody User user) {
     UserEntity entity = userConverter.convertToEntity(user);
     UserResponse userResponse = new UserResponse();
-    HttpStatus status;
 
-    try {
-      int result = service.createUser(entity);
-      userResponse.setData(userConverter.convertToData(entity, 1, result, 0));
-      return ResponseEntity.ok(userResponse);
-    } catch (BlueBadgeBusinessException e) {
-      Error error = new Error();
-      for (ErrorErrors errorItem : e.getErrorsList()) {
-        error.addErrorsItem(errorItem);
-      }
-      userResponse.setError(error);
-      return ResponseEntity.badRequest().body(userResponse);
-    }
+    int result = service.createUser(entity);
+    userResponse.setData(userConverter.convertToData(entity, 1, result, 0));
+    return ResponseEntity.ok(userResponse);
   }
 
   /**
