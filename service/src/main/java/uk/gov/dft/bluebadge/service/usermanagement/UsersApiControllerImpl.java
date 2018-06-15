@@ -59,20 +59,25 @@ public class UsersApiControllerImpl implements UsersApi {
   }
 
   @Override
-  public ResponseEntity<Void> updatePassword(
-      @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
-          Integer authorityId,
-      @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
-          Integer userId,
+  public ResponseEntity<UserResponse> updatePassword(
+      @ApiParam(value = "UUID for  ***REMOVED***)
+          String uuid,
       @ApiParam(value = "") @Valid @RequestBody Password passwords) {
 
-    int result = service.updatePassword(passwords);
+    UserResponse userResponse = new UserResponse();
 
-    if (result == 1) {
-      return ResponseEntity.ok().build();
+    Optional<UserEntity> userEntity = service.retrieveUserUsingUuid(uuid);
+
+    if(userEntity.isPresent()) {
+        userResponse.setData(userConverter.convertToData(userEntity.get(), 1, 0, 0));
+    } else {
+        UserData userData = new UserData();
+        userData.setTotalItems(0);
+        userResponse.setData(userData);
     }
 
-    return ResponseEntity.notFound().build();
+    service.updatePassword(uuid, passwords);
+    return ResponseEntity.ok(userResponse);
   }
 
   @Override

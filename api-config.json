@@ -123,19 +123,13 @@
         }
       }
     },
-    "/authorities/{authorityId}/users/{userId}/password" : {
+    "/user/password/{uuid}" : {
       "parameters" : [ {
         "in" : "path",
-        "name" : "authorityId",
-        "type" : "integer",
+        "name" : "uuid",
+        "type" : "string",
         "required" : true,
-        "description" : "ID of the authority."
-      }, {
-        "in" : "path",
-        "name" : "userId",
-        "type" : "integer",
-        "required" : true,
-        "description" : "Numeric ID of the user."
+        "description" : "UUID for password reset."
       }, {
         "name" : "password",
         "in" : "body",
@@ -147,9 +141,6 @@
               "type" : "string"
             },
             "passwordConfirm" : {
-              "type" : "string"
-            },
-            "uuid" : {
               "type" : "string"
             }
           }

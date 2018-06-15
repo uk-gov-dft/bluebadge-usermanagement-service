@@ -290,15 +290,13 @@ public interface UsersApi {
     }
   )
   @RequestMapping(
-    value = "/authorities/{authorityId}/users/{userId}/password",
+    value = "/user/password/{uuid}",
     produces = {"application/json"},
     method = RequestMethod.PATCH
   )
-  default ResponseEntity<Void> updatePassword(
-      @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
-          Integer authorityId,
-      @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
-          Integer userId,
+  default ResponseEntity<UserResponse> updatePassword(
+      @ApiParam(value = "UUID for  ***REMOVED***)
+          String uuid,
       @ApiParam(value = "") @Valid @RequestBody Password password) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
     } else {

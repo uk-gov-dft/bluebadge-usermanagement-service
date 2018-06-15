@@ -4,9 +4,10 @@ DELETE FROM users WHERE name LIKE '%Sampath%';
 DELETE FROM users WHERE name = 'nobody';
 -- TODO end.
 
+
+DELETE FROM email_link WHERE user_id < 0;
 DELETE FROM users WHERE email_address = 'createuservalid@dft.gov.uk';
 DELETE FROM users WHERE id < 0;
-DELETE FROM email_link where user_id = -1;
 INSERT INTO users (id, name, email_address, local_authority_id, role_id, password)
 VALUES(-1, 'Sampath', 'abc@dft.gov.uk', 2, 2, 'fff');
 INSERT INTO users (id, name, email_address, local_authority_id, role_id, password)

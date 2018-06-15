@@ -21,6 +21,8 @@ import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadResponse
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BlueBadgeBusinessException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.UserEntityValidationException;
 
+import javax.swing.text.html.Option;
+
 @Service
 @Transactional
 public class UserManagementService {
@@ -159,30 +161,37 @@ public class UserManagementService {
    * @return Update count.
    */
   @Transactional
-  public int updatePassword(Password passwords) {
+  public int updatePassword(String uuid, Password passwords) {
 
     String password = passwords.getPassword();
-    String uuid = passwords.getUuid();
     String passwordConfirm = passwords.getPasswordConfirm();
-
-    boolean isPasswordValid = this.validPasswordFormat(password);
-    boolean isPasswordConfirmValid = this.validPasswordFormat(passwordConfirm);
 
     BadResponseException badResponseException = new BadResponseException();
 
-    if (!isPasswordValid || !isPasswordConfirmValid) {
+    boolean isPasswordValid = this.validPasswordFormat(password);
+
+    if(passwordConfirm == null) {
       ErrorErrors error = new ErrorErrors();
-      error.setField("password or passwordConfirm");
+      error.setField("passwordConfirm");
+      error.setMessage("NotNull.password.passwordConfirm");
+      error.setReason("No password confirmation provided");
+      badResponseException.addError(error);
+      throw badResponseException;
+    }
+
+    if (!isPasswordValid) {
+      ErrorErrors error = new ErrorErrors();
+      error.setField("password");
       error.setMessage("Pattern.user.password");
-      error.setReason("Invalid password format.");
+      error.setReason("Invalid password format provided");
       badResponseException.addError(error);
     }
 
     if (!password.equals(passwordConfirm)) {
       ErrorErrors error = new ErrorErrors();
       error.setField("passwordConfirm");
-      error.setMessage("Pattern.user.password.confirm");
-      error.setReason("Passwords do not match");
+      error.setMessage("Pattern.user.passwordConfirm");
+      error.setReason("Password confirm field does not match with password field");
       badResponseException.addError(error);
     }
 
@@ -194,11 +203,11 @@ public class UserManagementService {
 
     if (link == null || !link.getActive()) {
       ErrorErrors error = new ErrorErrors();
-      error.setField("uuid");
+      error.setField("password");
       if (link == null) {
-        error.setMessage("Invalid.password.uuid");
+        error.setMessage("Invalid.uuid");
       } else {
-        error.setMessage("Inactive.password.uuid");
+        error.setMessage("Inactive.uuid");
       }
       error.setReason("uuid is not valid");
       badResponseException.addError(error);
@@ -213,5 +222,9 @@ public class UserManagementService {
 
     repository.updateEmailLinkToInvalid(uuid);
     return repository.updatePassword(user);
+  }
+
+  public Optional<UserEntity> retrieveUserUsingUuid(String uuid) {
+      return repository.retrieveUserUsingUuid(uuid);
   }
 }

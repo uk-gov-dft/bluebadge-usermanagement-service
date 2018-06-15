@@ -15,9 +15,6 @@ public class Password {
   @JsonProperty("passwordConfirm")
   private String passwordConfirm = null;
 
-  @JsonProperty("uuid")
-  private String uuid = null;
-
   public Password password(String password) {
     this.password = password;
     return this;
@@ -57,26 +54,6 @@ public class Password {
     this.passwordConfirm = passwordConfirm;
   }
 
-  public Password uuid(String uuid) {
-    this.uuid = uuid;
-    return this;
-  }
-
-  /**
-   * Get uuid
-   *
-   * @return uuid
-   */
-  @ApiModelProperty(required = true, value = "")
-  @NotNull
-  public String getUuid() {
-    return uuid;
-  }
-
-  public void setUuid(String uuid) {
-    this.uuid = uuid;
-  }
-
   @Override
   public boolean equals(java.lang.Object o) {
     if (this == o) {
@@ -87,13 +64,12 @@ public class Password {
     }
     Password password = (Password) o;
     return Objects.equals(this.password, password.password)
-        && Objects.equals(this.passwordConfirm, password.passwordConfirm)
-        && Objects.equals(this.uuid, password.uuid);
+        && Objects.equals(this.passwordConfirm, password.passwordConfirm);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(password, passwordConfirm, uuid);
+    return Objects.hash(password, passwordConfirm);
   }
 
   @Override
@@ -103,7 +79,6 @@ public class Password {
 
     sb.append("     ***REMOVED***);
     sb.append("     ***REMOVED***);
-    sb.append("    uuid: ").append(toIndentedString(uuid)).append("\n");
     sb.append("}");
     return sb.toString();
   }

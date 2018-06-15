@@ -78,6 +78,15 @@
         WHERE id = #{id}
     </update>
 
+    <select id="retrieveUserUsingUuid" parameterType="String" resultType="UserEntity">
+        SELECT u.id, u.name
+        , u.local_authority_id AS localAuthorityId
+        , u.email_address AS emailAddress
+        FROM users u
+        INNER JOIN email_link e ON u.id = e.user_id
+        WHERE e.uuid = #{uuid}
+    </select>
+
     <insert id="createUser" parameterType="UserEntity"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO users (name, local_authority_id, email_address, role_id)

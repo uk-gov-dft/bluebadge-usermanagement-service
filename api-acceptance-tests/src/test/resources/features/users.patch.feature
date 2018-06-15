@@ -5,45 +5,45 @@ Feature: Verify users update
     * url baseUrl
 
   Scenario: Update password
-    Given path 'authorities/2/users/-1/password'
+    Given path 'user/password/4175e31c-9c0c-41c0-9afb-40dc0a89b9c5'
     And request { ***REMOVED***}
     When method PATCH
     Then status 200
 
   Scenario: Update password missing required field
-    Given path 'authorities/2/users/-1/password'
+    Given path 'user/password/'
     And request { ***REMOVED***}
     When method PATCH
-    Then status 400
-    And match $.error.errors contains {field:"uuid", reason:"#notnull", message:"NotNull. ***REMOVED***}
+    Then status 404
+    #And match $.error.errors contains {field:"uuid", reason:"#notnull", message:"NotNull. ***REMOVED***}
 
 
   Scenario: Inactive UUID
-    Given path 'authorities/2/users/-1/password'
+    Given path 'user/password/4175e31c-0000-41c0-9afb-40dc0a89b9c5'
     And request { ***REMOVED***}
     When method PATCH
     Then status 400
 
   Scenario: Invalid UUID
-    Given path 'authorities/2/users/-1/password'
+    Given path  'user/password/4175e31c-1111-41c0-9afb-40dc0a89b9c5'
     And request { ***REMOVED***}
     When method PATCH
     Then status 400
 
   Scenario: Invalid password
-    Given path 'authorities/2/users/-1/password'
+    Given path 'user/password/4175e31c-9c0c-41c0-9afb-40dc0a89b9c5'
     And request { ***REMOVED***}
     When method PATCH
     Then status 400
 
   Scenario: Invalid password confirm
-    Given path 'authorities/2/users/-1/password'
+    Given path 'user/password/4175e31c-9c0c-41c0-9afb-40dc0a89b9c5'
     And request { ***REMOVED***}
     When method PATCH
     Then status 400
 
   Scenario: Password does not match
-    Given path 'authorities/2/users/-1/password'
+    Given path 'user/password/4175e31c-9c0c-41c0-9afb-40dc0a89b9c5'
     And request { ***REMOVED***}
     When method PATCH
     Then status 400
