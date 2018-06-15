@@ -4,11 +4,7 @@ buildscript {
 
     repositories {
         maven {
-            url 'https://artifactory.does.not.exist/artifactory/gradle-release'
-            credentials {
-                username = "rob"
-                 ***REMOVED***
-            }
+            url 'https://artifactory.does.not.exist/artifactory/gradle-dev-local'
         }
         mavenCentral()
         jcenter()
@@ -31,11 +27,8 @@ allprojects {
 
     repositories {
         maven {
-            url 'https://artifactory.does.not.exist/artifactory/gradle-release-dev'
-            credentials {
-                username = "rob"
-                 ***REMOVED***
-            }
+            url 'https://artifactory.does.not.exist/artifactory/gradle-dev-local'
+
         }
         mavenCentral()
         jcenter()

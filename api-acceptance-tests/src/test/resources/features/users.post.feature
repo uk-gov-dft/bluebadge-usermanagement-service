@@ -12,17 +12,16 @@ Feature: Verify users create
     And match $.error.errors contains {field:"emailAddress", reason:"#notnull", message:"NotNull.user.emailAddress", location:"#null", locationType:"#null"}
     And match $.error.errors contains {field:"name", reason:"#notnull", message:"NotNull.user.name", location:"#null", locationType:"#null"}
 
-  Scenario: Create User A bean and non bean error also zero length string
+  Scenario: Create User A bean zero length string
     Given path 'authorities/2/users'
     And request { emailAddress:"abcnobody@dft.gov.uk", name:"" }
     When method POST
     Then status 400
-    And match $.error.errors contains {field:"emailAddress", reason:"#notnull", message:"AlreadyExists.user.emailAddress", location:"#null", locationType:"#null"}
     And match $.error.errors contains {field:"name", reason:"#notnull", message:"NotNull.user.name", location:"#null", locationType:"#null"}
 
   Scenario: Create User All valid except email already exists
     Given path 'authorities/2/users'
-    And request { name:"asdfgh", emailAddress:"abcnobody@dft.gov.uk", localAuthorityId: 2 }
+    And request { name:"asdfgh", emailAddress:"abcnobody@dft.gov.uk", localAuthorityId: 2, roleId: 2 }
     When method POST
     Then status 400
     And match $.error.errors contains {field:"emailAddress", reason:"#notnull", message:"AlreadyExists.user.emailAddress", location:"#null", locationType:"#null"}

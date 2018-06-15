@@ -3,41 +3,32 @@ package uk.gov.dft.bluebadge.service.usermanagement.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.dft.bluebadge.client.message.api.MessageApiClient;
 import uk.gov.dft.bluebadge.model.usermanagement.ErrorErrors;
 import uk.gov.dft.bluebadge.model.usermanagement.Password;
-import uk.gov.dft.bluebadge.model.usermanagement.User;
-import uk.gov.dft.bluebadge.service.usermanagement.converter.UserConverter;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadResponseException;
-import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BlueBadgeBusinessException;
-import uk.gov.dft.bluebadge.service.usermanagement.service.exception.UserEntityValidationException;
-
-import javax.swing.text.html.Option;
 
 @Service
 @Transactional
 public class UserManagementService {
 
   private final UserManagementRepository repository;
-  private static final Pattern emailPattern =
-      Pattern.compile(
-          "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])",
-          Pattern.CASE_INSENSITIVE);
-  private static final Pattern passwordPattern =
-      Pattern.compile("^[^\\s-]{8,}$", Pattern.CASE_INSENSITIVE);
+  private MessageApiClient messageApiClient;
 
   @Autowired
-  UserManagementService(UserManagementRepository repository) {
+  UserManagementService(UserManagementRepository repository, MessageApiClient messageApiClient) {
     this.repository = repository;
+    this.messageApiClient = messageApiClient;
   }
 
   public Optional<UserEntity> retrieveUserById(Integer userId) {
@@ -56,7 +47,18 @@ public class UserManagementService {
     if (null != businessErrors) {
       throw new BadResponseException(businessErrors);
     }
-    return repository.createUser(userEntity);
+    int createCount = repository.createUser(userEntity);
+    uk.gov.dft.bluebadge.model.message.User messageUser =
+        new uk.gov.dft.bluebadge.model.message.User();
+    // TODO common user object?
+    // Create a password reset message
+    BeanUtils.copyProperties(userEntity, messageUser);
+    UUID uuid = messageApiClient.sendPasswordResetEmail(messageUser);
+    EmailLink emailLink = new EmailLink();
+    emailLink.setUuid(uuid.toString());
+    emailLink.setUserId(userEntity.getId());
+    repository.createEmailLink(emailLink);
+    return createCount;
   }
 
   /**
@@ -85,18 +87,6 @@ public class UserManagementService {
   }
 
   /**
-   * Version working on User API object. Called from bean validation to add extra business
-   * validation when there is already falied bean validation.
-   *
-   * @param user User API bean.
-   * @return List of errors.
-   */
-  public List<ErrorErrors> nonBeanValidation(User user) {
-    UserConverter converter = new UserConverter();
-    return nonBeanValidation(converter.convertToEntity(user));
-  }
-
-  /**
    * Apply business validation (non bean).
    *
    * @param userEntity User Entity bean.
@@ -109,15 +99,7 @@ public class UserManagementService {
     }
     List<ErrorErrors> errorsList = null;
 
-    if (!validEmailFormat(userEntity.getEmailAddress())) {
-      ErrorErrors error = new ErrorErrors();
-      error
-          .field("emailAddress")
-          .message("Pattern.user.emailAddress")
-          .reason("Not a valid email address.");
-      errorsList = new ArrayList<>();
-      errorsList.add(error);
-    } else if (repository.emailAddressAlreadyUsed(userEntity)) {
+    if (repository.emailAddressAlreadyUsed(userEntity)) {
       ErrorErrors error = new ErrorErrors();
       error
           .field("emailAddress")
@@ -128,16 +110,6 @@ public class UserManagementService {
     }
 
     return errorsList;
-  }
-
-  boolean validEmailFormat(String emailAddress) {
-    Matcher matcher = emailPattern.matcher(emailAddress);
-    return matcher.find();
-  }
-
-  private boolean validPasswordFormat(String password) {
-    Matcher matcher = passwordPattern.matcher(password);
-    return matcher.find();
   }
 
   /**
@@ -160,32 +132,12 @@ public class UserManagementService {
    *
    * @return Update count.
    */
-  @Transactional
   public int updatePassword(String uuid, Password passwords) {
 
     String password = passwords.getPassword();
     String passwordConfirm = passwords.getPasswordConfirm();
 
     BadResponseException badResponseException = new BadResponseException();
-
-    boolean isPasswordValid = this.validPasswordFormat(password);
-
-    if(passwordConfirm == null) {
-      ErrorErrors error = new ErrorErrors();
-      error.setField("passwordConfirm");
-      error.setMessage("NotNull.password.passwordConfirm");
-      error.setReason("No password confirmation provided");
-      badResponseException.addError(error);
-      throw badResponseException;
-    }
-
-    if (!isPasswordValid) {
-      ErrorErrors error = new ErrorErrors();
-      error.setField("password");
-      error.setMessage("Pattern.user.password");
-      error.setReason("Invalid password format provided");
-      badResponseException.addError(error);
-    }
 
     if (!password.equals(passwordConfirm)) {
       ErrorErrors error = new ErrorErrors();
@@ -225,6 +177,6 @@ public class UserManagementService {
   }
 
   public Optional<UserEntity> retrieveUserUsingUuid(String uuid) {
-      return repository.retrieveUserUsingUuid(uuid);
+    return repository.retrieveUserUsingUuid(uuid);
   }
 }

@@ -27,6 +27,7 @@ public class Password {
    */
   @ApiModelProperty(required = true, value = "")
   @NotNull
+  @Pattern(regexp = "^[^\\s-]{8,}$")
   public String getPassword() {
     return password;
   }

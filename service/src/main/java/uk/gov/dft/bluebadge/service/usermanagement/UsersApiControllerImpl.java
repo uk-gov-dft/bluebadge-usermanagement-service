@@ -3,8 +3,12 @@ package uk.gov.dft.bluebadge.service.usermanagement;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.ApiParam;
+import java.util.List;
+import java.util.Optional;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -19,12 +23,6 @@ import uk.gov.dft.bluebadge.service.usermanagement.converter.UserConverter;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.UserManagementService;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadResponseException;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import java.util.List;
-import java.util.Optional;
 
 @Controller
 public class UsersApiControllerImpl implements UsersApi {
@@ -68,12 +66,12 @@ public class UsersApiControllerImpl implements UsersApi {
 
     Optional<UserEntity> userEntity = service.retrieveUserUsingUuid(uuid);
 
-    if(userEntity.isPresent()) {
-        userResponse.setData(userConverter.convertToData(userEntity.get(), 1, 0, 0));
+    if (userEntity.isPresent()) {
+      userResponse.setData(userConverter.convertToData(userEntity.get(), 1, 0, 0));
     } else {
-        UserData userData = new UserData();
-        userData.setTotalItems(0);
-        userResponse.setData(userData);
+      UserData userData = new UserData();
+      userData.setTotalItems(0);
+      userResponse.setData(userData);
     }
 
     service.updatePassword(uuid, passwords);
@@ -98,7 +96,7 @@ public class UsersApiControllerImpl implements UsersApi {
    * @return The User wrapped in a UserResponse
    */
   @Override
-  public ResponseEntity<UserResponse> authoritiesAuthorityIdUsersUserIdGet(
+  public ResponseEntity<UserResponse> retrieveUser(
       @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
           Integer authorityId,
       @ApiParam(value = "Numeric ID of the user to get.", required = true) @PathVariable("userId")
@@ -125,7 +123,7 @@ public class UsersApiControllerImpl implements UsersApi {
    * @return The created user with id populated.
    */
   @Override
-  public ResponseEntity<UserResponse> authoritiesAuthorityIdUsersPost(
+  public ResponseEntity<UserResponse> createUser(
       @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
           Integer authorityId,
       @ApiParam(value = "") @Valid @RequestBody User user) {
@@ -170,7 +168,7 @@ public class UsersApiControllerImpl implements UsersApi {
    * @return List of Users
    */
   @Override
-  public ResponseEntity<UsersResponse> authoritiesAuthorityIdUsersGet(
+  public ResponseEntity<UsersResponse> findUsers(
       @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
           Integer authorityId,
       @ApiParam(value = "Name or email address fragment to filter on.")
@@ -192,7 +190,7 @@ public class UsersApiControllerImpl implements UsersApi {
   }
 
   @Override
-  public ResponseEntity<UserResponse> authoritiesAuthorityIdUsersUserIdPut(
+  public ResponseEntity<UserResponse> updateUser(
       @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
           Integer authorityId,
       @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
@@ -207,7 +205,7 @@ public class UsersApiControllerImpl implements UsersApi {
   }
 
   @Override
-  public ResponseEntity<Void> authoritiesAuthorityIdUsersUserIdDelete(
+  public ResponseEntity<Void> deleteUser(
       @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
           Integer authorityId,
       @ApiParam(value = "Numeric ID of the user to remove.", required = true)

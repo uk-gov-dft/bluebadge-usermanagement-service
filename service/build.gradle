@@ -61,11 +61,8 @@ dependencies {
     compile('org.postgresql:postgresql:42.2.2')
     compile('org.apache.commons:commons-lang3:3.7')
     compileOnly ('org.projectlombok:lombok:1.16.22')
-
     testCompile('org.springframework.boot:spring-boot-starter-test')
-
     runtime('org.springframework.boot:spring-boot-devtools')
-    compile group: 'org.springframework.security', name: 'spring-security-core', version: '3.1.0.RELEASE'
     compile group: 'uk.gov.dft.bluebadge', name: 'message-service-client', version: '0.1.0'
 }
 
