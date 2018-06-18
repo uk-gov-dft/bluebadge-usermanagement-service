@@ -142,7 +142,7 @@ public class UserManagementService {
     if (!password.equals(passwordConfirm)) {
       ErrorErrors error = new ErrorErrors();
       error.setField("passwordConfirm");
-      error.setMessage("Pattern.user.passwordConfirm");
+      error.setMessage("Pattern.password.passwordConfirm");
       error.setReason("Password confirm field does not match with password field");
       badResponseException.addError(error);
     }
