@@ -26,5 +26,7 @@ public interface UserManagementMapper {
 
   EmailLink retrieveEmailLinkWithUuid(String uuid);
 
+  void createEmailLink(EmailLink emailLink);
+
   void updateEmailLinkToInvalid(String uuid);
 }

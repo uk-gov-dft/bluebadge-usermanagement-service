@@ -39,28 +39,37 @@ public interface AuthoritiesApi {
   }
 
   @ApiOperation(
-    value = "Update an authority.",
-    nickname = "authoritiesAuthorityIdPut",
-    notes = "Update an authority.",
+    value = "Create an authority.",
+    nickname = "createAuthority",
+    notes = "Create a Local Authority",
+    response = AuthorityResponse.class,
     tags = {
       "Authorities",
     }
   )
   @ApiResponses(
     value = {
-      @ApiResponse(code = 200, message = "OK"),
-      @ApiResponse(code = 400, message = "Bad request.", response = CommonResponse.class)
+      @ApiResponse(code = 200, message = "OK", response = AuthorityResponse.class),
+      @ApiResponse(code = 400, message = "Bad request", response = CommonResponse.class)
     }
   )
   @RequestMapping(
-    value = "/authorities/{authorityId}",
+    value = "/authorities",
     produces = {"application/json"},
-    method = RequestMethod.PUT
+    method = RequestMethod.POST
   )
-  default ResponseEntity<Void> authoritiesAuthorityIdPut(
-      @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
-          Integer authorityId) {
+  default ResponseEntity<AuthorityResponse> createAuthority() {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
+      if (getAcceptHeader().get().contains("application/json")) {
+        try {
+          return new ResponseEntity<>(
+              getObjectMapper().get().readValue("\"\"", AuthorityResponse.class),
+              HttpStatus.NOT_IMPLEMENTED);
+        } catch (IOException e) {
+          log.error("Couldn't serialize response for content type application/json", e);
+          return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+      }
     } else {
       log.warn(
           "ObjectMapper or HttpServletRequest not configured in default AuthoritiesApi interface so no example is generated");
@@ -70,7 +79,7 @@ public interface AuthoritiesApi {
 
   @ApiOperation(
     value = "Get list of Local Authorities",
-    nickname = "authoritiesGet",
+    nickname = "retrieveAuthorities",
     notes = "List of local authorities for users with cross authority roles.",
     response = AuthoritiesResponse.class,
     tags = {
@@ -85,7 +94,7 @@ public interface AuthoritiesApi {
     produces = {"application/json"},
     method = RequestMethod.GET
   )
-  default ResponseEntity<AuthoritiesResponse> authoritiesGet() {
+  default ResponseEntity<AuthoritiesResponse> retrieveAuthorities() {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
       if (getAcceptHeader().get().contains("application/json")) {
         try {
@@ -105,37 +114,28 @@ public interface AuthoritiesApi {
   }
 
   @ApiOperation(
-    value = "Create an authority.",
-    nickname = "authoritiesPost",
-    notes = "Create a Local Authority",
-    response = AuthorityResponse.class,
+    value = "Update an authority.",
+    nickname = "updateAuthority",
+    notes = "Update an authority.",
     tags = {
       "Authorities",
     }
   )
   @ApiResponses(
     value = {
-      @ApiResponse(code = 200, message = "OK", response = AuthorityResponse.class),
-      @ApiResponse(code = 400, message = "Bad request", response = CommonResponse.class)
+      @ApiResponse(code = 200, message = "OK"),
+      @ApiResponse(code = 400, message = "Bad request.", response = CommonResponse.class)
     }
   )
   @RequestMapping(
-    value = "/authorities",
+    value = "/authorities/{authorityId}",
     produces = {"application/json"},
-    method = RequestMethod.POST
+    method = RequestMethod.PUT
   )
-  default ResponseEntity<AuthorityResponse> authoritiesPost() {
+  default ResponseEntity<Void> updateAuthority(
+      @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
+          Integer authorityId) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
-      if (getAcceptHeader().get().contains("application/json")) {
-        try {
-          return new ResponseEntity<>(
-              getObjectMapper().get().readValue("\"\"", AuthorityResponse.class),
-              HttpStatus.NOT_IMPLEMENTED);
-        } catch (IOException e) {
-          log.error("Couldn't serialize response for content type application/json", e);
-          return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-      }
     } else {
       log.warn(
           "ObjectMapper or HttpServletRequest not configured in default AuthoritiesApi interface so no example is generated");

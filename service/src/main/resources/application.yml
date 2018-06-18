@@ -35,3 +35,13 @@ server:
     context-path: /uk-gov-dft/user-management-service/1.0.0
 
 springfox.documentation.swagger.v2.path: /api-docs
+
+messageservice:
+  servicehost:
+    host: localhost
+    port: 8480
+    scheme: http
+    connectiontimeout: 6000
+    requesttimeout: 6000
+    contextpath: /uk-gov-dft/message-service/1.0.0
+

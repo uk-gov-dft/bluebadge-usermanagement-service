@@ -32,10 +32,10 @@ public class UserManagementRepository {
   public Optional<UserEntity> retrieveUserById(int id) {
     UserEntity userEntity = this.sqlSession.selectOne("retrieveUserById", id);
     if (null == userEntity) {
-        LOGGER.warn("Attempt to retrieve UserEntity id:{} that does not exist.", id);
+      LOGGER.warn("Attempt to retrieve UserEntity id:{} that does not exist.", id);
     }
     return Optional.ofNullable(userEntity);
-}
+  }
 
   /**
    * Retrieve a single UserEntity by Email Address.
@@ -109,12 +109,12 @@ public class UserManagementRepository {
   public Optional<UserEntity> retrieveUserUsingUuid(String uuid) {
     Assert.notNull(uuid, "No uuid is present");
 
-      UserEntity userEntity = sqlSession.selectOne("retrieveUserUsingUuid", uuid);
-      if (null == userEntity) {
-          LOGGER.warn("Attempt to retrieve UserEntity id:{} that does not exist.", uuid);
-      }
+    UserEntity userEntity = sqlSession.selectOne("retrieveUserUsingUuid", uuid);
+    if (null == userEntity) {
+      LOGGER.warn("Attempt to retrieve UserEntity id:{} that does not exist.", uuid);
+    }
 
-      return Optional.ofNullable(userEntity);
+    return Optional.ofNullable(userEntity);
   }
 
   /**
@@ -153,5 +153,9 @@ public class UserManagementRepository {
    */
   public boolean emailAddressAlreadyUsed(UserEntity userEntity) {
     return sqlSession.selectOne("emailAddressAlreadyUsed", userEntity);
+  }
+
+  public int createEmailLink(EmailLink emailLink) {
+    return sqlSession.insert("createEmailLink", emailLink);
   }
 }

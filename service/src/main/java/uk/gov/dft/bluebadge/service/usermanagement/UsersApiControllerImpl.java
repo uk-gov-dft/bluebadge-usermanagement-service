@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -23,8 +22,7 @@ import uk.gov.dft.bluebadge.service.usermanagement.controller.UsersApi;
 import uk.gov.dft.bluebadge.service.usermanagement.converter.UserConverter;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.UserManagementService;
-import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadResponseException;
-import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BlueBadgeBusinessException;
+import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
 
 @Controller
 public class UsersApiControllerImpl implements UsersApi {
@@ -43,8 +41,8 @@ public class UsersApiControllerImpl implements UsersApi {
     this.service = service;
   }
 
-  @ExceptionHandler({BadResponseException.class})
-  public ResponseEntity<CommonResponse> handleException(BadResponseException e) {
+  @ExceptionHandler({BadRequestException.class})
+  public ResponseEntity<CommonResponse> handleException(BadRequestException e) {
 
     CommonResponse response = new CommonResponse();
 
@@ -68,12 +66,12 @@ public class UsersApiControllerImpl implements UsersApi {
 
     Optional<UserEntity> userEntity = service.retrieveUserUsingUuid(uuid);
 
-    if(userEntity.isPresent()) {
-        userResponse.setData(userConverter.convertToData(userEntity.get(), 1, 0, 0));
+    if (userEntity.isPresent()) {
+      userResponse.setData(userConverter.convertToData(userEntity.get(), 1, 0, 0));
     } else {
-        UserData userData = new UserData();
-        userData.setTotalItems(0);
-        userResponse.setData(userData);
+      UserData userData = new UserData();
+      userData.setTotalItems(0);
+      userResponse.setData(userData);
     }
 
     service.updatePassword(uuid, passwords);
@@ -98,7 +96,7 @@ public class UsersApiControllerImpl implements UsersApi {
    * @return The User wrapped in a UserResponse
    */
   @Override
-  public ResponseEntity<UserResponse> authoritiesAuthorityIdUsersUserIdGet(
+  public ResponseEntity<UserResponse> retrieveUser(
       @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
           Integer authorityId,
       @ApiParam(value = "Numeric ID of the user to get.", required = true) @PathVariable("userId")
@@ -125,26 +123,16 @@ public class UsersApiControllerImpl implements UsersApi {
    * @return The created user with id populated.
    */
   @Override
-  public ResponseEntity<UserResponse> authoritiesAuthorityIdUsersPost(
+  public ResponseEntity<UserResponse> createUser(
       @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
           Integer authorityId,
       @ApiParam(value = "") @Valid @RequestBody User user) {
     UserEntity entity = userConverter.convertToEntity(user);
     UserResponse userResponse = new UserResponse();
-    HttpStatus status;
 
-    try {
-      int result = service.createUser(entity);
-      userResponse.setData(userConverter.convertToData(entity, 1, result, 0));
-      return ResponseEntity.ok(userResponse);
-    } catch (BlueBadgeBusinessException e) {
-      Error error = new Error();
-      for (ErrorErrors errorItem : e.getErrorsList()) {
-        error.addErrorsItem(errorItem);
-      }
-      userResponse.setError(error);
-      return ResponseEntity.badRequest().body(userResponse);
-    }
+    int result = service.createUser(entity);
+    userResponse.setData(userConverter.convertToData(entity, 1, result, 0));
+    return ResponseEntity.ok(userResponse);
   }
 
   /**
@@ -180,7 +168,7 @@ public class UsersApiControllerImpl implements UsersApi {
    * @return List of Users
    */
   @Override
-  public ResponseEntity<UsersResponse> authoritiesAuthorityIdUsersGet(
+  public ResponseEntity<UsersResponse> findUsers(
       @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
           Integer authorityId,
       @ApiParam(value = "Name or email address fragment to filter on.")
@@ -202,7 +190,7 @@ public class UsersApiControllerImpl implements UsersApi {
   }
 
   @Override
-  public ResponseEntity<UserResponse> authoritiesAuthorityIdUsersUserIdPut(
+  public ResponseEntity<UserResponse> updateUser(
       @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
           Integer authorityId,
       @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
@@ -217,7 +205,7 @@ public class UsersApiControllerImpl implements UsersApi {
   }
 
   @Override
-  public ResponseEntity<Void> authoritiesAuthorityIdUsersUserIdDelete(
+  public ResponseEntity<Void> deleteUser(
       @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
           Integer authorityId,
       @ApiParam(value = "Numeric ID of the user to remove.", required = true)

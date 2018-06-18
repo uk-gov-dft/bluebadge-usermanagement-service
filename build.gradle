@@ -3,23 +3,17 @@ import groovy.json.JsonSlurper
 buildscript {
 
     repositories {
+        maven {
+            url 'https://artifactory.does.not.exist/artifactory/gradle-dev-local'
+        }
         mavenCentral()
         jcenter()
-        maven {
-            url 'https://artifactory.does.not.exist/artifactory/gradle-release'
-            credentials {
-                username = "rob"
-                 ***REMOVED***
-            }
-        }
     }
 
     dependencies {
         classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4+"
     }
 }
-
-//apply plugin: 'com.jfrog.artifactory'
 
 allprojects {
 
@@ -32,30 +26,15 @@ allprojects {
     sourceCompatibility = 1.8
 
     repositories {
+        maven {
+            url 'https://artifactory.does.not.exist/artifactory/gradle-dev-local'
+
+        }
         mavenCentral()
         jcenter()
-        maven {
-            url 'https://artifactory.does.not.exist/artifactory/gradle-release-dev'
-            credentials {
-                username = "rob"
-                 ***REMOVED***
-            }
-        }
     }
 }
 
-//subprojects {
-//    repositories {
-//        maven {
-//            url 'https://artifactory.does.not.exist/artifactory/gradle-release-dev'
-//            credentials {
-//                username = "rob"
-//                 ***REMOVED***
-//            }
-//        }
-//    }
-//}
-//artifactoryPublish.skip=true
 artifactory {
     contextUrl = "https://artifactory.does.not.exist/artifactory"   //The base Artifactory URL if not overridden by the publisher/resolver
     publish {

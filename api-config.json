@@ -48,6 +48,7 @@
           "description" : "Name or email address fragment to filter on."
         } ],
         "summary" : "List of all Users",
+        "operationId" : "findUsers",
         "description" : "Returns a list of Users\n",
         "tags" : [ "Users" ],
         "responses" : {
@@ -68,6 +69,7 @@
       "post" : {
         "summary" : "Create a user",
         "description" : "Create a user",
+        "operationId" : "createUser",
         "tags" : [ "Users" ],
         "parameters" : [ {
           "name" : "user",
@@ -109,6 +111,7 @@
       "get" : {
         "tags" : [ "Users" ],
         "summary" : "Request password reset for user.",
+        "operationId" : "requestPasswordReset",
         "description" : "Email user with password reset link.",
         "responses" : {
           "200" : {
@@ -138,7 +141,8 @@
           "required" : [ " ***REMOVED*** ],
           "properties" : {
             "password" : {
-              "type" : "string"
+              "type" : "string",
+              "pattern" : "^[^\\s-]{8,}$"
             },
             "passwordConfirm" : {
               "type" : "string"
@@ -153,7 +157,10 @@
         "description" : "Update password reset for user.",
         "responses" : {
           "200" : {
-            "description" : "OK"
+            "description" : "OK",
+            "schema" : {
+              "$ref" : "#/definitions/UserResponse"
+            }
           },
           "400" : {
             "description" : "Bad request.",
@@ -168,6 +175,7 @@
       "get" : {
         "tags" : [ "Authorities" ],
         "summary" : "Get list of Local Authorities",
+        "operationId" : "retrieveAuthorities",
         "description" : "List of local authorities for users with cross authority roles.",
         "responses" : {
           "200" : {
@@ -181,6 +189,7 @@
       "post" : {
         "tags" : [ "Authorities" ],
         "summary" : "Create an authority.",
+        "operationId" : "createAuthority",
         "description" : "Create a Local Authority",
         "responses" : {
           "200" : {
@@ -208,6 +217,7 @@
       } ],
       "put" : {
         "tags" : [ "Authorities" ],
+        "operationId" : "updateAuthority",
         "summary" : "Update an authority.",
         "description" : "Update an authority.",
         "responses" : {
@@ -239,6 +249,7 @@
       } ],
       "get" : {
         "tags" : [ "Users" ],
+        "operationId" : "retrieveUser",
         "summary" : "Retrieve a specific user",
         "description" : "Retrieve a user and their roles",
         "responses" : {
@@ -252,6 +263,7 @@
       },
       "delete" : {
         "tags" : [ "Users" ],
+        "operationId" : "deleteUser",
         "summary" : "Removes a User from a Local Authority",
         "description" : "Removes a User from a Local Authority",
         "responses" : {
@@ -262,6 +274,7 @@
       },
       "put" : {
         "summary" : "Update a user",
+        "operationId" : "updateUser",
         "description" : "Update a user",
         "tags" : [ "Users" ],
         "parameters" : [ {
@@ -329,7 +342,8 @@
           "type" : "string",
           "format" : "email",
           "description" : "email address.",
-          "example" : "rob.worthington@norealserver.com"
+          "example" : "rob.worthington@norealserver.com",
+          "pattern" : "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])"
         },
         "localAuthorityId" : {
           "type" : "integer",
