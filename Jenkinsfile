@@ -1,5 +1,5 @@
-def version = "${env.BUILD_NUMBER}"
-def REPONAME = "${scm.getUserRemoteConfigs()[0].getUrl()}"
+def build_number  = "${env.BUILD_NUMBER}"
+def REPONAME      = "${scm.getUserRemoteConfigs()[0].getUrl()}"
 
 node {
 
@@ -11,6 +11,10 @@ node {
         )
      }
     
+    stage('Get Version') {
+         def version = readFile('VERSION').trim()
+    }
+
     stage ('Gradle build') {
         sh './gradlew clean build bootJar artifactoryPublish artifactoryDeploy'
     }

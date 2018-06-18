@@ -37,6 +37,18 @@ allprojects {
     }
 }
 
+//subprojects {
+//    repositories {
+//        maven {
+//            url 'https://artifactory.does.not.exist/artifactory/gradle-release-dev'
+//            credentials {
+//                username = "rob"
+//                 ***REMOVED***
+//            }
+//        }
+//    }
+//}
+//artifactoryPublish.skip=true
 artifactory {
     contextUrl = "https://artifactory.does.not.exist/artifactory"   //The base Artifactory URL if not overridden by the publisher/resolver
     publish {
@@ -57,6 +69,7 @@ artifactory {
         repository {
             repoKey = 'gradle-release'
             maven = true
+
         }
     }
 
@@ -119,5 +132,3 @@ task generateService(dependsOn: 'unzipGenerated', type: Sync){
     exclude '**/*ApiController.java'
     into "service/src/generated/java/uk/gov/dft/bluebadge/service/usermanagement"
 }
-
-
