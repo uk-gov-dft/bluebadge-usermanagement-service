@@ -43,7 +43,7 @@ public class UserManagementService {
    * @throws BadResponseException if validation fails.
    */
   public int createUser(UserEntity userEntity) {
-    List<ErrorErrors> businessErrors = nonBeanValidation(userEntity);
+    List<ErrorErrors> businessErrors = businessValidateUser(userEntity);
     if (null != businessErrors) {
       throw new BadResponseException(businessErrors);
     }
@@ -92,7 +92,7 @@ public class UserManagementService {
    * @param userEntity User Entity bean.
    * @return List of errors or null if validation ok.
    */
-  private List<ErrorErrors> nonBeanValidation(UserEntity userEntity) {
+  private List<ErrorErrors> businessValidateUser(UserEntity userEntity) {
     if (StringUtils.isEmpty(userEntity.getEmailAddress())) {
       // Already sorted in bean validation.
       return null;
@@ -120,7 +120,7 @@ public class UserManagementService {
    * @throws BadResponseException if validation fails.
    */
   public int updateUser(UserEntity userEntity) {
-    List<ErrorErrors> businessErrors = nonBeanValidation(userEntity);
+    List<ErrorErrors> businessErrors = businessValidateUser(userEntity);
     if (null != businessErrors) {
       throw new BadResponseException(businessErrors);
     }
