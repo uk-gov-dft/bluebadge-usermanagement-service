@@ -22,7 +22,7 @@ import uk.gov.dft.bluebadge.service.usermanagement.controller.UsersApi;
 import uk.gov.dft.bluebadge.service.usermanagement.converter.UserConverter;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.UserManagementService;
-import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadResponseException;
+import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
 
 @Controller
 public class UsersApiControllerImpl implements UsersApi {
@@ -41,8 +41,8 @@ public class UsersApiControllerImpl implements UsersApi {
     this.service = service;
   }
 
-  @ExceptionHandler({BadResponseException.class})
-  public ResponseEntity<CommonResponse> handleException(BadResponseException e) {
+  @ExceptionHandler({BadRequestException.class})
+  public ResponseEntity<CommonResponse> handleException(BadRequestException e) {
 
     CommonResponse response = new CommonResponse();
 

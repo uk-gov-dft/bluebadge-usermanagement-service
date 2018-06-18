@@ -12,7 +12,7 @@ Feature: Verify users update
     And match $.error.errors contains {field:"emailAddress", reason:"#notnull", message:"NotNull.user.emailAddress", location:"#null", locationType:"#null"}
     And match $.error.errors contains {field:"name", reason:"#notnull", message:"NotNull.user.name", location:"#null", locationType:"#null"}
 
-  Scenario: Update User A bean zero length string
+  Scenario: Update User Get a bad response via bean validation
     Given path 'authorities/2/users/-1'
     And request {id: -1, emailAddress:"abcnobody@dft.gov.uk", name:"" }
     When method PUT

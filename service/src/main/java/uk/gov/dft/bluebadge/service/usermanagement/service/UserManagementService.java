@@ -16,7 +16,7 @@ import uk.gov.dft.bluebadge.model.usermanagement.Password;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
-import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadResponseException;
+import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
 
 @Service
 @Transactional
@@ -40,12 +40,12 @@ public class UserManagementService {
    *
    * @param userEntity User to create.
    * @return Create count.
-   * @throws BadResponseException if validation fails.
+   * @throws BadRequestException if validation fails.
    */
   public int createUser(UserEntity userEntity) {
     List<ErrorErrors> businessErrors = businessValidateUser(userEntity);
     if (null != businessErrors) {
-      throw new BadResponseException(businessErrors);
+      throw new BadRequestException(businessErrors);
     }
     int createCount = repository.createUser(userEntity);
     uk.gov.dft.bluebadge.model.message.User messageUser =
@@ -117,12 +117,12 @@ public class UserManagementService {
    *
    * @param userEntity Entity to update.
    * @return Update count.
-   * @throws BadResponseException if validation fails.
+   * @throws BadRequestException if validation fails.
    */
   public int updateUser(UserEntity userEntity) {
     List<ErrorErrors> businessErrors = businessValidateUser(userEntity);
     if (null != businessErrors) {
-      throw new BadResponseException(businessErrors);
+      throw new BadRequestException(businessErrors);
     }
     return repository.updateUser(userEntity);
   }
@@ -137,18 +137,18 @@ public class UserManagementService {
     String password = passwords.getPassword();
     String passwordConfirm = passwords.getPasswordConfirm();
 
-    BadResponseException badResponseException = new BadResponseException();
+    BadRequestException badRequestException = new BadRequestException();
 
     if (!password.equals(passwordConfirm)) {
       ErrorErrors error = new ErrorErrors();
       error.setField("passwordConfirm");
       error.setMessage("Pattern.password.passwordConfirm");
       error.setReason("Password confirm field does not match with password field");
-      badResponseException.addError(error);
+      badRequestException.addError(error);
     }
 
-    if (badResponseException.hasErrors()) {
-      throw badResponseException;
+    if (badRequestException.hasErrors()) {
+      throw badRequestException;
     }
 
     EmailLink link = this.repository.retrieveEmailLinkWithUuid(uuid);
@@ -162,9 +162,9 @@ public class UserManagementService {
         error.setMessage("Inactive.uuid");
       }
       error.setReason("uuid is not valid");
-      badResponseException.addError(error);
+      badRequestException.addError(error);
 
-      throw badResponseException;
+      throw badRequestException;
     }
 
     String hash = BCrypt.hashpw(password, BCrypt.gensalt());

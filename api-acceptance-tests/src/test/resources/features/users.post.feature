@@ -12,7 +12,7 @@ Feature: Verify users create
     And match $.error.errors contains {field:"emailAddress", reason:"#notnull", message:"NotNull.user.emailAddress", location:"#null", locationType:"#null"}
     And match $.error.errors contains {field:"name", reason:"#notnull", message:"NotNull.user.name", location:"#null", locationType:"#null"}
 
-  Scenario: Create User A bean zero length string
+  Scenario: Create User Get a bad request due to bean validation
     Given path 'authorities/2/users'
     And request { emailAddress:"abcnobody@dft.gov.uk", name:"" }
     When method POST
