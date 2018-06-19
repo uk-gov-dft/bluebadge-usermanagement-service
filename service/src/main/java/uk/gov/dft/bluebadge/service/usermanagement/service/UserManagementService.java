@@ -17,6 +17,7 @@ import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepo
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
+import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException;
 
 @Service
 @Transactional
@@ -31,8 +32,12 @@ public class UserManagementService {
     this.messageApiClient = messageApiClient;
   }
 
-  public Optional<UserEntity> retrieveUserById(Integer userId) {
-    return repository.retrieveUserById(userId);
+  public UserEntity retrieveUserById(Integer userId) {
+    Optional<UserEntity> userEntity = repository.retrieveUserById(userId);
+    if(!userEntity.isPresent()){
+      throw new NotFoundException();
+    }
+    return userEntity.get();
   }
 
   /**
@@ -48,8 +53,13 @@ public class UserManagementService {
       throw new BadRequestException(businessErrors);
     }
     int createCount = repository.createUser(userEntity);
+    requestPasswordResetEmail(userEntity);
+    return createCount;
+  }
+
+  public void requestPasswordResetEmail(UserEntity userEntity){
     uk.gov.dft.bluebadge.model.message.User messageUser =
-        new uk.gov.dft.bluebadge.model.message.User();
+            new uk.gov.dft.bluebadge.model.message.User();
     // TODO common user object?
     // Create a password reset message
     BeanUtils.copyProperties(userEntity, messageUser);
@@ -58,7 +68,7 @@ public class UserManagementService {
     emailLink.setUuid(uuid.toString());
     emailLink.setUserId(userEntity.getId());
     repository.createEmailLink(emailLink);
-    return createCount;
+    repository.updateUserToInactive(userEntity.getId());
   }
 
   /**
@@ -93,10 +103,6 @@ public class UserManagementService {
    * @return List of errors or null if validation ok.
    */
   private List<ErrorErrors> businessValidateUser(UserEntity userEntity) {
-    if (StringUtils.isEmpty(userEntity.getEmailAddress())) {
-      // Already sorted in bean validation.
-      return null;
-    }
     List<ErrorErrors> errorsList = null;
 
     if (repository.emailAddressAlreadyUsed(userEntity)) {
@@ -137,18 +143,12 @@ public class UserManagementService {
     String password = passwords.getPassword();
     String passwordConfirm = passwords.getPasswordConfirm();
 
-    BadRequestException badRequestException = new BadRequestException();
-
     if (!password.equals(passwordConfirm)) {
       ErrorErrors error = new ErrorErrors();
       error.setField("passwordConfirm");
       error.setMessage("Pattern.password.passwordConfirm");
       error.setReason("Password confirm field does not match with password field");
-      badRequestException.addError(error);
-    }
-
-    if (badRequestException.hasErrors()) {
-      throw badRequestException;
+      throw new BadRequestException(error);
     }
 
     EmailLink link = this.repository.retrieveEmailLinkWithUuid(uuid);
@@ -162,9 +162,7 @@ public class UserManagementService {
         error.setMessage("Inactive.uuid");
       }
       error.setReason("uuid is not valid");
-      badRequestException.addError(error);
-
-      throw badRequestException;
+      throw new BadRequestException(error);
     }
 
     String hash = BCrypt.hashpw(password, BCrypt.gensalt());

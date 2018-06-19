@@ -167,12 +167,10 @@ public class UserManagementClient {
   }
 
   public void resetPassword(Integer authorityId, Integer userId){
-    // TODO mocked out API.  To be replaced.
     logger.warn("Using mock resetPassword api.  To be implemented.");
   }
 
   public List<Authority> getAuthorities(){
-    // TODO mocked out API.  To be replaced.
     logger.warn("Using mocked out getAuthorities.  To be implemented.");
     List<Authority> response = new ArrayList<>();
     response.add(new Authority().id(-1).name("Test Authority 1"));
@@ -182,14 +180,12 @@ public class UserManagementClient {
   }
 
   public Authority createAuthority(Authority authority){
-    // TODO mocked out API.  To be replaced.
     logger.warn("Using mocked out createAuthority.  To be implemented.");
     authority.setId(-1);
     return authority;
   }
 
   public void updateAuthority(Authority authority){
-    // TODO mocked out API.  To be replaced.
     logger.warn("Using mocked out updateAuthority.  To be implemented.");
   }
 

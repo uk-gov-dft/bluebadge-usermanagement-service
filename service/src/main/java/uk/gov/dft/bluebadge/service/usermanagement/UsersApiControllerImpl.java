@@ -16,13 +16,19 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import uk.gov.dft.bluebadge.model.usermanagement.*;
-import uk.gov.dft.bluebadge.model.usermanagement.Error;
+import uk.gov.dft.bluebadge.model.usermanagement.CommonResponse;
+import uk.gov.dft.bluebadge.model.usermanagement.Password;
+import uk.gov.dft.bluebadge.model.usermanagement.User;
+import uk.gov.dft.bluebadge.model.usermanagement.UserData;
+import uk.gov.dft.bluebadge.model.usermanagement.UserResponse;
+import uk.gov.dft.bluebadge.model.usermanagement.UsersData;
+import uk.gov.dft.bluebadge.model.usermanagement.UsersResponse;
 import uk.gov.dft.bluebadge.service.usermanagement.controller.UsersApi;
 import uk.gov.dft.bluebadge.service.usermanagement.converter.UserConverter;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.UserManagementService;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
+import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException;
 
 @Controller
 public class UsersApiControllerImpl implements UsersApi {
@@ -41,19 +47,16 @@ public class UsersApiControllerImpl implements UsersApi {
     this.service = service;
   }
 
+  @SuppressWarnings("unused")
   @ExceptionHandler({BadRequestException.class})
-  public ResponseEntity<CommonResponse> handleException(BadRequestException e) {
+  public ResponseEntity<CommonResponse> handleBadRequestException(BadRequestException e) {
+    return ResponseEntity.badRequest().body(e.getCommonResponse());
+  }
 
-    CommonResponse response = new CommonResponse();
-
-    Error error = new Error();
-
-    for (ErrorErrors errorItem : e.getErrorsList()) {
-      error.addErrorsItem(errorItem);
-    }
-
-    response.setError(error);
-    return ResponseEntity.badRequest().body(response);
+  @SuppressWarnings("unused")
+  @ExceptionHandler
+  public ResponseEntity handleNotFoundException(NotFoundException e) {
+    return ResponseEntity.notFound().build();
   }
 
   @Override
@@ -64,6 +67,9 @@ public class UsersApiControllerImpl implements UsersApi {
 
     UserResponse userResponse = new UserResponse();
 
+    // TODO is this a good idea?  Might be better if the service
+    // updatePassword method returned the user?
+    // Also if the user can't be found 404
     Optional<UserEntity> userEntity = service.retrieveUserUsingUuid(uuid);
 
     if (userEntity.isPresent()) {
@@ -103,15 +109,9 @@ public class UsersApiControllerImpl implements UsersApi {
           Integer userId) {
     UserResponse userResponse = new UserResponse();
 
-    Optional<UserEntity> userEntity = service.retrieveUserById(userId);
+    UserEntity userEntity = service.retrieveUserById(userId);
+    userResponse.setData(userConverter.convertToData(userEntity, 1, 0, 0));
 
-    if (userEntity.isPresent()) {
-      userResponse.setData(userConverter.convertToData(userEntity.get(), 1, 0, 0));
-    } else {
-      UserData userData = new UserData();
-      userData.setTotalItems(0);
-      userResponse.setData(userData);
-    }
     return ResponseEntity.ok(userResponse);
   }
 
@@ -126,7 +126,7 @@ public class UsersApiControllerImpl implements UsersApi {
   public ResponseEntity<UserResponse> createUser(
       @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
           Integer authorityId,
-      @ApiParam(value = "") @Valid @RequestBody User user) {
+      @ApiParam() @Valid @RequestBody User user) {
     UserEntity entity = userConverter.convertToEntity(user);
     UserResponse userResponse = new UserResponse();
 
@@ -146,7 +146,7 @@ public class UsersApiControllerImpl implements UsersApi {
       @NotNull
           @ApiParam(value = "User email address to check for.", required = true)
           @Valid
-          @RequestParam(value = "emailAddress", required = true)
+          @RequestParam(value = "emailAddress")
           String emailAddress) {
 
     Optional<UserEntity> userEntity = service.retrieveUserByEmail(emailAddress);
@@ -195,7 +195,7 @@ public class UsersApiControllerImpl implements UsersApi {
           Integer authorityId,
       @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
           Integer userId,
-      @ApiParam(value = "") @Valid @RequestBody User user) {
+      @ApiParam() @Valid @RequestBody User user) {
     UserEntity entity = userConverter.convertToEntity(user);
     UserResponse userResponse = new UserResponse();
 
@@ -213,6 +213,18 @@ public class UsersApiControllerImpl implements UsersApi {
           Integer userId) {
     Assert.notNull(userId, "User id must be provided for delete.");
     service.deleteUser(userId);
-    return ResponseEntity.noContent().build();
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
+  public ResponseEntity<Void> requestPasswordReset(
+      @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
+          Integer authorityId,
+      @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
+          Integer userId) {
+
+    UserEntity user = service.retrieveUserById(userId);
+    service.requestPasswordResetEmail(user);
+    return ResponseEntity.ok().build();
   }
 }

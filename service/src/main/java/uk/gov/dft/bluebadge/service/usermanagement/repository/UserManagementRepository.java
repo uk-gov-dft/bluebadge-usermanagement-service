@@ -158,4 +158,8 @@ public class UserManagementRepository {
   public int createEmailLink(EmailLink emailLink) {
     return sqlSession.insert("createEmailLink", emailLink);
   }
+
+  public int updateUserToInactive(Integer id){
+    return sqlSession.update("updateUserToInactive", id);
+  }
 }
