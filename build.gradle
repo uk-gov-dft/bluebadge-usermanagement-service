@@ -45,7 +45,6 @@ allprojects {
     repositories {
         maven {
             url 'https://artifactory.does.not.exist/artifactory/gradle-dev-local'
-
         }
         mavenCentral()
         jcenter()
@@ -136,5 +135,3 @@ task generateService(dependsOn: 'unzipGenerated', type: Sync){
     exclude '**/*ApiController.java'
     into "service/src/generated/java/uk/gov/dft/bluebadge/service/usermanagement"
 }
-
-
