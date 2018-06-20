@@ -3,32 +3,29 @@ package uk.gov.dft.bluebadge.service.usermanagement.service;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import uk.gov.dft.bluebadge.client.message.api.MessageApiClient;
-import uk.gov.dft.bluebadge.model.message.User;
 import uk.gov.dft.bluebadge.model.usermanagement.Password;
+import uk.gov.dft.bluebadge.service.client.messageservice.MessageApiClient;
+import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetRequest;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException;
 
-import java.util.Optional;
-import java.util.UUID;
-
 public class UserManagementServiceTest {
 
   private UserManagementService service;
 
-  @Mock
-  private UserManagementRepository repository;
+  @Mock private UserManagementRepository repository;
 
-  @Mock
-  private MessageApiClient messageApiClient;
+  @Mock private MessageApiClient messageApiClient;
 
   @Before
   public void setUp() {
@@ -46,7 +43,8 @@ public class UserManagementServiceTest {
 
     when(repository.emailAddressAlreadyUsed(user)).thenReturn(false);
     when(repository.createUser(user)).thenReturn(1);
-    when(messageApiClient.sendPasswordResetEmail(any(User.class))).thenReturn(UUID.randomUUID());
+    when(messageApiClient.sendPasswordResetEmail(any(PasswordResetRequest.class)))
+        .thenReturn(UUID.randomUUID());
 
     // When user is created
     service.createUser(user);
@@ -56,7 +54,7 @@ public class UserManagementServiceTest {
     // And user is created
     verify(repository, times(1)).createUser(user);
     // And password reset email is created
-    verify(messageApiClient, times(1)).sendPasswordResetEmail(any(User.class));
+    verify(messageApiClient, times(1)).sendPasswordResetEmail(any(PasswordResetRequest.class));
     // And user is set inactive
     verify(repository, times(1)).updateUserToInactive(-1);
     // And email_link is created
@@ -73,7 +71,8 @@ public class UserManagementServiceTest {
 
     when(repository.emailAddressAlreadyUsed(user)).thenReturn(true);
     when(repository.createUser(user)).thenReturn(1);
-    when(messageApiClient.sendPasswordResetEmail(any(User.class))).thenReturn(UUID.randomUUID());
+    when(messageApiClient.sendPasswordResetEmail(any(PasswordResetRequest.class)))
+        .thenReturn(UUID.randomUUID());
 
     // When user is created
     service.createUser(user);
@@ -83,7 +82,7 @@ public class UserManagementServiceTest {
     // And user is not created
     verify(repository, never()).createUser(user);
     // And password reset email is not created
-    verify(messageApiClient, never()).sendPasswordResetEmail(any(User.class));
+    verify(messageApiClient, never()).sendPasswordResetEmail(any(PasswordResetRequest.class));
     // And user is not set inactive
     verify(repository, never()).updateUserToInactive(-1);
     // And email_link is not created
@@ -97,13 +96,14 @@ public class UserManagementServiceTest {
     user.setName("test");
     user.setId(-1);
 
-    when(messageApiClient.sendPasswordResetEmail(any(User.class))).thenReturn(UUID.randomUUID());
+    when(messageApiClient.sendPasswordResetEmail(any(PasswordResetRequest.class)))
+        .thenReturn(UUID.randomUUID());
 
     // When a password change is requested
-    service.requestPasswordResetEmail(user);
+    service.requestPasswordResetEmail(user, false);
 
     // Then password reset email is created
-    verify(messageApiClient, times(1)).sendPasswordResetEmail(any(User.class));
+    verify(messageApiClient, times(1)).sendPasswordResetEmail(any(PasswordResetRequest.class));
     // And user is set inactive
     verify(repository).updateUserToInactive(-1);
     // And email_link is created

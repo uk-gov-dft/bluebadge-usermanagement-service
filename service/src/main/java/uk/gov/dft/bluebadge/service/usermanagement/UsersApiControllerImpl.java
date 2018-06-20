@@ -67,9 +67,6 @@ public class UsersApiControllerImpl implements UsersApi {
 
     UserResponse userResponse = new UserResponse();
 
-    // TODO is this a good idea?  Might be better if the service
-    // updatePassword method returned the user?
-    // Also if the user can't be found 404
     Optional<UserEntity> userEntity = service.retrieveUserUsingUuid(uuid);
 
     if (userEntity.isPresent()) {
@@ -224,7 +221,7 @@ public class UsersApiControllerImpl implements UsersApi {
           Integer userId) {
 
     UserEntity user = service.retrieveUserById(userId);
-    service.requestPasswordResetEmail(user);
+    service.requestPasswordResetEmail(user, false);
     return ResponseEntity.ok().build();
   }
 }

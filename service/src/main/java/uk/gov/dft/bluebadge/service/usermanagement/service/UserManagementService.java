@@ -4,15 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.dft.bluebadge.client.message.api.MessageApiClient;
 import uk.gov.dft.bluebadge.model.usermanagement.ErrorErrors;
 import uk.gov.dft.bluebadge.model.usermanagement.Password;
+import uk.gov.dft.bluebadge.service.client.messageservice.MessageApiClient;
+import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetRequest;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
@@ -21,6 +21,7 @@ import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundExc
 
 @Service
 @Transactional
+@Slf4j
 public class UserManagementService {
 
   private final UserManagementRepository repository;
@@ -34,7 +35,8 @@ public class UserManagementService {
 
   public UserEntity retrieveUserById(Integer userId) {
     Optional<UserEntity> userEntity = repository.retrieveUserById(userId);
-    if(!userEntity.isPresent()){
+    if (!userEntity.isPresent()) {
+      log.info("Request to retrieve user id:{} that did not exist", userId);
       throw new NotFoundException();
     }
     return userEntity.get();
@@ -50,25 +52,39 @@ public class UserManagementService {
   public int createUser(UserEntity userEntity) {
     List<ErrorErrors> businessErrors = businessValidateUser(userEntity);
     if (null != businessErrors) {
+      log.debug("Business validation failed for user:{}", userEntity.getName());
       throw new BadRequestException(businessErrors);
     }
     int createCount = repository.createUser(userEntity);
-    requestPasswordResetEmail(userEntity);
+    requestPasswordResetEmail(userEntity, true);
+    log.debug("Created user {}", userEntity.getId());
     return createCount;
   }
 
-  public void requestPasswordResetEmail(UserEntity userEntity){
-    uk.gov.dft.bluebadge.model.message.User messageUser =
-            new uk.gov.dft.bluebadge.model.message.User();
-    // TODO common user object?
+  /**
+   * Requests reset of a users password via message service.
+   *
+   * @param userEntity The user.
+   * @param isNewUser true if create, false for existing. Different email template used.
+   */
+  public void requestPasswordResetEmail(UserEntity userEntity, boolean isNewUser) {
+    log.debug("Resetting password for user:{}", userEntity.getId());
+    PasswordResetRequest resetRequest = new PasswordResetRequest();
+
     // Create a password reset message
-    BeanUtils.copyProperties(userEntity, messageUser);
-    UUID uuid = messageApiClient.sendPasswordResetEmail(messageUser);
+    resetRequest.setEmailAddress(userEntity.getEmailAddress());
+    resetRequest.setId(userEntity.getId());
+    resetRequest.setName(userEntity.getName());
+    resetRequest.setLocalAuthorityId(userEntity.getLocalAuthorityId());
+    resetRequest.setIsNewUser(isNewUser);
+
+    UUID uuid = messageApiClient.sendPasswordResetEmail(resetRequest);
     EmailLink emailLink = new EmailLink();
     emailLink.setUuid(uuid.toString());
     emailLink.setUserId(userEntity.getId());
     repository.createEmailLink(emailLink);
     repository.updateUserToInactive(userEntity.getId());
+    log.debug("Successfully changed password for user:{}", userEntity.getId());
   }
 
   /**
@@ -81,6 +97,12 @@ public class UserManagementService {
     return repository.deleteUser(id);
   }
 
+  /**
+   * Should not be required once authentication implemented.
+   *
+   * @param emailAddress address to search for.
+   * @return The user entity.
+   */
   public Optional<UserEntity> retrieveUserByEmail(String emailAddress) {
     return repository.retrieveUserByEmail(emailAddress);
   }
@@ -140,10 +162,12 @@ public class UserManagementService {
    */
   public int updatePassword(String uuid, Password passwords) {
 
+    log.debug("Updating password for guid:{}", uuid);
     String password = passwords.getPassword();
     String passwordConfirm = passwords.getPasswordConfirm();
 
     if (!password.equals(passwordConfirm)) {
+      log.debug("Passwords did not match. {}", uuid);
       ErrorErrors error = new ErrorErrors();
       error.setField("passwordConfirm");
       error.setMessage("Pattern.password.passwordConfirm");
@@ -157,6 +181,7 @@ public class UserManagementService {
       ErrorErrors error = new ErrorErrors();
       error.setField("password");
       if (link == null) {
+        ;
         error.setMessage("Invalid.uuid");
       } else {
         error.setMessage("Inactive.uuid");
@@ -171,6 +196,7 @@ public class UserManagementService {
     user.setPassword(hash);
 
     repository.updateEmailLinkToInvalid(uuid);
+    log.debug("Passwords updated. {}", uuid);
     return repository.updatePassword(user);
   }
 
