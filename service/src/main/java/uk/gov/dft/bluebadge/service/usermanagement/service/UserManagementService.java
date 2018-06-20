@@ -4,22 +4,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.dft.bluebadge.client.message.api.MessageApiClient;
 import uk.gov.dft.bluebadge.model.usermanagement.ErrorErrors;
 import uk.gov.dft.bluebadge.model.usermanagement.Password;
+import uk.gov.dft.bluebadge.service.client.messageservice.MessageApiClient;
+import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetRequest;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
+import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException;
 
 @Service
 @Transactional
+@Slf4j
 public class UserManagementService {
 
   private final UserManagementRepository repository;
@@ -31,8 +33,13 @@ public class UserManagementService {
     this.messageApiClient = messageApiClient;
   }
 
-  public Optional<UserEntity> retrieveUserById(Integer userId) {
-    return repository.retrieveUserById(userId);
+  public UserEntity retrieveUserById(Integer userId) {
+    Optional<UserEntity> userEntity = repository.retrieveUserById(userId);
+    if (!userEntity.isPresent()) {
+      log.info("Request to retrieve user id:{} that did not exist", userId);
+      throw new NotFoundException();
+    }
+    return userEntity.get();
   }
 
   /**
@@ -45,20 +52,39 @@ public class UserManagementService {
   public int createUser(UserEntity userEntity) {
     List<ErrorErrors> businessErrors = businessValidateUser(userEntity);
     if (null != businessErrors) {
+      log.debug("Business validation failed for user:{}", userEntity.getName());
       throw new BadRequestException(businessErrors);
     }
     int createCount = repository.createUser(userEntity);
-    uk.gov.dft.bluebadge.model.message.User messageUser =
-        new uk.gov.dft.bluebadge.model.message.User();
-    // TODO common user object?
-    // Create a password reset message
-    BeanUtils.copyProperties(userEntity, messageUser);
-    UUID uuid = messageApiClient.sendPasswordResetEmail(messageUser);
-    EmailLink emailLink = new EmailLink();
-    emailLink.setUuid(uuid.toString());
-    emailLink.setUserId(userEntity.getId());
-    repository.createEmailLink(emailLink);
+    requestPasswordResetEmail(userEntity, true);
+    log.debug("Created user {}", userEntity.getId());
     return createCount;
+  }
+
+  /**
+   * Requests reset of a users password via message service.
+   *
+   * @param userEntity The user.
+   * @param isNewUser true if create, false for existing. Different email template used.
+   */
+  public void requestPasswordResetEmail(UserEntity userEntity, boolean isNewUser) {
+    log.debug("Resetting password for user:{}", userEntity.getId());
+    PasswordResetRequest resetRequest =
+        PasswordResetRequest.builder()
+            .emailAddress(userEntity.getEmailAddress())
+            .userId(userEntity.getId())
+            .name(userEntity.getName())
+            .localAuthorityId(userEntity.getLocalAuthorityId())
+            .isNewUser(isNewUser)
+            .build();
+
+    UUID uuid = messageApiClient.sendPasswordResetEmail(resetRequest);
+    EmailLink emailLink =
+        EmailLink.builder().uuid(uuid.toString()).userId(userEntity.getId()).build();
+
+    repository.createEmailLink(emailLink);
+    repository.updateUserToInactive(userEntity.getId());
+    log.debug("Successfully changed password for user:{}", userEntity.getId());
   }
 
   /**
@@ -71,6 +97,12 @@ public class UserManagementService {
     return repository.deleteUser(id);
   }
 
+  /**
+   * Should not be required once authentication implemented.
+   *
+   * @param emailAddress address to search for.
+   * @return The user entity.
+   */
   public Optional<UserEntity> retrieveUserByEmail(String emailAddress) {
     return repository.retrieveUserByEmail(emailAddress);
   }
@@ -93,10 +125,6 @@ public class UserManagementService {
    * @return List of errors or null if validation ok.
    */
   private List<ErrorErrors> businessValidateUser(UserEntity userEntity) {
-    if (StringUtils.isEmpty(userEntity.getEmailAddress())) {
-      // Already sorted in bean validation.
-      return null;
-    }
     List<ErrorErrors> errorsList = null;
 
     if (repository.emailAddressAlreadyUsed(userEntity)) {
@@ -134,26 +162,22 @@ public class UserManagementService {
    */
   public int updatePassword(String uuid, Password passwords) {
 
+    log.debug("Updating password for guid:{}", uuid);
     String password = passwords.getPassword();
     String passwordConfirm = passwords.getPasswordConfirm();
 
-    BadRequestException badRequestException = new BadRequestException();
-
     if (!password.equals(passwordConfirm)) {
+      log.debug("Passwords did not match. {}", uuid);
       ErrorErrors error = new ErrorErrors();
       error.setField("passwordConfirm");
       error.setMessage("Pattern.password.passwordConfirm");
       error.setReason("Password confirm field does not match with password field");
-      badRequestException.addError(error);
-    }
-
-    if (badRequestException.hasErrors()) {
-      throw badRequestException;
+      throw new BadRequestException(error);
     }
 
     EmailLink link = this.repository.retrieveEmailLinkWithUuid(uuid);
 
-    if (link == null || !link.getActive()) {
+    if (link == null || !link.getIsActive()) {
       ErrorErrors error = new ErrorErrors();
       error.setField("password");
       if (link == null) {
@@ -162,9 +186,7 @@ public class UserManagementService {
         error.setMessage("Inactive.uuid");
       }
       error.setReason("uuid is not valid");
-      badRequestException.addError(error);
-
-      throw badRequestException;
+      throw new BadRequestException(error);
     }
 
     String hash = BCrypt.hashpw(password, BCrypt.gensalt());
@@ -173,6 +195,7 @@ public class UserManagementService {
     user.setPassword(hash);
 
     repository.updateEmailLinkToInvalid(uuid);
+    log.debug("Passwords updated. {}", uuid);
     return repository.updatePassword(user);
   }
 

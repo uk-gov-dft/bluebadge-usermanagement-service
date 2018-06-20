@@ -2,7 +2,7 @@
 Feature: Verify users retrieval
 
   Background:
-  * url baseUrl
+    * url baseUrl
 
   Scenario: Verify retrieve all users for an authority
     Given path 'authorities/2/users'
@@ -51,3 +51,13 @@ Feature: Verify users retrieval
     When method GET
     Then status 200
     And match $.data.totalItems == 0
+
+  Scenario: Verify ok request password email.
+    Given path '/authorities/2/users/-1/passwordReset'
+    When method GET
+    Then status 200
+
+  Scenario: Verify user not exists password reset.
+    Given path '/authorities/2/users/-9999/passwordReset'
+    When method GET
+    Then status 404

@@ -142,7 +142,7 @@
           "properties" : {
             "password" : {
               "type" : "string",
-              "pattern" : "^[^\\s-]{8,}$"
+              "pattern" : ".{8,}$"
             },
             "passwordConfirm" : {
               "type" : "string"
