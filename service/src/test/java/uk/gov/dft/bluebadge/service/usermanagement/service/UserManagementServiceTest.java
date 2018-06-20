@@ -170,10 +170,7 @@ public class UserManagementServiceTest {
      ***REMOVED***);
      ***REMOVED***);
     String uuid = UUID.randomUUID().toString();
-    EmailLink link = new EmailLink();
-    link.setUserId(-1);
-    link.setUuid(uuid);
-    link.setActive(true);
+    EmailLink link = EmailLink.builder().userId(-1).uuid(uuid).isActive(true).build();
 
     when(repository.updatePassword(any())).thenReturn(1);
     when(repository.updateEmailLinkToInvalid(uuid)).thenReturn(1);
@@ -195,10 +192,7 @@ public class UserManagementServiceTest {
      ***REMOVED***);
      ***REMOVED***);
     String uuid = UUID.randomUUID().toString();
-    EmailLink link = new EmailLink();
-    link.setUserId(-1);
-    link.setUuid(uuid);
-    link.setActive(false);
+    EmailLink link = EmailLink.builder().userId(-1).uuid(uuid).isActive(false).build();
 
     when(repository.retrieveEmailLinkWithUuid(uuid)).thenReturn(link);
 

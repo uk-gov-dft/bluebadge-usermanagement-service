@@ -21,7 +21,6 @@ public class MessageApiClient {
     static final String SEND_EMAIL_ENDPOINT = "/messages/send***REMOVED***-email";
   }
 
-  @Qualifier("messageServiceConfiguration")
   private MessageServiceConfiguration messageServiceConfiguration;
 
   private RestTemplateFactory restTemplateFactory;
@@ -38,6 +37,7 @@ public class MessageApiClient {
    * @return a user with the given user id and the guid set.
    */
   public UUID sendPasswordResetEmail(PasswordResetRequest resetRequest) {
+    log.debug("Calling message service to request password email. User:{}", resetRequest.getUserId());
     Assert.notNull(resetRequest, "must be set");
 
     HttpEntity<PasswordResetRequest> request = new HttpEntity<>(resetRequest);

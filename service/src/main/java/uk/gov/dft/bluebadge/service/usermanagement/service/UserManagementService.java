@@ -69,19 +69,19 @@ public class UserManagementService {
    */
   public void requestPasswordResetEmail(UserEntity userEntity, boolean isNewUser) {
     log.debug("Resetting password for user:{}", userEntity.getId());
-    PasswordResetRequest resetRequest = new PasswordResetRequest();
-
-    // Create a password reset message
-    resetRequest.setEmailAddress(userEntity.getEmailAddress());
-    resetRequest.setId(userEntity.getId());
-    resetRequest.setName(userEntity.getName());
-    resetRequest.setLocalAuthorityId(userEntity.getLocalAuthorityId());
-    resetRequest.setIsNewUser(isNewUser);
+    PasswordResetRequest resetRequest =
+        PasswordResetRequest.builder()
+            .emailAddress(userEntity.getEmailAddress())
+            .userId(userEntity.getId())
+            .name(userEntity.getName())
+            .localAuthorityId(userEntity.getLocalAuthorityId())
+            .isNewUser(isNewUser)
+            .build();
 
     UUID uuid = messageApiClient.sendPasswordResetEmail(resetRequest);
-    EmailLink emailLink = new EmailLink();
-    emailLink.setUuid(uuid.toString());
-    emailLink.setUserId(userEntity.getId());
+    EmailLink emailLink =
+        EmailLink.builder().uuid(uuid.toString()).userId(userEntity.getId()).build();
+
     repository.createEmailLink(emailLink);
     repository.updateUserToInactive(userEntity.getId());
     log.debug("Successfully changed password for user:{}", userEntity.getId());
@@ -177,11 +177,10 @@ public class UserManagementService {
 
     EmailLink link = this.repository.retrieveEmailLinkWithUuid(uuid);
 
-    if (link == null || !link.getActive()) {
+    if (link == null || !link.getIsActive()) {
       ErrorErrors error = new ErrorErrors();
       error.setField("password");
       if (link == null) {
-        ;
         error.setMessage("Invalid.uuid");
       } else {
         error.setMessage("Inactive.uuid");
