@@ -63,7 +63,7 @@ dependencies {
     compileOnly ('org.projectlombok:lombok:1.16.22')
     testCompile('org.springframework.boot:spring-boot-starter-test')
     runtime('org.springframework.boot:spring-boot-devtools')
-    compile group: 'uk.gov.dft.bluebadge', name: 'message-service-client', version: '0.1.0'
+    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.5'
 }
 
 checkstyle {

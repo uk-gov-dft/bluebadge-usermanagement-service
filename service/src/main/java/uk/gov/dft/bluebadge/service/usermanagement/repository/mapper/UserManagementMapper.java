@@ -29,4 +29,6 @@ public interface UserManagementMapper {
   void createEmailLink(EmailLink emailLink);
 
   void updateEmailLinkToInvalid(String uuid);
+
+  void updateUserToInactive(Integer id);
 }
