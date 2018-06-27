@@ -5,7 +5,6 @@ import static uk.gov.dft.bluebadge.service.client.messageservice.MessageApiClien
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -37,7 +36,8 @@ public class MessageApiClient {
    * @return a user with the given user id and the guid set.
    */
   public UUID sendPasswordResetEmail(PasswordResetRequest resetRequest) {
-    log.debug("Calling message service to request password email. User:{}", resetRequest.getUserId());
+    log.debug(
+        "Calling message service to request password email. User:{}", resetRequest.getUserId());
     Assert.notNull(resetRequest, "must be set");
 
     HttpEntity<PasswordResetRequest> request = new HttpEntity<>(resetRequest);
