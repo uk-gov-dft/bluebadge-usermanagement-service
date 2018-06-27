@@ -1,7 +1,7 @@
 package uk.gov.dft.bluebadge.service.usermanagement.converter;
 
-import uk.gov.dft.bluebadge.model.usermanagement.User;
-import uk.gov.dft.bluebadge.model.usermanagement.UserData;
+import uk.gov.dft.bluebadge.model.usermanagement.generated.User;
+import uk.gov.dft.bluebadge.model.usermanagement.generated.UserData;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 
 public class UserConverter implements BiConverter<UserEntity, User, UserData> {

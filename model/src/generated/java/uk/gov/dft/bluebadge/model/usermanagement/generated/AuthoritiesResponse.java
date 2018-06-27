@@ -1,20 +1,31 @@
-package uk.gov.dft.bluebadge.model.usermanagement;
+package uk.gov.dft.bluebadge.model.usermanagement.generated;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
 import org.springframework.validation.annotation.Validated;
 
-/** UserResponse */
+/** AuthoritiesResponse */
 @Validated
-public class UserResponse extends CommonResponse {
+public class AuthoritiesResponse extends CommonResponse {
   @JsonProperty("data")
-  private UserData data = null;
+  @Valid
+  private List<Authority> data = null;
 
-  public UserResponse data(UserData data) {
+  public AuthoritiesResponse data(List<Authority> data) {
     this.data = data;
+    return this;
+  }
+
+  public AuthoritiesResponse addDataItem(Authority dataItem) {
+    if (this.data == null) {
+      this.data = new ArrayList<>();
+    }
+    this.data.add(dataItem);
     return this;
   }
 
@@ -25,11 +36,11 @@ public class UserResponse extends CommonResponse {
    */
   @ApiModelProperty(value = "")
   @Valid
-  public UserData getData() {
+  public List<Authority> getData() {
     return data;
   }
 
-  public void setData(UserData data) {
+  public void setData(List<Authority> data) {
     this.data = data;
   }
 
@@ -41,8 +52,8 @@ public class UserResponse extends CommonResponse {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    UserResponse userResponse = (UserResponse) o;
-    return Objects.equals(this.data, userResponse.data) && super.equals(o);
+    AuthoritiesResponse authoritiesResponse = (AuthoritiesResponse) o;
+    return Objects.equals(this.data, authoritiesResponse.data) && super.equals(o);
   }
 
   @Override
@@ -53,7 +64,7 @@ public class UserResponse extends CommonResponse {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class UserResponse {\n");
+    sb.append("class AuthoritiesResponse {\n");
     sb.append("    ").append(toIndentedString(super.toString())).append("\n");
     sb.append("    data: ").append(toIndentedString(data)).append("\n");
     sb.append("}");

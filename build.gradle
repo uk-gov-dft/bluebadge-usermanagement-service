@@ -123,16 +123,16 @@ task unzipGenerated(type: Copy) {
 
 task generateModel(dependsOn: 'unzipGenerated', type: Sync){
     group = "GenerateAPI"
-    from "${buildDir}/unpacked/spring-server/generated/src/main/java/uk/gov/dft/bluebadge/model/usermanagement"
+    from "${buildDir}/unpacked/spring-server/generated/src/main/java/uk/gov/dft/bluebadge/model/usermanagement/generated"
     include "**/*.java"
-    into "model/src/generated/java/uk/gov/dft/bluebadge/model/usermanagement"
+    into "model/src/generated/java/uk/gov/dft/bluebadge/model/usermanagement/generated"
 }
 
 task generateService(dependsOn: 'unzipGenerated', type: Sync){
     group = "GenerateAPI"
-    from "${buildDir}/unpacked/spring-server/generated/src/main/java/uk/gov/dft/bluebadge/service/usermanagement"
+    from "${buildDir}/unpacked/spring-server/generated/src/main/java/uk/gov/dft/bluebadge/service/usermanagement/generated"
     exclude '**/Swagger2SpringBoot.java'
     exclude '**/RFC3339DateFormat.java'
     exclude '**/*ApiController.java'
-    into "service/src/generated/java/uk/gov/dft/bluebadge/service/usermanagement"
+    into "service/src/generated/java/uk/gov/dft/bluebadge/service/usermanagement/generated"
 }

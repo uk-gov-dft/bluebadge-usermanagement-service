@@ -1,4 +1,4 @@
-package uk.gov.dft.bluebadge.model.usermanagement;
+package uk.gov.dft.bluebadge.model.usermanagement.generated;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
@@ -9,39 +9,39 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 import org.springframework.validation.annotation.Validated;
 
-/** AuthoritiesResponse */
+/** UsersData */
 @Validated
-public class AuthoritiesResponse extends CommonResponse {
-  @JsonProperty("data")
+public class UsersData extends Data {
+  @JsonProperty("users")
   @Valid
-  private List<Authority> data = null;
+  private List<User> users = null;
 
-  public AuthoritiesResponse data(List<Authority> data) {
-    this.data = data;
+  public UsersData users(List<User> users) {
+    this.users = users;
     return this;
   }
 
-  public AuthoritiesResponse addDataItem(Authority dataItem) {
-    if (this.data == null) {
-      this.data = new ArrayList<>();
+  public UsersData addUsersItem(User usersItem) {
+    if (this.users == null) {
+      this.users = new ArrayList<>();
     }
-    this.data.add(dataItem);
+    this.users.add(usersItem);
     return this;
   }
 
   /**
-   * Get data
+   * Get users
    *
-   * @return data
+   * @return users
    */
   @ApiModelProperty(value = "")
   @Valid
-  public List<Authority> getData() {
-    return data;
+  public List<User> getUsers() {
+    return users;
   }
 
-  public void setData(List<Authority> data) {
-    this.data = data;
+  public void setUsers(List<User> users) {
+    this.users = users;
   }
 
   @Override
@@ -52,21 +52,21 @@ public class AuthoritiesResponse extends CommonResponse {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    AuthoritiesResponse authoritiesResponse = (AuthoritiesResponse) o;
-    return Objects.equals(this.data, authoritiesResponse.data) && super.equals(o);
+    UsersData usersData = (UsersData) o;
+    return Objects.equals(this.users, usersData.users) && super.equals(o);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(data, super.hashCode());
+    return Objects.hash(users, super.hashCode());
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class AuthoritiesResponse {\n");
+    sb.append("class UsersData {\n");
     sb.append("    ").append(toIndentedString(super.toString())).append("\n");
-    sb.append("    data: ").append(toIndentedString(data)).append("\n");
+    sb.append("    users: ").append(toIndentedString(users)).append("\n");
     sb.append("}");
     return sb.toString();
   }

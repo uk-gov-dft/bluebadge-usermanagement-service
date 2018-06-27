@@ -1,4 +1,4 @@
-package uk.gov.dft.bluebadge.service.usermanagement.controller;
+package uk.gov.dft.bluebadge.service.usermanagement.generated.controller;
 
 public class ApiException extends Exception {
   private int code;

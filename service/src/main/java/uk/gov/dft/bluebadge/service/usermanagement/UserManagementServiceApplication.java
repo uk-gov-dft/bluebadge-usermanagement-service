@@ -10,7 +10,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @SpringBootApplication
 @EnableSwagger2
 @ComponentScan(basePackages = {"uk.gov.dft.bluebadge"})
-public class ServiceApplication implements CommandLineRunner {
+public class UserManagementServiceApplication implements CommandLineRunner {
 
   @Override
   public void run(String... arg0) {
@@ -20,7 +20,7 @@ public class ServiceApplication implements CommandLineRunner {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplication(ServiceApplication.class).run(args);
+    new SpringApplication(UserManagementServiceApplication.class).run(args);
   }
 
   static class ExitException extends RuntimeException implements ExitCodeGenerator {

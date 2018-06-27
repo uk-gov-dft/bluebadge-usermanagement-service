@@ -1,4 +1,4 @@
-package uk.gov.dft.bluebadge.model.usermanagement;
+package uk.gov.dft.bluebadge.model.usermanagement.generated;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
@@ -7,13 +7,13 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 import org.springframework.validation.annotation.Validated;
 
-/** AuthorityResponse */
+/** UserResponse */
 @Validated
-public class AuthorityResponse extends CommonResponse {
+public class UserResponse extends CommonResponse {
   @JsonProperty("data")
-  private Authority data = null;
+  private UserData data = null;
 
-  public AuthorityResponse data(Authority data) {
+  public UserResponse data(UserData data) {
     this.data = data;
     return this;
   }
@@ -25,11 +25,11 @@ public class AuthorityResponse extends CommonResponse {
    */
   @ApiModelProperty(value = "")
   @Valid
-  public Authority getData() {
+  public UserData getData() {
     return data;
   }
 
-  public void setData(Authority data) {
+  public void setData(UserData data) {
     this.data = data;
   }
 
@@ -41,8 +41,8 @@ public class AuthorityResponse extends CommonResponse {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    AuthorityResponse authorityResponse = (AuthorityResponse) o;
-    return Objects.equals(this.data, authorityResponse.data) && super.equals(o);
+    UserResponse userResponse = (UserResponse) o;
+    return Objects.equals(this.data, userResponse.data) && super.equals(o);
   }
 
   @Override
@@ -53,7 +53,7 @@ public class AuthorityResponse extends CommonResponse {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class AuthorityResponse {\n");
+    sb.append("class UserResponse {\n");
     sb.append("    ").append(toIndentedString(super.toString())).append("\n");
     sb.append("    data: ").append(toIndentedString(data)).append("\n");
     sb.append("}");
