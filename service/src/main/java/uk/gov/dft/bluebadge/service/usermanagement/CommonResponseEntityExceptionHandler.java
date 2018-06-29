@@ -10,9 +10,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import uk.gov.dft.bluebadge.model.usermanagement.CommonResponse;
-import uk.gov.dft.bluebadge.model.usermanagement.Error;
-import uk.gov.dft.bluebadge.model.usermanagement.ErrorErrors;
+import uk.gov.dft.bluebadge.model.usermanagement.generated.CommonResponse;
+import uk.gov.dft.bluebadge.model.usermanagement.generated.Error;
+import uk.gov.dft.bluebadge.model.usermanagement.generated.ErrorErrors;
 import uk.gov.dft.bluebadge.service.usermanagement.service.UserManagementService;
 
 @ControllerAdvice

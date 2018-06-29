@@ -1,4 +1,4 @@
-package uk.gov.dft.bluebadge.service.usermanagement.controller;
+package uk.gov.dft.bluebadge.service.usermanagement.generated.controller;
 
 import java.io.IOException;
 import javax.servlet.*;

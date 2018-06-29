@@ -1,4 +1,4 @@
-package uk.gov.dft.bluebadge.service.usermanagement.controller;
+package uk.gov.dft.bluebadge.service.usermanagement.generated.controller;
 
 import javax.xml.bind.annotation.XmlTransient;
 

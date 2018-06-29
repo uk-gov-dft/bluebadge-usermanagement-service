@@ -1,6 +1,6 @@
 package uk.gov.dft.bluebadge.service.usermanagement.converter;
 
-import uk.gov.dft.bluebadge.model.usermanagement.Data;
+import uk.gov.dft.bluebadge.model.usermanagement.generated.Data;
 
 /**
  * Converts to and from API model and DB Entity Model.
