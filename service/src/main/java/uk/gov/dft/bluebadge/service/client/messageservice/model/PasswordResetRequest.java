@@ -8,17 +8,17 @@ import lombok.Data;
 @Builder
 public class PasswordResetRequest {
   @JsonProperty("userId")
-  private Integer userId = null;
+  private Integer userId;
 
   @JsonProperty("name")
-  private String name = null;
+  private String name;
 
   @JsonProperty("emailAddress")
-  private String emailAddress = null;
+  private String emailAddress;
 
   @JsonProperty("localAuthorityId")
-  private Integer localAuthorityId = null;
+  private Integer localAuthorityId;
 
   @JsonProperty("isNewUser")
-  private Boolean isNewUser = null;
+  private Boolean isNewUser;
 }
