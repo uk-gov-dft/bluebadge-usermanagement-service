@@ -17,7 +17,7 @@ import uk.gov.dft.bluebadge.service.client.messageservice.model.UuidResponse;
 public class MessageApiClient {
 
   static class Endpoints {
-    public Endpoints() {}
+    private Endpoints() {}
 
     static final String SEND_EMAIL_ENDPOINT = "/messages/send***REMOVED***-email";
   }
