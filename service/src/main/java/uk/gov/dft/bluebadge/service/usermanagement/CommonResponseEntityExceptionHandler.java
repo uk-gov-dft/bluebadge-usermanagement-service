@@ -1,6 +1,5 @@
 package uk.gov.dft.bluebadge.service.usermanagement;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,17 +12,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import uk.gov.dft.bluebadge.model.usermanagement.generated.CommonResponse;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.Error;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.ErrorErrors;
-import uk.gov.dft.bluebadge.service.usermanagement.service.UserManagementService;
 
 @ControllerAdvice
 public class CommonResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
-
-  private UserManagementService userManagementService;
-
-  @Autowired
-  public CommonResponseEntityExceptionHandler(UserManagementService userManagementService) {
-    this.userManagementService = userManagementService;
-  }
 
   @Override
   protected ResponseEntity<Object> handleMethodArgumentNotValid(

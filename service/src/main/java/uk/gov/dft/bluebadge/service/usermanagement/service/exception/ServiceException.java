@@ -6,8 +6,8 @@ import uk.gov.dft.bluebadge.model.usermanagement.generated.CommonResponse;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.Error;
 
 public abstract class ServiceException extends RuntimeException {
-  CommonResponse commonResponse;
-  private HttpStatus httpStatus;
+  final transient CommonResponse commonResponse;
+  private final HttpStatus httpStatus;
 
   ServiceException(HttpStatus httpStatus) {
     super();
