@@ -5,59 +5,50 @@ Feature: Verify users retrieval
     * url baseUrl
 
   Scenario: Verify retrieve all users for an authority
-    Given path 'authorities/2/users'
+    Given path 'users'
+    And param authorityId = 2
     When method GET
     Then status 200
-    And match each $.data.users contains {id:"#notnull", name:"#notnull", emailAddress:"#notnull"}
+    And match each $.data contains {id:"#notnull", name:"#notnull", emailAddress:"#notnull"}
 
   Scenario: Verify retrieve all users for an authority with name filter match
-    Given path 'authorities/2/users'
+    Given path 'users'
     And param name = 'Sam'
+    And param authorityId = 2
     When method GET
     Then status 200
-    And match each $.data.users contains {id:"#notnull", name:"#notnull", emailAddress:"#notnull"}
+    And match each $.data contains {id:"#notnull", name:"#notnull", emailAddress:"#notnull"}
 
   Scenario: Verify retrieve all users for an authority with name filter match where match case insensitive
-    Given path 'authorities/2/users'
+    Given path 'users'
     And param name = 'sAmPaTh'
+    And param authorityId = 2
     When method GET
     Then status 200
-    And match each $.data.users contains {id:"#notnull", name:"#notnull", emailAddress:"#notnull"}
+    And match each $.data contains {id:"#notnull", name:"#notnull", emailAddress:"#notnull"}
 
   Scenario: Verify retrieve all users for an authority with emailAddress filter match
-    Given path 'authorities/2/users'
+    Given path 'users'
     And param name = 'def@'
+    And param authorityId = 2
     When method GET
     Then status 200
-    And match each $.data.users contains {id:"#notnull", name:"#notnull", emailAddress:"#notnull"}
+    And match each $.data contains {id:"#notnull", name:"#notnull", emailAddress:"#notnull"}
 
   Scenario: Verify retrieve all users for an authority with filter not matching
-    Given path 'authorities/2/users'
+    Given path 'users'
     And param name = 'zzzzzzzzzz'
+    And param authorityId = 2
     When method GET
     Then status 200
-    And match $.data.totalItems == 0
-
-  Scenario: Verify retrieval of a specific user by email address
-    Given path 'users'
-    And param emailAddress = 'Abcnobody@dft.gov.uk'
-    When method GET
-    Then status 200
-    And match $.data.totalItems == 1
-
-  Scenario: Verify retrieval of user by nonexists email address
-    Given path 'users'
-    And param emailAddress = 'JJJKKKFFFUUUZZZ@dft.gov.uk'
-    When method GET
-    Then status 200
-    And match $.data.totalItems == 0
+    #And match $.data.totalItems == 0
 
   Scenario: Verify ok request password email.
-    Given path '/authorities/2/users/-1/passwordReset'
+    Given path 'users/-1/passwordReset'
     When method GET
     Then status 200
 
   Scenario: Verify user not exists password reset.
-    Given path '/authorities/2/users/-9999/passwordReset'
+    Given path 'users/-9999/passwordReset'
     When method GET
     Then status 404

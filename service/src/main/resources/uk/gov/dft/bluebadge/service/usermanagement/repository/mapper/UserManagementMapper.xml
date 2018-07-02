@@ -13,17 +13,6 @@
         WHERE u.id = #{id}
     </select>
 
-    <select id="retrieveUserByEmailAddress" resultType="UserEntity">
-        SELECT u.id, u.name
-            , u.local_authority_id AS localAuthorityId
-            , u.email_address AS emailAddress
-            , u.role_id AS roleId
-            , r.description AS roleName
-        FROM users u
-        INNER JOIN roles r ON u.role_id = r.id
-        WHERE UPPER(email_address) = UPPER(#{emailAddress})
-    </select>
-
     <select id="retrieveUsersByAuthorityId" resultType="UserEntity" parameterType="UserEntity">
         SELECT u.id, u.name
             , u.local_authority_id AS localAuthorityId
