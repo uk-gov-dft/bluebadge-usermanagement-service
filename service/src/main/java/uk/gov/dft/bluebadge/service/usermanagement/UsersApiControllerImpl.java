@@ -173,6 +173,7 @@ public class UsersApiControllerImpl implements UsersApi {
           @RequestParam(value = "name", required = false)
           Optional<String> name) {
 
+    log.info("Finding users for authority {}, with filter:{}", authorityId, name);
     List<UserEntity> userEntityList =
         service.retrieveUsersByAuthorityId(authorityId, name.orElse(null));
     UsersData data = new UsersData().users(Lists.newArrayList());
