@@ -60,9 +60,14 @@ dependencies {
     compile('org.postgresql:postgresql:42.2.2')
     compile('org.apache.commons:commons-lang3:3.7')
     compileOnly ('org.projectlombok:lombok:1.16.22')
-    testCompile('org.springframework.boot:spring-boot-starter-test')
-    runtime('org.springframework.boot:spring-boot-devtools')
     compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.5'
+
+    runtime('org.springframework.boot:spring-boot-devtools')
+    runtime group: 'ch.qos.logback.contrib', name: 'logback-json-classic', version: '0.1.5'
+    runtime group: 'ch.qos.logback.contrib', name: 'logback-jackson', version: '0.1.5'
+    runtime group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.3'
+
+    testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
 bootRun {
