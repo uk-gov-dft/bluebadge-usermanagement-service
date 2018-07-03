@@ -59,13 +59,11 @@ public interface UsersApi {
     }
   )
   @RequestMapping(
-    value = "/authorities/{authorityId}/users",
+    value = "/users",
     produces = {"application/json"},
     method = RequestMethod.POST
   )
   default ResponseEntity<UserResponse> createUser(
-      @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
-          Integer authorityId,
       @ApiParam(value = "") @Valid @RequestBody User user) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
       if (getAcceptHeader().get().contains("application/json")) {
@@ -93,15 +91,18 @@ public interface UsersApi {
       "Users",
     }
   )
-  @ApiResponses(value = {@ApiResponse(code = 204, message = "Resource Successfully Removed")})
+  @ApiResponses(
+    value = {
+      @ApiResponse(code = 200, message = "Resource Successfully Removed"),
+      @ApiResponse(code = 404, message = "User not found.", response = CommonResponse.class)
+    }
+  )
   @RequestMapping(
-    value = "/authorities/{authorityId}/users/{userId}",
+    value = "/users/{userId}",
     produces = {"application/json"},
     method = RequestMethod.DELETE
   )
   default ResponseEntity<Void> deleteUser(
-      @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
-          Integer authorityId,
       @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
           Integer userId) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -123,22 +124,29 @@ public interface UsersApi {
   )
   @ApiResponses(
     value = {
-      @ApiResponse(code = 200, message = "An array of users", response = UsersResponse.class),
+      @ApiResponse(
+        code = 200,
+        message = "An array Zero, One or many users",
+        response = UsersResponse.class
+      ),
       @ApiResponse(code = 200, message = "Unexpected error", response = CommonResponse.class)
     }
   )
   @RequestMapping(
-    value = "/authorities/{authorityId}/users",
+    value = "/users",
     produces = {"application/json"},
     method = RequestMethod.GET
   )
   default ResponseEntity<UsersResponse> findUsers(
-      @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
-          Integer authorityId,
       @ApiParam(value = "Name or email address fragment to filter on.")
           @Valid
           @RequestParam(value = "name", required = false)
-          Optional<String> name) {
+          Optional<String> name,
+      @NotNull
+          @ApiParam(value = "To Be Removed. LA id will passed in token", required = true)
+          @Valid
+          @RequestParam(value = "authorityId", required = true)
+          Integer authorityId) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
       if (getAcceptHeader().get().contains("application/json")) {
         try {
@@ -172,13 +180,11 @@ public interface UsersApi {
     }
   )
   @RequestMapping(
-    value = "/authorities/{authorityId}/users/{userId}/passwordReset",
+    value = "/users/{userId}/passwordReset",
     produces = {"application/json"},
     method = RequestMethod.GET
   )
   default ResponseEntity<Void> requestPasswordReset(
-      @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
-          Integer authorityId,
       @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
           Integer userId) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -198,15 +204,18 @@ public interface UsersApi {
       "Users",
     }
   )
-  @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = UserResponse.class)})
+  @ApiResponses(
+    value = {
+      @ApiResponse(code = 200, message = "OK", response = UserResponse.class),
+      @ApiResponse(code = 404, message = "User not found.", response = CommonResponse.class)
+    }
+  )
   @RequestMapping(
-    value = "/authorities/{authorityId}/users/{userId}",
+    value = "/users/{userId}",
     produces = {"application/json"},
     method = RequestMethod.GET
   )
   default ResponseEntity<UserResponse> retrieveUser(
-      @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
-          Integer authorityId,
       @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
           Integer userId) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -270,9 +279,9 @@ public interface UsersApi {
   }
 
   @ApiOperation(
-    value = "Update a user",
+    value = "Update a user.",
     nickname = "updateUser",
-    notes = "Update a user",
+    notes = "Update a user.",
     response = UserResponse.class,
     tags = {
       "Users",
@@ -285,61 +294,19 @@ public interface UsersApi {
         message = "Resource valid and updated if exists.",
         response = UserResponse.class
       ),
-      @ApiResponse(code = 400, message = "Bad request", response = CommonResponse.class)
+      @ApiResponse(code = 400, message = "Bad request", response = CommonResponse.class),
+      @ApiResponse(code = 404, message = "User not found.", response = CommonResponse.class)
     }
   )
   @RequestMapping(
-    value = "/authorities/{authorityId}/users/{userId}",
+    value = "/users/{userId}",
     produces = {"application/json"},
     method = RequestMethod.PUT
   )
   default ResponseEntity<UserResponse> updateUser(
-      @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
-          Integer authorityId,
       @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
           Integer userId,
       @ApiParam(value = "") @Valid @RequestBody User user) {
-    if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
-      if (getAcceptHeader().get().contains("application/json")) {
-        try {
-          return new ResponseEntity<>(
-              getObjectMapper().get().readValue("\"\"", UserResponse.class),
-              HttpStatus.NOT_IMPLEMENTED);
-        } catch (IOException e) {
-          log.error("Couldn't serialize response for content type application/json", e);
-          return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-      }
-    } else {
-      log.warn(
-          "ObjectMapper or HttpServletRequest not configured in default UsersApi interface so no example is generated");
-    }
-    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-  }
-
-  @ApiOperation(
-    value = "Check user for email address exists.",
-    nickname = "usersGet",
-    notes = "Returns user if user exists ",
-    response = UserResponse.class,
-    tags = {
-      "Users",
-    }
-  )
-  @ApiResponses(
-    value = {@ApiResponse(code = 200, message = "The user.", response = UserResponse.class)}
-  )
-  @RequestMapping(
-    value = "/users",
-    produces = {"application/json"},
-    method = RequestMethod.GET
-  )
-  default ResponseEntity<UserResponse> usersGet(
-      @NotNull
-          @ApiParam(value = "User email address to check for.", required = true)
-          @Valid
-          @RequestParam(value = "emailAddress", required = true)
-          String emailAddress) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
       if (getAcceptHeader().get().contains("application/json")) {
         try {

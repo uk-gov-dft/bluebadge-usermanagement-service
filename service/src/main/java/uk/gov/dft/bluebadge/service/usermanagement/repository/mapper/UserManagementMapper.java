@@ -10,8 +10,6 @@ import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 public interface UserManagementMapper {
   UserEntity retrieveUserById(int id);
 
-  UserEntity retrieveUserByEmailAddress(String emailAddress);
-
   List<UserEntity> retrieveUsersByAuthorityId(UserEntity userEntity);
 
   void updateUser(UserEntity userEntity);

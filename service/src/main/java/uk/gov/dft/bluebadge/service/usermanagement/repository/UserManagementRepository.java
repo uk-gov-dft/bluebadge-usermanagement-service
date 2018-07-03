@@ -32,20 +32,8 @@ public class UserManagementRepository {
   public Optional<UserEntity> retrieveUserById(int id) {
     UserEntity userEntity = this.sqlSession.selectOne("retrieveUserById", id);
     if (null == userEntity) {
-      LOGGER.warn("Attempt to retrieve UserEntity id:{} that does not exist.", id);
+      LOGGER.info("Attempt to retrieve UserEntity id:{} that does not exist.", id);
     }
-    return Optional.ofNullable(userEntity);
-  }
-
-  /**
-   * Retrieve a single UserEntity by Email Address.
-   *
-   * @param emailAddress Address to filter on.
-   * @return The retrieved UserEntity.
-   */
-  public Optional<UserEntity> retrieveUserByEmail(String emailAddress) {
-    UserEntity userEntity = this.sqlSession.selectOne("retrieveUserByEmailAddress", emailAddress);
-
     return Optional.ofNullable(userEntity);
   }
 
@@ -72,9 +60,9 @@ public class UserManagementRepository {
     Assert.notNull(user, "updateUser called with null entity to update");
     int result = sqlSession.update("updateUser", user);
     if (0 == result) {
-      LOGGER.warn("Attempt to update UserEntity id: {} that does not exist.", user.getId());
+      LOGGER.info("Attempt to update UserEntity id: {} that does not exist.", user.getId());
     } else {
-      LOGGER.info("Updated UserEntity id: {}.", user.getId());
+      LOGGER.debug("Updated UserEntity id: {}.", user.getId());
     }
     return result;
   }
@@ -92,15 +80,14 @@ public class UserManagementRepository {
     Assert.notNull(user, "updatePassword called with null entity to update");
     int result = sqlSession.update("updatePassword", user);
     if (0 == result) {
-      LOGGER.warn("Attempt to update UserEntity id: {} that does not exist.", user.getId());
+      LOGGER.info("Attempt to update UserEntity id: {} that does not exist.", user.getId());
     } else {
-      LOGGER.info("Updated UserEntity id: {}.", user.getId());
+      LOGGER.debug("Updated UserEntity id: {}.", user.getId());
     }
     return result;
   }
 
   public EmailLink retrieveEmailLinkWithUuid(String uuid) {
-
     Assert.notNull(uuid, "No uuid is present");
 
     return sqlSession.selectOne("retrieveEmailLinkWithUuid", uuid);
@@ -111,7 +98,7 @@ public class UserManagementRepository {
 
     UserEntity userEntity = sqlSession.selectOne("retrieveUserUsingUuid", uuid);
     if (null == userEntity) {
-      LOGGER.warn("Attempt to retrieve UserEntity id:{} that does not exist.", uuid);
+      LOGGER.info("Attempt to retrieve UserEntity id:{} that does not exist.", uuid);
     }
 
     return Optional.ofNullable(userEntity);
@@ -123,10 +110,10 @@ public class UserManagementRepository {
    * @param user UserEntity to create.
    * @return Insert count.
    */
-  public int createUser(UserEntity user) {
+  public void createUser(UserEntity user) {
     Assert.notNull(user, "createUser called with null entity to update");
     LOGGER.info("Created UserEntity id: {}.", user.getId());
-    return sqlSession.insert("createUser", user);
+    sqlSession.insert("createUser", user);
   }
 
   /**
@@ -138,9 +125,9 @@ public class UserManagementRepository {
   public int deleteUser(int id) {
     int result = sqlSession.delete("deleteUser", id);
     if (0 == result) {
-      LOGGER.warn("Attempt to delete UserEntity id: {} that did not exist.", id);
+      LOGGER.info("Attempt to delete UserEntity id: {} that did not exist.", id);
     } else {
-      LOGGER.info("Deleted UserEntity id: {}.", id);
+      LOGGER.debug("Deleted UserEntity id: {}.", id);
     }
     return result;
   }
@@ -155,8 +142,8 @@ public class UserManagementRepository {
     return sqlSession.selectOne("emailAddressAlreadyUsed", userEntity);
   }
 
-  public int createEmailLink(EmailLink emailLink) {
-    return sqlSession.insert("createEmailLink", emailLink);
+  public void createEmailLink(EmailLink emailLink) {
+    sqlSession.insert("createEmailLink", emailLink);
   }
 
   public int updateUserToInactive(Integer id) {

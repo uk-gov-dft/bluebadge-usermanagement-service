@@ -5,11 +5,11 @@ Feature: Verify users Delete
     * url baseUrl
 
   Scenario: Verify delete not exists
-    Given path 'authorities/2/users/-100000'
+    Given path 'users/-100000'
     When method DELETE
-    Then status 200
+    Then status 404
 
   Scenario: Verify delete OK.
-    Given path 'authorities/2/users/-5'
+    Given path 'users/-5'
     When method DELETE
     Then status 200

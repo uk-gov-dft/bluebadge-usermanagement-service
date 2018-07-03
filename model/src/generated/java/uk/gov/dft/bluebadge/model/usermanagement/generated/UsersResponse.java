@@ -2,6 +2,8 @@ package uk.gov.dft.bluebadge.model.usermanagement.generated;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -11,10 +13,19 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class UsersResponse extends CommonResponse {
   @JsonProperty("data")
-  private UsersData data = null;
+  @Valid
+  private List<User> data = null;
 
-  public UsersResponse data(UsersData data) {
+  public UsersResponse data(List<User> data) {
     this.data = data;
+    return this;
+  }
+
+  public UsersResponse addDataItem(User dataItem) {
+    if (this.data == null) {
+      this.data = new ArrayList<>();
+    }
+    this.data.add(dataItem);
     return this;
   }
 
@@ -25,11 +36,11 @@ public class UsersResponse extends CommonResponse {
    */
   @ApiModelProperty(value = "")
   @Valid
-  public UsersData getData() {
+  public List<User> getData() {
     return data;
   }
 
-  public void setData(UsersData data) {
+  public void setData(List<User> data) {
     this.data = data;
   }
 

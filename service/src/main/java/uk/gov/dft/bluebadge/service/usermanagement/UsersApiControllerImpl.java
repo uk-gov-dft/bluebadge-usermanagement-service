@@ -1,7 +1,6 @@
 package uk.gov.dft.bluebadge.service.usermanagement;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
 import io.swagger.annotations.ApiParam;
 import java.util.List;
 import java.util.Optional;
@@ -19,16 +18,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.CommonResponse;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.Password;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.User;
-import uk.gov.dft.bluebadge.model.usermanagement.generated.UserData;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.UserResponse;
-import uk.gov.dft.bluebadge.model.usermanagement.generated.UsersData;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.UsersResponse;
 import uk.gov.dft.bluebadge.service.usermanagement.converter.UserConverter;
 import uk.gov.dft.bluebadge.service.usermanagement.generated.controller.UsersApi;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.UserManagementService;
-import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException;
+import uk.gov.dft.bluebadge.service.usermanagement.service.exception.ServiceException;
 
 @Controller
 public class UsersApiControllerImpl implements UsersApi {
@@ -48,9 +45,9 @@ public class UsersApiControllerImpl implements UsersApi {
   }
 
   @SuppressWarnings("unused")
-  @ExceptionHandler({BadRequestException.class})
-  public ResponseEntity<CommonResponse> handleBadRequestException(BadRequestException e) {
-    return ResponseEntity.badRequest().body(e.getCommonResponse());
+  @ExceptionHandler({ServiceException.class})
+  public ResponseEntity<CommonResponse> handleServiceException(ServiceException e) {
+    return e.getResponse();
   }
 
   @SuppressWarnings("unused")
@@ -67,17 +64,10 @@ public class UsersApiControllerImpl implements UsersApi {
 
     UserResponse userResponse = new UserResponse();
 
-    Optional<UserEntity> userEntity = service.retrieveUserUsingUuid(uuid);
-
-    if (userEntity.isPresent()) {
-      userResponse.setData(userConverter.convertToData(userEntity.get(), 1, 0, 0));
-    } else {
-      UserData userData = new UserData();
-      userData.setTotalItems(0);
-      userResponse.setData(userData);
-    }
-
     service.updatePassword(uuid, passwords);
+    UserEntity userEntity = service.retrieveUserUsingUuid(uuid);
+    userResponse.setData(userConverter.convertToModel(userEntity));
+
     return ResponseEntity.ok(userResponse);
   }
 
@@ -94,20 +84,17 @@ public class UsersApiControllerImpl implements UsersApi {
   /**
    * Retrieve a single user.
    *
-   * @param authorityId Authority of user.
    * @param userId PK of user to retrieve
    * @return The User wrapped in a UserResponse
    */
   @Override
   public ResponseEntity<UserResponse> retrieveUser(
-      @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
-          Integer authorityId,
       @ApiParam(value = "Numeric ID of the user to get.", required = true) @PathVariable("userId")
           Integer userId) {
     UserResponse userResponse = new UserResponse();
 
     UserEntity userEntity = service.retrieveUserById(userId);
-    userResponse.setData(userConverter.convertToData(userEntity, 1, 0, 0));
+    userResponse.setData(userConverter.convertToModel(userEntity));
 
     return ResponseEntity.ok(userResponse);
   }
@@ -115,46 +102,16 @@ public class UsersApiControllerImpl implements UsersApi {
   /**
    * Creates User.
    *
-   * @param authorityId Authority of user.
    * @param user User to create.
    * @return The created user with id populated.
    */
   @Override
-  public ResponseEntity<UserResponse> createUser(
-      @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
-          Integer authorityId,
-      @ApiParam() @Valid @RequestBody User user) {
+  public ResponseEntity<UserResponse> createUser(@ApiParam() @Valid @RequestBody User user) {
     UserEntity entity = userConverter.convertToEntity(user);
     UserResponse userResponse = new UserResponse();
 
-    int result = service.createUser(entity);
-    userResponse.setData(userConverter.convertToData(entity, 1, result, 0));
-    return ResponseEntity.ok(userResponse);
-  }
-
-  /**
-   * Existence check for user email address.
-   *
-   * @param emailAddress Email address to check for.
-   * @return true if exists and request ok else false.
-   */
-  @Override
-  public ResponseEntity<UserResponse> usersGet(
-      @NotNull
-          @ApiParam(value = "User email address to check for.", required = true)
-          @Valid
-          @RequestParam(value = "emailAddress")
-          String emailAddress) {
-
-    Optional<UserEntity> userEntity = service.retrieveUserByEmail(emailAddress);
-    UserResponse userResponse = new UserResponse();
-    if (userEntity.isPresent()) {
-      userResponse.setData(userConverter.convertToData(userEntity.get(), 1, 0, 0));
-    } else {
-      UserData userData = new UserData();
-      userData.setTotalItems(0);
-      userResponse.setData(userData);
-    }
+    service.createUser(entity);
+    userResponse.setData(userConverter.convertToModel(entity));
     return ResponseEntity.ok(userResponse);
   }
 
@@ -166,46 +123,39 @@ public class UsersApiControllerImpl implements UsersApi {
    */
   @Override
   public ResponseEntity<UsersResponse> findUsers(
-      @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
-          Integer authorityId,
       @ApiParam(value = "Name or email address fragment to filter on.")
           @Valid
           @RequestParam(value = "name", required = false)
-          Optional<String> name) {
+          Optional<String> name,
+      @NotNull
+          @ApiParam(value = "To Be Removed. LA id will passed in token", required = true)
+          @Valid
+          @RequestParam(value = "authorityId", required = true)
+          Integer authorityId) {
 
     log.info("Finding users for authority {}, with filter:{}", authorityId, name);
     List<UserEntity> userEntityList =
         service.retrieveUsersByAuthorityId(authorityId, name.orElse(null));
-    UsersData data = new UsersData().users(Lists.newArrayList());
-    for (UserEntity userEntity : userEntityList) {
-      data.addUsersItem(userConverter.convertToModel(userEntity));
-    }
 
-    data.setTotalItems(userEntityList.size());
-    data.setDeleted(0);
-    data.setUpdated(0);
-    return ResponseEntity.ok(new UsersResponse().data(data));
+    return ResponseEntity.ok(
+        new UsersResponse().data(userConverter.convertToModelList(userEntityList)));
   }
 
   @Override
   public ResponseEntity<UserResponse> updateUser(
-      @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
-          Integer authorityId,
       @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
           Integer userId,
       @ApiParam() @Valid @RequestBody User user) {
     UserEntity entity = userConverter.convertToEntity(user);
     UserResponse userResponse = new UserResponse();
 
-    int result = service.updateUser(entity);
-    userResponse.setData(userConverter.convertToData(entity, 1, result, 0));
+    service.updateUser(entity);
+    userResponse.setData(userConverter.convertToModel(entity));
     return ResponseEntity.ok(userResponse);
   }
 
   @Override
   public ResponseEntity<Void> deleteUser(
-      @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
-          Integer authorityId,
       @ApiParam(value = "Numeric ID of the user to remove.", required = true)
           @PathVariable("userId")
           Integer userId) {
@@ -216,13 +166,9 @@ public class UsersApiControllerImpl implements UsersApi {
 
   @Override
   public ResponseEntity<Void> requestPasswordReset(
-      @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
-          Integer authorityId,
       @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
           Integer userId) {
-
-    UserEntity user = service.retrieveUserById(userId);
-    service.requestPasswordResetEmail(user, false);
+    service.requestPasswordResetEmail(userId, false);
     return ResponseEntity.ok().build();
   }
 }

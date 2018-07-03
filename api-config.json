@@ -10,35 +10,6 @@
   "produces" : [ "application/json" ],
   "paths" : {
     "/users" : {
-      "parameters" : [ {
-        "in" : "query",
-        "name" : "emailAddress",
-        "type" : "string",
-        "required" : true,
-        "description" : "User email address to check for."
-      } ],
-      "get" : {
-        "summary" : "Check user for email address exists.",
-        "description" : "Returns user if user exists\n",
-        "tags" : [ "Users" ],
-        "responses" : {
-          "200" : {
-            "description" : "The user.",
-            "schema" : {
-              "$ref" : "#/definitions/UserResponse"
-            }
-          }
-        }
-      }
-    },
-    "/authorities/{authorityId}/users" : {
-      "parameters" : [ {
-        "in" : "path",
-        "name" : "authorityId",
-        "type" : "integer",
-        "required" : true,
-        "description" : "ID of the authority."
-      } ],
       "get" : {
         "parameters" : [ {
           "in" : "query",
@@ -46,6 +17,12 @@
           "type" : "string",
           "required" : false,
           "description" : "Name or email address fragment to filter on."
+        }, {
+          "in" : "query",
+          "name" : "authorityId",
+          "type" : "integer",
+          "required" : true,
+          "description" : "To Be Removed. LA id will passed in token"
         } ],
         "summary" : "List of all Users",
         "operationId" : "findUsers",
@@ -53,7 +30,7 @@
         "tags" : [ "Users" ],
         "responses" : {
           "200" : {
-            "description" : "An array of users",
+            "description" : "An array Zero, One or many users",
             "schema" : {
               "$ref" : "#/definitions/UsersResponse"
             }
@@ -94,14 +71,8 @@
         }
       }
     },
-    "/authorities/{authorityId}/users/{userId}/passwordReset" : {
+    "/users/{userId}/passwordReset" : {
       "parameters" : [ {
-        "in" : "path",
-        "name" : "authorityId",
-        "type" : "integer",
-        "required" : true,
-        "description" : "ID of the authority."
-      }, {
         "in" : "path",
         "name" : "userId",
         "type" : "integer",
@@ -233,14 +204,8 @@
         }
       }
     },
-    "/authorities/{authorityId}/users/{userId}" : {
+    "/users/{userId}" : {
       "parameters" : [ {
-        "in" : "path",
-        "name" : "authorityId",
-        "type" : "integer",
-        "required" : true,
-        "description" : "ID of the authority."
-      }, {
         "in" : "path",
         "name" : "userId",
         "type" : "integer",
@@ -258,6 +223,12 @@
             "schema" : {
               "$ref" : "#/definitions/UserResponse"
             }
+          },
+          "404" : {
+            "description" : "User not found.",
+            "schema" : {
+              "$ref" : "#/definitions/CommonResponse"
+            }
           }
         }
       },
@@ -267,15 +238,21 @@
         "summary" : "Removes a User from a Local Authority",
         "description" : "Removes a User from a Local Authority",
         "responses" : {
-          "204" : {
+          "200" : {
             "description" : "Resource Successfully Removed"
+          },
+          "404" : {
+            "description" : "User not found.",
+            "schema" : {
+              "$ref" : "#/definitions/CommonResponse"
+            }
           }
         }
       },
       "put" : {
-        "summary" : "Update a user",
+        "summary" : "Update a user.",
         "operationId" : "updateUser",
-        "description" : "Update a user",
+        "description" : "Update a user.",
         "tags" : [ "Users" ],
         "parameters" : [ {
           "name" : "user",
@@ -293,6 +270,12 @@
           },
           "400" : {
             "description" : "Bad request",
+            "schema" : {
+              "$ref" : "#/definitions/CommonResponse"
+            }
+          },
+          "404" : {
+            "description" : "User not found.",
             "schema" : {
               "$ref" : "#/definitions/CommonResponse"
             }
@@ -370,7 +353,10 @@
         "type" : "object",
         "properties" : {
           "data" : {
-            "$ref" : "#/definitions/UsersData"
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/definitions/User"
+            }
           }
         }
       } ]
@@ -383,7 +369,7 @@
         "type" : "object",
         "properties" : {
           "data" : {
-            "$ref" : "#/definitions/UserData"
+            "$ref" : "#/definitions/User"
           }
         }
       } ]
@@ -417,30 +403,6 @@
         }
       } ]
     },
-    "UserData" : {
-      "type" : "object",
-      "allOf" : [ {
-        "$ref" : "#/definitions/Data"
-      }, {
-        "$ref" : "#/definitions/User"
-      } ]
-    },
-    "UsersData" : {
-      "type" : "object",
-      "allOf" : [ {
-        "$ref" : "#/definitions/Data"
-      }, {
-        "type" : "object",
-        "properties" : {
-          "users" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/definitions/User"
-            }
-          }
-        }
-      } ]
-    },
     "CommonResponse" : {
       "type" : "object",
       "properties" : {
@@ -461,20 +423,6 @@
         }
       }
     },
-    "Data" : {
-      "type" : "object",
-      "properties" : {
-        "updated" : {
-          "type" : "integer"
-        },
-        "deleted" : {
-          "type" : "integer"
-        },
-        "totalItems" : {
-          "type" : "integer"
-        }
-      }
-    },
     "Error" : {
       "type" : "object",
       "properties" : {
@@ -482,6 +430,9 @@
           "type" : "integer"
         },
         "message" : {
+          "type" : "string"
+        },
+        "reason" : {
           "type" : "string"
         },
         "errors" : {
