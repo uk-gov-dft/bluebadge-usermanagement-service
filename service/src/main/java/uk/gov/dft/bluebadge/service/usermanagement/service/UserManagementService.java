@@ -1,5 +1,9 @@
 package uk.gov.dft.bluebadge.service.usermanagement.service;
 
+import static uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException.Operation.DELETE;
+import static uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException.Operation.RETRIEVE;
+import static uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException.Operation.UPDATE;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +41,7 @@ public class UserManagementService {
     Optional<UserEntity> userEntity = repository.retrieveUserById(userId);
     if (!userEntity.isPresent()) {
       log.info("Request to retrieve user id:{} that did not exist", userId);
-      throw new NotFoundException();
+      throw new NotFoundException("user", RETRIEVE);
     }
     return userEntity.get();
   }
@@ -46,29 +50,20 @@ public class UserManagementService {
    * Create user entity.
    *
    * @param userEntity User to create.
-   * @return Create count.
    * @throws BadRequestException if validation fails.
    */
-  public int createUser(UserEntity userEntity) {
+  public void createUser(UserEntity userEntity) {
     List<ErrorErrors> businessErrors = businessValidateUser(userEntity);
     if (null != businessErrors) {
       log.debug("Business validation failed for user:{}", userEntity.getName());
       throw new BadRequestException(businessErrors);
     }
-    int createCount = repository.createUser(userEntity);
+    repository.createUser(userEntity);
     requestPasswordResetEmail(userEntity, true);
     log.debug("Created user {}", userEntity.getId());
-    return createCount;
   }
 
-  /**
-   * Requests reset of a users password via message service.
-   *
-   * @param userEntity The user.
-   * @param isNewUser true if create, false for existing. Different email template used.
-   */
-  public void requestPasswordResetEmail(UserEntity userEntity, boolean isNewUser) {
-    log.debug("Resetting password for user:{}", userEntity.getId());
+  private void requestPasswordResetEmail(UserEntity userEntity, boolean isNewUser) {
     PasswordResetRequest resetRequest =
         PasswordResetRequest.builder()
             .emailAddress(userEntity.getEmailAddress())
@@ -88,23 +83,32 @@ public class UserManagementService {
   }
 
   /**
-   * Delete a user.
+   * Requests reset of a users password via message service.
    *
-   * @param id PK of user to delete.
-   * @return Delete count
+   * @param userId The user PK.
+   * @param isNewUser true if create, false for existing. Different email template used.
    */
-  public int deleteUser(int id) {
-    return repository.deleteUser(id);
+  public void requestPasswordResetEmail(int userId, boolean isNewUser) {
+    log.debug("Resetting password for user:{}", userId);
+    Optional<UserEntity> optionalUserEntity = repository.retrieveUserById(userId);
+    UserEntity userEntity;
+    if (optionalUserEntity.isPresent()) {
+      userEntity = optionalUserEntity.get();
+    } else {
+      throw new NotFoundException("user", RETRIEVE);
+    }
+    requestPasswordResetEmail(userEntity, isNewUser);
   }
 
   /**
-   * Should not be required once authentication implemented.
+   * Delete a user.
    *
-   * @param emailAddress address to search for.
-   * @return The user entity.
+   * @param id PK of user to delete.
    */
-  public Optional<UserEntity> retrieveUserByEmail(String emailAddress) {
-    return repository.retrieveUserByEmail(emailAddress);
+  public void deleteUser(int id) {
+    if (repository.deleteUser(id) == 0) {
+      throw new NotFoundException("user", DELETE);
+    }
   }
 
   public List<UserEntity> retrieveUsersByAuthorityId(int authorityId, String nameFilter) {
@@ -144,23 +148,20 @@ public class UserManagementService {
    * Update user entity.
    *
    * @param userEntity Entity to update.
-   * @return Update count.
    * @throws BadRequestException if validation fails.
    */
-  public int updateUser(UserEntity userEntity) {
+  public void updateUser(UserEntity userEntity) {
     List<ErrorErrors> businessErrors = businessValidateUser(userEntity);
     if (null != businessErrors) {
       throw new BadRequestException(businessErrors);
     }
-    return repository.updateUser(userEntity);
+    if (repository.updateUser(userEntity) == 0) {
+      throw new NotFoundException("user", UPDATE);
+    }
   }
 
-  /**
-   * Update user password.
-   *
-   * @return Update count.
-   */
-  public int updatePassword(String uuid, Password passwords) {
+  /** Update user password. */
+  public void updatePassword(String uuid, Password passwords) {
 
     log.debug("Updating password for guid:{}", uuid);
     String password = passwords.getPassword();
@@ -196,10 +197,17 @@ public class UserManagementService {
 
     repository.updateEmailLinkToInvalid(uuid);
     log.debug("Passwords updated. {}", uuid);
-    return repository.updatePassword(user);
+    if (repository.updatePassword(user) == 0) {
+      throw new NotFoundException("user", UPDATE);
+    }
   }
 
-  public Optional<UserEntity> retrieveUserUsingUuid(String uuid) {
-    return repository.retrieveUserUsingUuid(uuid);
+  public UserEntity retrieveUserUsingUuid(String uuid) {
+
+    Optional<UserEntity> userEntity = repository.retrieveUserUsingUuid(uuid);
+    if (!userEntity.isPresent()) {
+      throw new NotFoundException("user", RETRIEVE);
+    }
+    return userEntity.get();
   }
 }

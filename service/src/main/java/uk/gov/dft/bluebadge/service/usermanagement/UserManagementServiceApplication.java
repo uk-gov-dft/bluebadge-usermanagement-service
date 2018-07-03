@@ -19,7 +19,7 @@ public class UserManagementServiceApplication implements CommandLineRunner {
     }
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) {
     new SpringApplication(UserManagementServiceApplication.class).run(args);
   }
 

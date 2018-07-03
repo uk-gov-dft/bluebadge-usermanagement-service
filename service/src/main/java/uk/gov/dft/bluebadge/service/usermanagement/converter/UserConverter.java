@@ -1,10 +1,9 @@
 package uk.gov.dft.bluebadge.service.usermanagement.converter;
 
 import uk.gov.dft.bluebadge.model.usermanagement.generated.User;
-import uk.gov.dft.bluebadge.model.usermanagement.generated.UserData;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 
-public class UserConverter implements BiConverter<UserEntity, User, UserData> {
+public class UserConverter implements BiConverter<UserEntity, User> {
 
   @Override
   public UserEntity convertToEntity(User model) {
@@ -28,18 +27,5 @@ public class UserConverter implements BiConverter<UserEntity, User, UserData> {
     user.setRoleId(entity.getRoleId());
     user.setRoleName(entity.getRoleName());
     return user;
-  }
-
-  @Override
-  public UserData convertToData(UserEntity userEntity, int totalItems, int updates, int deletes) {
-    UserData data = new UserData();
-    data.setId(userEntity.getId());
-    data.setLocalAuthorityId(userEntity.getLocalAuthorityId());
-    data.setName(userEntity.getName());
-    data.setEmailAddress(userEntity.getEmailAddress());
-    data.setTotalItems(totalItems);
-    data.setRoleId(userEntity.getRoleId());
-    data.setRoleName(userEntity.getRoleName());
-    return data;
   }
 }

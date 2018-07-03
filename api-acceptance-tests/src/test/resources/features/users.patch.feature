@@ -10,14 +10,6 @@ Feature: Verify users update
     When method PATCH
     Then status 200
 
-  Scenario: Update password missing required field
-    Given path 'user/password/'
-    And request { ***REMOVED***}
-    When method PATCH
-    Then status 404
-    #And match $.error.errors contains {field:"uuid", reason:"#notnull", message:"NotNull. ***REMOVED***}
-
-
   Scenario: Inactive UUID
     Given path 'user/password/4175e31c-0000-41c0-9afb-40dc0a89b9c5'
     And request { ***REMOVED***}
