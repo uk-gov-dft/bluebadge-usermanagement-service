@@ -8,7 +8,6 @@ logging:
 management:
   server:
     port: 8181
-    address: localhost
     servlet:
       context-path: /manage
   endpoints:
