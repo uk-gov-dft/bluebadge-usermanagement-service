@@ -27,8 +27,6 @@ spring:
     date-format: uk.gov.dft.bluebadge.service.usermanagement.RFC3339DateFormat
     serialization:
       write-dates-as-timestamps: false
-  profiles:
-    active: dev
 
 server:
   port: 8180
