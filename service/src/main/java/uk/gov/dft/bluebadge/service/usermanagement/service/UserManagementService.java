@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,12 +30,17 @@ import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundExc
 public class UserManagementService {
 
   private final UserManagementRepository repository;
-  private MessageApiClient messageApiClient;
+  private final MessageApiClient messageApiClient;
+  private final String laWebappEmailLinkURI;
 
   @Autowired
-  UserManagementService(UserManagementRepository repository, MessageApiClient messageApiClient) {
+  UserManagementService(
+      UserManagementRepository repository,
+      MessageApiClient messageApiClient,
+      @Value("${la-webapp.email-link-uri}") String laWebappEmailLinkURI) {
     this.repository = repository;
     this.messageApiClient = messageApiClient;
+    this.laWebappEmailLinkURI = laWebappEmailLinkURI;
   }
 
   public UserEntity retrieveUserById(Integer userId) {
@@ -64,18 +70,21 @@ public class UserManagementService {
   }
 
   private void requestPasswordResetEmail(UserEntity userEntity, boolean isNewUser) {
+    EmailLink emailLink =
+        EmailLink.builder()
+            .webappUri(this.laWebappEmailLinkURI)
+            .uuid(UUID.randomUUID().toString())
+            .userId(userEntity.getId())
+            .build();
+
     PasswordResetRequest resetRequest =
         PasswordResetRequest.builder()
             .emailAddress(userEntity.getEmailAddress())
-            .userId(userEntity.getId())
             .name(userEntity.getName())
-            .localAuthorityId(userEntity.getLocalAuthorityId())
-            .isNewUser(isNewUser)
+            .passwordLink(emailLink.getLink())
             .build();
 
     UUID uuid = messageApiClient.sendPasswordResetEmail(resetRequest);
-    EmailLink emailLink =
-        EmailLink.builder().uuid(uuid.toString()).userId(userEntity.getId()).build();
 
     repository.createEmailLink(emailLink);
     repository.updateUserToInactive(userEntity.getId());

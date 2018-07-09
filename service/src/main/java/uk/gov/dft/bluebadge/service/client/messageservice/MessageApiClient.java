@@ -1,14 +1,13 @@
 package uk.gov.dft.bluebadge.service.client.messageservice;
 
-import static uk.gov.dft.bluebadge.service.client.messageservice.MessageApiClient.Endpoints.SEND_EMAIL_ENDPOINT;
-
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import uk.gov.dft.bluebadge.service.client.RestTemplateFactory;
+import uk.gov.dft.bluebadge.service.client.common.ServiceConfiguration;
+import uk.gov.dft.bluebadge.service.client.messageservice.model.GenericMessageRequest;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetRequest;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.UuidResponse;
 
@@ -16,21 +15,25 @@ import uk.gov.dft.bluebadge.service.client.messageservice.model.UuidResponse;
 @Service
 public class MessageApiClient {
 
-  static class Endpoints {
-    private Endpoints() {}
+  static final String SEND_MESSAGE_URL = "/messages";
 
-    static final String SEND_EMAIL_ENDPOINT = "/messages/send***REMOVED***-email";
-  }
-
-  private MessageServiceConfiguration messageServiceConfiguration;
-
+  private ServiceConfiguration messageServiceConfiguration;
   private RestTemplateFactory restTemplateFactory;
 
   @Autowired
   public MessageApiClient(
-      MessageServiceConfiguration serviceConfiguration, RestTemplateFactory restTemplateFactory) {
-    this.messageServiceConfiguration = serviceConfiguration;
+      ServiceConfiguration messageServiceConfiguration, RestTemplateFactory restTemplateFactory) {
+    this.messageServiceConfiguration = messageServiceConfiguration;
     this.restTemplateFactory = restTemplateFactory;
+  }
+
+  private UuidResponse sendMessage(GenericMessageRequest messageRequest) {
+    return restTemplateFactory
+        .getInstance()
+        .postForObject(
+            messageServiceConfiguration.getUrlPrefix() + SEND_MESSAGE_URL,
+            messageRequest,
+            UuidResponse.class);
   }
 
   /**
@@ -39,18 +42,9 @@ public class MessageApiClient {
    */
   public UUID sendPasswordResetEmail(PasswordResetRequest resetRequest) {
     log.debug(
-        "Calling message service to request password email. User:{}", resetRequest.getUserId());
+        "Calling message service to request password email. PasswordResetRequest:{}", resetRequest);
     Assert.notNull(resetRequest, "must be set");
-
-    HttpEntity<PasswordResetRequest> request = new HttpEntity<>(resetRequest);
-
-    UuidResponse response =
-        restTemplateFactory
-            .getInstance()
-            .postForObject(
-                messageServiceConfiguration.getUrlPrefix() + SEND_EMAIL_ENDPOINT,
-                request,
-                UuidResponse.class);
+    UuidResponse response = sendMessage(resetRequest);
     return UUID.fromString(response.getData().getUuid());
   }
 }

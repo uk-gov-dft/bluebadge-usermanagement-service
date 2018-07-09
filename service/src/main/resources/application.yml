@@ -44,3 +44,6 @@ messageservice:
     requesttimeout: 6000
     contextpath: /uk-gov-dft/message-service/1.0.0
 
+la-webapp:
+  email-link-uri: http://localhost:8080/set***REMOVED***/
+

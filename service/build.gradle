@@ -68,6 +68,7 @@ dependencies {
     runtime group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.3'
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompileOnly ('org.projectlombok:lombok:1.16.22')
 }
 
 bootRun {

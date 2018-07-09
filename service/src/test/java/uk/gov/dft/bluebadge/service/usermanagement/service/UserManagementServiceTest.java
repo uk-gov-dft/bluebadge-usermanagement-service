@@ -1,5 +1,6 @@
 package uk.gov.dft.bluebadge.service.usermanagement.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -10,6 +11,7 @@ import java.util.UUID;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.Password;
@@ -23,16 +25,16 @@ import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundExc
 
 public class UserManagementServiceTest {
 
+  private static final String WEBAPP_URI = "http://somewhere";
   private UserManagementService service;
 
   @Mock private UserManagementRepository repository;
-
   @Mock private MessageApiClient messageApiClient;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    service = new UserManagementService(repository, messageApiClient);
+    service = new UserManagementService(repository, messageApiClient, WEBAPP_URI);
   }
 
   @Test
@@ -93,6 +95,7 @@ public class UserManagementServiceTest {
   public void requestPasswordResetEmail() {
     // Given a new valid user
     UserEntity user = new UserEntity();
+    user.setEmailAddress("test@email.com");
     user.setName("test");
     user.setId(-1);
 
@@ -104,7 +107,14 @@ public class UserManagementServiceTest {
     service.requestPasswordResetEmail(-1, false);
 
     // Then password reset email is created
-    verify(messageApiClient, times(1)).sendPasswordResetEmail(any(PasswordResetRequest.class));
+    ArgumentCaptor<PasswordResetRequest> passwordRequest =
+        ArgumentCaptor.forClass(PasswordResetRequest.class);
+    verify(messageApiClient, times(1)).sendPasswordResetEmail(passwordRequest.capture());
+    assertThat(passwordRequest).isNotNull();
+    assertThat(passwordRequest.getValue()).isNotNull();
+    assertThat( ***REMOVED***);
+    assertThat( ***REMOVED***);
+
     // And user is set inactive
     verify(repository).updateUserToInactive(-1);
     // And email_link is created
@@ -183,18 +193,24 @@ public class UserManagementServiceTest {
     Password password = new Password();
      ***REMOVED***);
      ***REMOVED***);
-    String uuid = UUID.randomUUID().toString();
-    EmailLink link = EmailLink.builder().userId(-1).uuid(uuid).isActive(true).build();
+    UUID uuid = UUID.randomUUID();
+    EmailLink link =
+        EmailLink.builder()
+            .webappUri(WEBAPP_URI)
+            .userId(-1)
+            .uuid(uuid.toString())
+            .isActive(true)
+            .build();
 
     when(repository.updatePassword(any())).thenReturn(1);
-    when(repository.updateEmailLinkToInvalid(uuid)).thenReturn(1);
-    when(repository.retrieveEmailLinkWithUuid(uuid)).thenReturn(link);
+    when(repository.updateEmailLinkToInvalid(uuid.toString())).thenReturn(1);
+    when(repository.retrieveEmailLinkWithUuid(uuid.toString())).thenReturn(link);
 
     // When update password requested
-    service.updatePassword(uuid, password);
+    service.updatePassword(uuid.toString(), password);
 
     // Then the email link is set inactive
-    verify(repository, times(1)).updateEmailLinkToInvalid(uuid);
+    verify(repository, times(1)).updateEmailLinkToInvalid(uuid.toString());
     // And the password is stored
     verify(repository, times(1)).updatePassword(any());
   }
@@ -205,16 +221,22 @@ public class UserManagementServiceTest {
     Password password = new Password();
      ***REMOVED***);
      ***REMOVED***);
-    String uuid = UUID.randomUUID().toString();
-    EmailLink link = EmailLink.builder().userId(-1).uuid(uuid).isActive(false).build();
+    UUID uuid = UUID.randomUUID();
+    EmailLink link =
+        EmailLink.builder()
+            .webappUri(WEBAPP_URI)
+            .userId(-1)
+            .uuid(uuid.toString())
+            .isActive(false)
+            .build();
 
-    when(repository.retrieveEmailLinkWithUuid(uuid)).thenReturn(link);
+    when(repository.retrieveEmailLinkWithUuid(uuid.toString())).thenReturn(link);
 
     // When update password requested
-    service.updatePassword(uuid, password);
+    service.updatePassword(uuid.toString(), password);
 
     // Then the email link is set inactive
-    verify(repository, never()).updateEmailLinkToInvalid(uuid);
+    verify(repository, never()).updateEmailLinkToInvalid(uuid.toString());
     // And the password is stored
     verify(repository, never()).updatePassword(any());
   }
