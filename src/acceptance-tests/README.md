@@ -2,29 +2,16 @@
 
 #### Start the usermanagement service
 
-First you need to start the usermanagement service by executing following commands
+First you need to start the user management and message services
 
 ```
-cd usermanagement-service
-git pull
-git checkout whateverbranch
-cd model
-gradle install
-cd ../client
-gradle install
-cd ..
-gradle build
 gradle bootRun
 ```
 
 #### How to run api acceptance tests
 
-You may need to install maven plugin in intellij.
-
-Then go to api-acceptance-test project and right click on pom.xml → Add as Maven project
-
 ```
-mvn clean verify -f api-acceptance-tests/pom.xml -Pacceptance-test
+gradle acceptanceTests
 ```
 
 ### Relevant Articles: 

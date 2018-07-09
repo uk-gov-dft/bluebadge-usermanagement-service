@@ -7,5 +7,5 @@ import org.junit.runner.RunWith;
 @RunWith(Karate.class)
 @CucumberOptions(features = "classpath:features")
 public class AcceptanceTest {
-    // no-op, config class only
+  // no-op, config class only
 }
