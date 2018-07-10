@@ -294,7 +294,7 @@ public class UserManagementServiceTest {
   @Test
   public void retrieveUsersByAuthorityId() {
     List<UserEntity> userList = new ArrayList<>();
-    when(repository.retrieveUsersByAuthorityId(any())).thenReturn(userList);
+    when(repository.findUsers(any())).thenReturn(userList);
     service.retrieveUsersByAuthorityId(1, "abc");
   }
 
@@ -302,7 +302,8 @@ public class UserManagementServiceTest {
   public void retrieveUserUsingUuid_ok() {
     UUID uuid = UUID.randomUUID();
     UserEntity userEntity = new UserEntity();
-    when(repository.retrieveUserUsingUuid(uuid.toString())).thenReturn(Optional.of(userEntity));
+    when(repository.retrieveUserUsingEmailLinkUuid(uuid.toString()))
+        .thenReturn(Optional.of(userEntity));
 
     Assert.assertEquals(userEntity, service.retrieveUserUsingUuid(uuid.toString()));
   }
@@ -311,7 +312,7 @@ public class UserManagementServiceTest {
   public void retrieveUserUsingUuid_no_user() {
     UUID uuid = UUID.randomUUID();
     UserEntity userEntity = new UserEntity();
-    when(repository.retrieveUserUsingUuid(uuid.toString())).thenReturn(Optional.empty());
+    when(repository.retrieveUserUsingEmailLinkUuid(uuid.toString())).thenReturn(Optional.empty());
 
     service.retrieveUserUsingUuid(uuid.toString());
   }

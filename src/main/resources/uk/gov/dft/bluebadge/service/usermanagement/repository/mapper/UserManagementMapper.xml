@@ -13,7 +13,7 @@
         WHERE u.id = #{id}
     </select>
 
-    <select id="retrieveUsersByAuthorityId" resultType="UserEntity" parameterType="UserEntity">
+    <select id="findUsers" resultType="UserEntity" parameterType="UserEntity">
         SELECT u.id, u.name
             , u.local_authority_id AS localAuthorityId
             , u.email_address AS emailAddress
@@ -79,12 +79,15 @@
         WHERE id = #{id}
     </update>
 
-    <select id="retrieveUserUsingUuid" parameterType="String" resultType="UserEntity">
+    <select id="retrieveUserUsingEmailLinkUuid" parameterType="String" resultType="UserEntity">
         SELECT u.id, u.name
-        , u.local_authority_id AS localAuthorityId
-        , u.email_address AS emailAddress
+            , u.local_authority_id AS localAuthorityId
+            , u.email_address AS emailAddress
+            , u.role_id AS roleId
+            , r.description AS roleName
         FROM users u
         INNER JOIN email_link e ON u.id = e.user_id
+        INNER JOIN roles r ON u.role_id = r.id
         WHERE e.uuid = #{uuid}
     </select>
 

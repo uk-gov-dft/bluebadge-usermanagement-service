@@ -127,7 +127,7 @@ public class UserManagementService {
     queryParams.setLocalAuthorityId(authorityId);
     queryParams.setName(nameFilter);
     queryParams.setEmailAddress(nameFilter);
-    return repository.retrieveUsersByAuthorityId(queryParams);
+    return repository.findUsers(queryParams);
   }
 
   /**
@@ -212,7 +212,7 @@ public class UserManagementService {
 
   public UserEntity retrieveUserUsingUuid(String uuid) {
 
-    Optional<UserEntity> userEntity = repository.retrieveUserUsingUuid(uuid);
+    Optional<UserEntity> userEntity = repository.retrieveUserUsingEmailLinkUuid(uuid);
     if (!userEntity.isPresent()) {
       throw new NotFoundException("user", RETRIEVE);
     }

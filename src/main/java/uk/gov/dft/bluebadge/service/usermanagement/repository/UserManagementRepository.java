@@ -42,8 +42,8 @@ public class UserManagementRepository {
    *
    * @return List of all UserEntity's.
    */
-  public List<UserEntity> retrieveUsersByAuthorityId(UserEntity userEntity) {
-    List<UserEntity> result = sqlSession.selectList("retrieveUsersByAuthorityId", userEntity);
+  public List<UserEntity> findUsers(UserEntity userEntity) {
+    List<UserEntity> result = sqlSession.selectList("findUsers", userEntity);
     if (result == null) {
       result = Lists.newArrayList();
     }
@@ -93,12 +93,13 @@ public class UserManagementRepository {
     return sqlSession.selectOne("retrieveEmailLinkWithUuid", uuid);
   }
 
-  public Optional<UserEntity> retrieveUserUsingUuid(String uuid) {
+  public Optional<UserEntity> retrieveUserUsingEmailLinkUuid(String uuid) {
     Assert.notNull(uuid, "No uuid is present");
 
-    UserEntity userEntity = sqlSession.selectOne("retrieveUserUsingUuid", uuid);
+    UserEntity userEntity = sqlSession.selectOne("retrieveUserUsingEmailLinkUuid", uuid);
     if (null == userEntity) {
-      LOGGER.info("Attempt to retrieve UserEntity id:{} that does not exist.", uuid);
+      LOGGER.info(
+          "Attempt to retrieve UserEntity by email link uuid:{} that does not exist.", uuid);
     }
 
     return Optional.ofNullable(userEntity);
