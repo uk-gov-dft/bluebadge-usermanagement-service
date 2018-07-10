@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
 import javax.validation.Valid;
 import org.springframework.validation.annotation.Validated;
-import uk.gov.dft.bluebadge.model.usermanagement.generated.CommonResponse;
+import uk.gov.dft.bluebadge.common.api.model.CommonResponse;
 
 /** UuidResponse */
 @Validated

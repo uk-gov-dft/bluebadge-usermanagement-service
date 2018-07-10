@@ -48,6 +48,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     List<UserEntity> users = userManagementRepository.findUsers(params);
     assertThat(users).extracting("localAuthorityId").containsOnly(2);
   }
+
   @Test
   public void findUsers_byAuthorityId_noResults() throws Exception {
     UserEntity params = new UserEntity();
@@ -55,6 +56,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     List<UserEntity> users = userManagementRepository.findUsers(params);
     assertThat(users).isEmpty();
   }
+
   @Test
   public void findUsers_byAuthorityIdAndName() throws Exception {
     UserEntity params = new UserEntity();
@@ -99,6 +101,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     int i = userManagementRepository.updatePassword(userEntity);
     assertThat(i).isEqualTo(1);
   }
+
   @Test
   public void updatePassword_notExist() throws Exception {
     UserEntity userEntity = new UserEntity();
@@ -137,6 +140,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
         userManagementRepository.retrieveUserUsingEmailLinkUuid(DEFAULT_USER_EMAIL_LINK_UUID);
     checkDefaultUser(userEntity);
   }
+
   @Test
   public void retrieveUserUsingEmailLinkUuid_notExist() throws Exception {
     Optional<UserEntity> userEntity =
@@ -180,6 +184,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     Optional<UserEntity> userEntity = userManagementRepository.retrieveUserById(-1);
     assertThat(userEntity.isPresent()).isFalse();
   }
+
   @Test
   public void deleteUser_notExists() throws Exception {
     int i = userManagementRepository.deleteUser(-1001);

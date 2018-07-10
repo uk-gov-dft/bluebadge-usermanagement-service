@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.dft.bluebadge.model.usermanagement.generated.ErrorErrors;
+import uk.gov.dft.bluebadge.common.api.model.ErrorErrors;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.Password;
 import uk.gov.dft.bluebadge.service.client.messageservice.MessageApiClient;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetRequest;
