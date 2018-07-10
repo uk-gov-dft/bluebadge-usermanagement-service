@@ -48,7 +48,13 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     List<UserEntity> users = userManagementRepository.findUsers(params);
     assertThat(users).extracting("localAuthorityId").containsOnly(2);
   }
-
+  @Test
+  public void findUsers_byAuthorityId_noResults() throws Exception {
+    UserEntity params = new UserEntity();
+    params.setLocalAuthorityId(200);
+    List<UserEntity> users = userManagementRepository.findUsers(params);
+    assertThat(users).isEmpty();
+  }
   @Test
   public void findUsers_byAuthorityIdAndName() throws Exception {
     UserEntity params = new UserEntity();
@@ -93,6 +99,13 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     int i = userManagementRepository.updatePassword(userEntity);
     assertThat(i).isEqualTo(1);
   }
+  @Test
+  public void updatePassword_notExist() throws Exception {
+    UserEntity userEntity = userManagementRepository.retrieveUserById(-1001).get();
+    userEntity.setPassword("newPassword");
+    int i = userManagementRepository.updatePassword(userEntity);
+    assertThat(i).isEqualTo(0);
+  }
 
   @Test
   public void retrieveEmailLinkWithUuid() throws Exception {
@@ -118,10 +131,17 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
   }
 
   @Test
-  public void retrieveUserUsingUuid() throws Exception {
+  public void retrieveUserUsingEmailLinkUuid() throws Exception {
     Optional<UserEntity> userEntity =
         userManagementRepository.retrieveUserUsingEmailLinkUuid(DEFAULT_USER_EMAIL_LINK_UUID);
     checkDefaultUser(userEntity);
+  }
+  @Test
+  public void retrieveUserUsingEmailLinkUuid_notExist() throws Exception {
+    Optional<UserEntity> userEntity =
+        userManagementRepository.retrieveUserUsingEmailLinkUuid(UUID.randomUUID().toString());
+    assertThat(userEntity).isNotNull();
+    assertThat(userEntity.isPresent()).isFalse();
   }
 
   @Test
@@ -158,6 +178,11 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
 
     Optional<UserEntity> userEntity = userManagementRepository.retrieveUserById(-1);
     assertThat(userEntity.isPresent()).isFalse();
+  }
+  @Test
+  public void deleteUser_notExists() throws Exception {
+    int i = userManagementRepository.deleteUser(-1001);
+    assertThat(i).isEqualTo(0);
   }
 
   @Test
