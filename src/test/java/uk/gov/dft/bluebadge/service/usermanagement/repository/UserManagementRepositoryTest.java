@@ -101,7 +101,8 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
   }
   @Test
   public void updatePassword_notExist() throws Exception {
-    UserEntity userEntity = userManagementRepository.retrieveUserById(-1001).get();
+    UserEntity userEntity = new UserEntity();
+    userEntity.setId(-1001);
     userEntity.setPassword("newPassword");
     int i = userManagementRepository.updatePassword(userEntity);
     assertThat(i).isEqualTo(0);
