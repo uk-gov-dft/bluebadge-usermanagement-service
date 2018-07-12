@@ -1,1 +1,1 @@
-include 'model', 'service'
+include 'database-schema'
