@@ -14,6 +14,7 @@ node {
     stage ('Gradle build') {
         try {
             sh './gradlew clean build bootJar artifactoryPublish artifactoryDeploy'
+            sh 'bash scripts/upload-artifacts.sh'
         }
         finally {
             junit '**/TEST*.xml'
