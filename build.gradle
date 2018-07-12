@@ -28,11 +28,11 @@ def getTheVersion() {
                 gitBranch = 'SNAPSHOT'
             }
             if (gitBranch == 'master') {
-                versionSuffix = '' 
+                versionSuffix = ''
             } else {
                 versionSuffix = '-' + gitBranch
             }
-            
+
         }
     } catch (e) {
     }
@@ -70,7 +70,7 @@ artifactory {
         publishArtifacts=true
         publishPom=true
         defaults {
-            publications('project_model', 'project_service')
+            publications('project_model', 'project_service', 'project_schema')
             publishArtifacts=true
             publishPom=true
         }
@@ -142,4 +142,13 @@ task generateService(dependsOn: 'unzipGenerated', type: Sync){
     exclude '**/RFC3339DateFormat.java'
     exclude '**/*ApiController.java'
     into "service/src/generated/java/uk/gov/dft/bluebadge/service/usermanagement/generated"
+}
+
+task createDatabaseSchemaZip(type: Zip) {
+    def targetFilename = getTheVersion() + "_schema.zip"
+    from 'database-schema/'
+    include '*'
+    include '*/*'
+    archiveName targetFilename
+    destinationDir(file("service/build/database-schema"))
 }
