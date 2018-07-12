@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiFunction;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,9 +18,14 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.dft.bluebadge.common.api.model.ErrorErrors;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.Password;
 import uk.gov.dft.bluebadge.service.client.messageservice.MessageApiClient;
+import uk.gov.dft.bluebadge.service.client.messageservice.model.GenericMessageRequest;
+import uk.gov.dft.bluebadge.service.client.messageservice.model.NewUserRequest;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetRequest;
+import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetSuccessRequest;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.LocalAuthorityRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.LocalAuthorityEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException;
@@ -29,22 +35,24 @@ import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundExc
 @Slf4j
 public class UserManagementService {
 
-  private final UserManagementRepository repository;
+  private final UserManagementRepository userManagementRepository;
+  private final LocalAuthorityRepository localAuthorityRepository;
   private final MessageApiClient messageApiClient;
   private final String laWebappEmailLinkURI;
 
   @Autowired
   UserManagementService(
       UserManagementRepository repository,
-      MessageApiClient messageApiClient,
+      LocalAuthorityRepository localAuthorityRepository, MessageApiClient messageApiClient,
       @Value("${la-webapp.email-link-uri}") String laWebappEmailLinkURI) {
-    this.repository = repository;
+    this.userManagementRepository = repository;
+    this.localAuthorityRepository = localAuthorityRepository;
     this.messageApiClient = messageApiClient;
     this.laWebappEmailLinkURI = laWebappEmailLinkURI;
   }
 
   public UserEntity retrieveUserById(Integer userId) {
-    Optional<UserEntity> userEntity = repository.retrieveUserById(userId);
+    Optional<UserEntity> userEntity = userManagementRepository.retrieveUserById(userId);
     if (!userEntity.isPresent()) {
       log.info("Request to retrieve user id:{} that did not exist", userId);
       throw new NotFoundException("user", RETRIEVE);
@@ -64,31 +72,45 @@ public class UserManagementService {
       log.debug("Business validation failed for user:{}", userEntity.getName());
       throw new BadRequestException(businessErrors);
     }
-    repository.createUser(userEntity);
-    requestPasswordResetEmail(userEntity);
+    userManagementRepository.createUser(userEntity);
+    requestEmailLinkMessage(userEntity, (ue, el)->buildNewUserRequestDetails(ue, el));
     log.debug("Created user {}", userEntity.getId());
   }
 
-  private void requestPasswordResetEmail(UserEntity userEntity) {
-    EmailLink emailLink =
-        EmailLink.builder()
-            .webappUri(this.laWebappEmailLinkURI)
-            .uuid(UUID.randomUUID().toString())
-            .userId(userEntity.getId())
-            .build();
-
-    PasswordResetRequest resetRequest =
-        PasswordResetRequest.builder()
-            .emailAddress(userEntity.getEmailAddress())
-            .name(userEntity.getName())
-            .passwordLink(emailLink.getLink())
-            .build();
-
-    messageApiClient.sendPasswordResetEmail(resetRequest);
-
-    repository.createEmailLink(emailLink);
-    repository.updateUserToInactive(userEntity.getId());
+  private void requestEmailLinkMessage(UserEntity userEntity,
+                                       BiFunction<UserEntity, EmailLink, ? extends GenericMessageRequest> messageDetailsFunc) {
+    EmailLink emailLink = createEmailLink(userEntity);
+    GenericMessageRequest messageDetails = messageDetailsFunc.apply(userEntity, emailLink);
+    messageApiClient.sendEmailLinkMessage(messageDetails);
+    userManagementRepository.updateUserToInactive(userEntity.getId());
     log.debug("Successfully changed password for user:{}", userEntity.getId());
+  }
+
+  private PasswordResetRequest buildPasswordRequestDetails(UserEntity ue, EmailLink el){
+    return PasswordResetRequest.builder()
+        .emailAddress(ue.getEmailAddress())
+        .fullName(ue.getName())
+        .passwordLink(el.getLink())
+        .build();
+  }
+  private NewUserRequest buildNewUserRequestDetails(UserEntity ue, EmailLink el){
+    LocalAuthorityEntity localAuthority = localAuthorityRepository.retrieveLocalAuthorityById(ue.getLocalAuthorityId());
+    return NewUserRequest.builder()
+        .emailAddress(ue.getEmailAddress())
+        .fullName(ue.getName())
+        .passwordLink(el.getLink())
+        .localAuthorityName(localAuthority.getName())
+        .build();
+  }
+
+  private EmailLink createEmailLink(UserEntity userEntity) {
+    EmailLink emailLink = EmailLink.builder()
+        .webappUri(this.laWebappEmailLinkURI)
+        .uuid(UUID.randomUUID().toString())
+        .userId(userEntity.getId())
+        .build();
+    userManagementRepository.createEmailLink(emailLink);
+    return emailLink;
   }
 
   /**
@@ -98,14 +120,14 @@ public class UserManagementService {
    */
   public void requestPasswordResetEmail(int userId) {
     log.debug("Resetting password for user:{}", userId);
-    Optional<UserEntity> optionalUserEntity = repository.retrieveUserById(userId);
+    Optional<UserEntity> optionalUserEntity = userManagementRepository.retrieveUserById(userId);
     UserEntity userEntity;
     if (optionalUserEntity.isPresent()) {
       userEntity = optionalUserEntity.get();
     } else {
       throw new NotFoundException("user", RETRIEVE);
     }
-    requestPasswordResetEmail(userEntity);
+    requestEmailLinkMessage(userEntity, (ue, el)->buildPasswordRequestDetails(ue, el));
   }
 
   /**
@@ -114,7 +136,7 @@ public class UserManagementService {
    * @param id PK of user to delete.
    */
   public void deleteUser(int id) {
-    if (repository.deleteUser(id) == 0) {
+    if (userManagementRepository.deleteUser(id) == 0) {
       throw new NotFoundException("user", DELETE);
     }
   }
@@ -127,7 +149,7 @@ public class UserManagementService {
     queryParams.setLocalAuthorityId(authorityId);
     queryParams.setName(nameFilter);
     queryParams.setEmailAddress(nameFilter);
-    return repository.findUsers(queryParams);
+    return userManagementRepository.findUsers(queryParams);
   }
 
   /**
@@ -139,7 +161,7 @@ public class UserManagementService {
   private List<ErrorErrors> businessValidateUser(UserEntity userEntity) {
     List<ErrorErrors> errorsList = null;
 
-    if (repository.emailAddressAlreadyUsed(userEntity)) {
+    if (userManagementRepository.emailAddressAlreadyUsed(userEntity)) {
       ErrorErrors error = new ErrorErrors();
       error
           .field("emailAddress")
@@ -163,7 +185,7 @@ public class UserManagementService {
     if (null != businessErrors) {
       throw new BadRequestException(businessErrors);
     }
-    if (repository.updateUser(userEntity) == 0) {
+    if (userManagementRepository.updateUser(userEntity) == 0) {
       throw new NotFoundException("user", UPDATE);
     }
   }
@@ -184,7 +206,7 @@ public class UserManagementService {
       throw new BadRequestException(error);
     }
 
-    EmailLink link = this.repository.retrieveEmailLinkWithUuid(uuid);
+    EmailLink link = this.userManagementRepository.retrieveEmailLinkWithUuid(uuid);
 
     if (link == null || !link.getIsActive()) {
       ErrorErrors error = new ErrorErrors();
@@ -203,16 +225,23 @@ public class UserManagementService {
     user.setId(link.getUserId());
     user.setPassword(hash);
 
-    repository.updateEmailLinkToInvalid(uuid);
+    userManagementRepository.updateEmailLinkToInvalid(uuid);
     log.debug("Passwords updated. {}", uuid);
-    if (repository.updatePassword(user) == 0) {
+    if (userManagementRepository.updatePassword(user) == 0) {
       throw new NotFoundException("user", UPDATE);
     }
+
+    Optional<UserEntity> userEntity = userManagementRepository.retrieveUserById(link.getUserId());
+    PasswordResetSuccessRequest passwordResetSuccessRequest = PasswordResetSuccessRequest.builder()
+        .emailAddress(userEntity.get().getEmailAddress())
+        .fullName(userEntity.get().getName())
+        .build();
+    messageApiClient.sendPasswordResetSuccessMessage(passwordResetSuccessRequest);
   }
 
   public UserEntity retrieveUserUsingUuid(String uuid) {
 
-    Optional<UserEntity> userEntity = repository.retrieveUserUsingEmailLinkUuid(uuid);
+    Optional<UserEntity> userEntity = userManagementRepository.retrieveUserUsingEmailLinkUuid(uuid);
     if (!userEntity.isPresent()) {
       throw new NotFoundException("user", RETRIEVE);
     }

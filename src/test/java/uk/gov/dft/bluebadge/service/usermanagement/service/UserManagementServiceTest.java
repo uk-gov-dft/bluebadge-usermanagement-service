@@ -17,6 +17,7 @@ import org.mockito.MockitoAnnotations;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.Password;
 import uk.gov.dft.bluebadge.service.client.messageservice.MessageApiClient;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetRequest;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.LocalAuthorityRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
@@ -29,12 +30,13 @@ public class UserManagementServiceTest {
   private UserManagementService service;
 
   @Mock private UserManagementRepository repository;
+  @Mock private LocalAuthorityRepository localAuthorityRepository;
   @Mock private MessageApiClient messageApiClient;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    service = new UserManagementService(repository, messageApiClient, WEBAPP_URI);
+    service = new UserManagementService(repository, localAuthorityRepository, messageApiClient, WEBAPP_URI);
   }
 
   @Test
