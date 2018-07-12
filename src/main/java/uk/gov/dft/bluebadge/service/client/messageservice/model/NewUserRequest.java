@@ -14,7 +14,9 @@ public class NewUserRequest extends GenericMessageRequest {
 
   @Builder
   private NewUserRequest(
-      @NonNull String emailAddress, @NonNull String fullName, @NonNull String localAuthorityName,
+      @NonNull String emailAddress,
+      @NonNull String fullName,
+      @NonNull String localAuthorityName,
       @NonNull String passwordLink) {
     super(
         NEW_USER_TEMPLATE,

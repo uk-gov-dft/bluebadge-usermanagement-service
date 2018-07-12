@@ -43,7 +43,8 @@ public class UserManagementService {
   @Autowired
   UserManagementService(
       UserManagementRepository repository,
-      LocalAuthorityRepository localAuthorityRepository, MessageApiClient messageApiClient,
+      LocalAuthorityRepository localAuthorityRepository,
+      MessageApiClient messageApiClient,
       @Value("${la-webapp.email-link-uri}") String laWebappEmailLinkURI) {
     this.userManagementRepository = repository;
     this.localAuthorityRepository = localAuthorityRepository;
@@ -73,12 +74,13 @@ public class UserManagementService {
       throw new BadRequestException(businessErrors);
     }
     userManagementRepository.createUser(userEntity);
-    requestEmailLinkMessage(userEntity, (ue, el)->buildNewUserRequestDetails(ue, el));
+    requestEmailLinkMessage(userEntity, (ue, el) -> buildNewUserRequestDetails(ue, el));
     log.debug("Created user {}", userEntity.getId());
   }
 
-  private void requestEmailLinkMessage(UserEntity userEntity,
-                                       BiFunction<UserEntity, EmailLink, ? extends GenericMessageRequest> messageDetailsFunc) {
+  private void requestEmailLinkMessage(
+      UserEntity userEntity,
+      BiFunction<UserEntity, EmailLink, ? extends GenericMessageRequest> messageDetailsFunc) {
     EmailLink emailLink = createEmailLink(userEntity);
     GenericMessageRequest messageDetails = messageDetailsFunc.apply(userEntity, emailLink);
     messageApiClient.sendEmailLinkMessage(messageDetails);
@@ -86,15 +88,17 @@ public class UserManagementService {
     log.debug("Successfully changed password for user:{}", userEntity.getId());
   }
 
-  private PasswordResetRequest buildPasswordRequestDetails(UserEntity ue, EmailLink el){
+  private PasswordResetRequest buildPasswordRequestDetails(UserEntity ue, EmailLink el) {
     return PasswordResetRequest.builder()
         .emailAddress(ue.getEmailAddress())
         .fullName(ue.getName())
         .passwordLink(el.getLink())
         .build();
   }
-  private NewUserRequest buildNewUserRequestDetails(UserEntity ue, EmailLink el){
-    LocalAuthorityEntity localAuthority = localAuthorityRepository.retrieveLocalAuthorityById(ue.getLocalAuthorityId());
+
+  private NewUserRequest buildNewUserRequestDetails(UserEntity ue, EmailLink el) {
+    LocalAuthorityEntity localAuthority =
+        localAuthorityRepository.retrieveLocalAuthorityById(ue.getLocalAuthorityId());
     return NewUserRequest.builder()
         .emailAddress(ue.getEmailAddress())
         .fullName(ue.getName())
@@ -104,11 +108,12 @@ public class UserManagementService {
   }
 
   private EmailLink createEmailLink(UserEntity userEntity) {
-    EmailLink emailLink = EmailLink.builder()
-        .webappUri(this.laWebappEmailLinkURI)
-        .uuid(UUID.randomUUID().toString())
-        .userId(userEntity.getId())
-        .build();
+    EmailLink emailLink =
+        EmailLink.builder()
+            .webappUri(this.laWebappEmailLinkURI)
+            .uuid(UUID.randomUUID().toString())
+            .userId(userEntity.getId())
+            .build();
     userManagementRepository.createEmailLink(emailLink);
     return emailLink;
   }
@@ -127,7 +132,7 @@ public class UserManagementService {
     } else {
       throw new NotFoundException("user", RETRIEVE);
     }
-    requestEmailLinkMessage(userEntity, (ue, el)->buildPasswordRequestDetails(ue, el));
+    requestEmailLinkMessage(userEntity, (ue, el) -> buildPasswordRequestDetails(ue, el));
   }
 
   /**
@@ -232,10 +237,11 @@ public class UserManagementService {
     }
 
     Optional<UserEntity> userEntity = userManagementRepository.retrieveUserById(link.getUserId());
-    PasswordResetSuccessRequest passwordResetSuccessRequest = PasswordResetSuccessRequest.builder()
-        .emailAddress(userEntity.get().getEmailAddress())
-        .fullName(userEntity.get().getName())
-        .build();
+    PasswordResetSuccessRequest passwordResetSuccessRequest =
+        PasswordResetSuccessRequest.builder()
+            .emailAddress(userEntity.get().getEmailAddress())
+            .fullName(userEntity.get().getName())
+            .build();
     messageApiClient.sendPasswordResetSuccessMessage(passwordResetSuccessRequest);
   }
 

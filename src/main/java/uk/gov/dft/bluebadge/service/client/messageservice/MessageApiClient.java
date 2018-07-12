@@ -48,16 +48,16 @@ public class MessageApiClient {
     UuidResponse response = sendMessage(resetRequest);
     return UUID.fromString(response.getData().getUuid());
   }
+
   public UUID sendEmailLinkMessage(GenericMessageRequest resetRequest) {
-    log.debug(
-        "Calling message service to request email link message:{}", resetRequest);
+    log.debug("Calling message service to request email link message:{}", resetRequest);
     Assert.notNull(resetRequest, "must be set");
     UuidResponse response = sendMessage(resetRequest);
     return UUID.fromString(response.getData().getUuid());
   }
+
   public UUID sendPasswordResetSuccessMessage(PasswordResetSuccessRequest request) {
-    log.debug(
-        "Calling message service to request message:{}", request);
+    log.debug("Calling message service to request message:{}", request);
     Assert.notNull(request, "must be set");
     UuidResponse response = sendMessage(request);
     return UUID.fromString(response.getData().getUuid());

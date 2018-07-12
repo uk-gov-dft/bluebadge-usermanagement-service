@@ -15,12 +15,12 @@ import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.LocalAuthor
 public class LocalAuthorityRepositoryTest extends ApplicationContextTests {
   public static final int LOCAL_AUTHORITY_ID = 2;
 
-  @Autowired
-  LocalAuthorityRepository localAuthorityRepository;
+  @Autowired LocalAuthorityRepository localAuthorityRepository;
 
   @Test
   public void retrieveUserById_exists() throws Exception {
-    LocalAuthorityEntity localAuthority = localAuthorityRepository.retrieveLocalAuthorityById(LOCAL_AUTHORITY_ID);
+    LocalAuthorityEntity localAuthority =
+        localAuthorityRepository.retrieveLocalAuthorityById(LOCAL_AUTHORITY_ID);
     assertThat(localAuthority).isNotNull();
     assertThat(localAuthority.getId()).isEqualTo(LOCAL_AUTHORITY_ID);
     assertThat(localAuthority.getName()).isEqualTo("Aberdeenshire Council");
@@ -29,7 +29,8 @@ public class LocalAuthorityRepositoryTest extends ApplicationContextTests {
 
   @Test
   public void retrieveUserById_notExists() throws Exception {
-    LocalAuthorityEntity localAuthority = localAuthorityRepository.retrieveLocalAuthorityById(-99999);
+    LocalAuthorityEntity localAuthority =
+        localAuthorityRepository.retrieveLocalAuthorityById(-99999);
     assertThat(localAuthority).isNull();
   }
 }

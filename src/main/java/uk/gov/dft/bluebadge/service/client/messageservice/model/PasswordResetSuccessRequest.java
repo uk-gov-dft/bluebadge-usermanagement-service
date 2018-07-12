@@ -11,14 +11,11 @@ public class PasswordResetSuccessRequest extends GenericMessageRequest {
   private String fullName;
 
   @Builder
-  private PasswordResetSuccessRequest(
-      @NonNull String emailAddress, @NonNull String fullName) {
+  private PasswordResetSuccessRequest(@NonNull String emailAddress, @NonNull String fullName) {
     super(
         PASSWORD_RESET_SUCCESS_TEMPLATE,
         emailAddress,
-        ImmutableMap.<String, String>builder()
-            .put("fullName", fullName)
-            .build());
+        ImmutableMap.<String, String>builder().put("fullName", fullName).build());
     this.fullName = fullName;
   }
 }

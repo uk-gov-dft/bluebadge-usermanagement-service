@@ -1,9 +1,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="uk.gov.dft.bluebadge.service.usermanagement.repository.mapper.UserManagementMapper">
-    <select id="retrieveLocalAuthorityById" resultType="LocalAuthority" parameterType="Integer">
-        SELECT la.id, la.name, la.local_authority_area_id
+<mapper namespace="uk.gov.dft.bluebadge.service.usermanagement.repository.mapper.LocalAuthorityMapper">
+    <select id="retrieveLocalAuthorityById" resultType="LocalAuthorityEntity" parameterType="Integer">
+        SELECT la.id, la.name, la.local_authority_area_id as areaName
         FROM local_authority la
         WHERE la.id = #{id}
     </select>

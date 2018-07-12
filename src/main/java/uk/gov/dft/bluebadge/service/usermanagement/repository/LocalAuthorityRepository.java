@@ -8,7 +8,7 @@ import uk.gov.dft.bluebadge.service.usermanagement.repository.mapper.LocalAuthor
 
 @Component
 @Slf4j
-public class LocalAuthorityRepository implements LocalAuthorityMapper{
+public class LocalAuthorityRepository implements LocalAuthorityMapper {
   private final SqlSession sqlSession;
 
   public LocalAuthorityRepository(SqlSession sqlSession) {
