@@ -194,7 +194,7 @@ artifactory {
         publishArtifacts=true
         publishPom=true
         defaults {
-            publications('project_model', 'project_service', 'project_schema')
+            publications('project_model', 'project_service')
             publishArtifacts=true
             publishPom=true
         }
