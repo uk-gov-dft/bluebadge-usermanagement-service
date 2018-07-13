@@ -8,7 +8,6 @@ import org.springframework.util.Assert;
 import uk.gov.dft.bluebadge.service.client.RestTemplateFactory;
 import uk.gov.dft.bluebadge.service.client.common.ServiceConfiguration;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.GenericMessageRequest;
-
 import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetSuccessRequest;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.UuidResponse;
 
