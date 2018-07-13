@@ -62,7 +62,7 @@ public class MessageApiClientTest extends ApplicationContextTests {
     mockServer
         .expect(once(), requestTo(serviceConfiguration.getUrlPrefix() + SEND_MESSAGE_URL))
         .andExpect(method(HttpMethod.POST))
-        .andExpect(jsonPath("template", equalTo("PASSWORD_RESET_TEMPLATE")))
+        .andExpect(jsonPath("template", equalTo("RESET_PASSWORD")))
         .andExpect(jsonPath("emailAddress", equalTo("bob@bob.com")))
         .andExpect(jsonPath("attributes.fullName", equalTo("bob")))
         .andExpect(jsonPath("attributes. ***REMOVED***)))
@@ -74,7 +74,7 @@ public class MessageApiClientTest extends ApplicationContextTests {
             .fullName("bob")
             . ***REMOVED***)
             .build();
-    UUID uuid = client.sendPasswordResetEmail(passwordResetRequest);
+    UUID uuid = client.sendEmailLinkMessage(passwordResetRequest);
 
     assertThat(uuid).isNotNull();
     assertThat(uuid.toString()).isEqualTo(uuidResponse.getData().getUuid());
@@ -89,14 +89,14 @@ public class MessageApiClientTest extends ApplicationContextTests {
         .andExpect(jsonPath("template", equalTo("NEW_USER")))
         .andExpect(jsonPath("emailAddress", equalTo("bob@bob.com")))
         .andExpect(jsonPath("attributes.fullName", equalTo("bob")))
-        .andExpect(jsonPath("attributes.localAuthorityName", equalTo("Cumbria")))
+        .andExpect(jsonPath("attributes.localAuthority", equalTo("Cumbria")))
         .andExpect(jsonPath("attributes. ***REMOVED***)))
         .andRespond(withSuccess(om.writeValueAsString(uuidResponse), MediaType.APPLICATION_JSON));
 
     NewUserRequest newUserRequest =
         NewUserRequest.builder()
             .emailAddress("bob@bob.com")
-            .localAuthorityName("Cumbria")
+            .localAuthority("Cumbria")
             .fullName("bob")
             . ***REMOVED***)
             .build();
@@ -118,10 +118,7 @@ public class MessageApiClientTest extends ApplicationContextTests {
         .andRespond(withSuccess(om.writeValueAsString(uuidResponse), MediaType.APPLICATION_JSON));
 
     PasswordResetSuccessRequest passwordResetSuccessRequest =
-        PasswordResetSuccessRequest.builder()
-            .emailAddress("bob@bob.com")
-            .fullName("bob")
-            .build();
+        PasswordResetSuccessRequest.builder().emailAddress("bob@bob.com").fullName("bob").build();
 
     UUID uuid = client.sendPasswordResetSuccessMessage(passwordResetSuccessRequest);
 

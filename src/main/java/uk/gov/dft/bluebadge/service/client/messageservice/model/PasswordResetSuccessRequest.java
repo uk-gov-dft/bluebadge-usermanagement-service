@@ -7,7 +7,9 @@ import lombok.NonNull;
 
 @Getter
 public class PasswordResetSuccessRequest extends GenericMessageRequest {
+  /** This is the name of the template within the Message service */
   public static final String PASSWORD_RESET_SUCCESS_TEMPLATE = "PASSWORD_RESET_SUCCESS";
+
   private String fullName;
 
   @Builder

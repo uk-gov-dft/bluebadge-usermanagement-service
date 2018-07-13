@@ -103,7 +103,7 @@ public class UserManagementService {
         .emailAddress(ue.getEmailAddress())
         .fullName(ue.getName())
         .passwordLink(el.getLink())
-        .localAuthorityName(localAuthority.getName())
+        .localAuthority(localAuthority.getName())
         .build();
   }
 

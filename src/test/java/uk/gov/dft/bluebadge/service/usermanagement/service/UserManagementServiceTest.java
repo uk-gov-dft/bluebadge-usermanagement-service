@@ -57,8 +57,6 @@ public class UserManagementServiceTest {
 
     when(repository.emailAddressAlreadyUsed(user)).thenReturn(false);
     when(localAuthorityRepository.retrieveLocalAuthorityById(99)).thenReturn(localAuthority);
-    when(messageApiClient.sendPasswordResetEmail(any(PasswordResetRequest.class)))
-        .thenReturn(UUID.randomUUID());
 
     // When user is created
     service.createUser(user);
@@ -85,7 +83,7 @@ public class UserManagementServiceTest {
     user.setEmailAddress("ggg");
 
     when(repository.emailAddressAlreadyUsed(user)).thenReturn(true);
-    when(messageApiClient.sendPasswordResetEmail(any(PasswordResetRequest.class)))
+    when(messageApiClient.sendEmailLinkMessage(any(PasswordResetRequest.class)))
         .thenReturn(UUID.randomUUID());
 
     // When user is created
@@ -96,7 +94,7 @@ public class UserManagementServiceTest {
     // And user is not created
     verify(repository, never()).createUser(user);
     // And password reset email is not created
-    verify(messageApiClient, never()).sendPasswordResetEmail(any(PasswordResetRequest.class));
+    verify(messageApiClient, never()).sendEmailLinkMessage(any(PasswordResetRequest.class));
     // And user is not set inactive
     verify(repository, never()).updateUserToInactive(-1);
     // And email_link is not created
@@ -111,7 +109,7 @@ public class UserManagementServiceTest {
     user.setName("test");
     user.setId(-1);
 
-    when(messageApiClient.sendPasswordResetEmail(any(PasswordResetRequest.class)))
+    when(messageApiClient.sendEmailLinkMessage(any(PasswordResetRequest.class)))
         .thenReturn(UUID.randomUUID());
 
     when(repository.retrieveUserById(-1)).thenReturn(Optional.of(user));
@@ -232,7 +230,8 @@ public class UserManagementServiceTest {
 
     ArgumentCaptor<PasswordResetSuccessRequest> passwordSuccessRequest =
         ArgumentCaptor.forClass(PasswordResetSuccessRequest.class);
-    verify(messageApiClient, times(1)).sendPasswordResetSuccessMessage(passwordSuccessRequest.capture());
+    verify(messageApiClient, times(1))
+        .sendPasswordResetSuccessMessage(passwordSuccessRequest.capture());
     assertThat(passwordSuccessRequest).isNotNull();
     assertThat(passwordSuccessRequest.getValue()).isNotNull();
     assertThat( ***REMOVED***);

@@ -3,6 +3,10 @@ Feature: Verify users Delete
 
   Background:
     * url baseUrl
+    * def dbConfig = { username: 'developer',  ***REMOVED*** }
+    * def DbUtils = Java.type('uk.gov.service.bluebadge.test.utils.DbUtils')
+    * def db = new DbUtils(dbConfig)
+    * def setup = db.runScript('acceptance-test-data.sql')
 
   Scenario: Verify delete not exists
     Given path 'users/-100000'

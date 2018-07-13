@@ -7,7 +7,9 @@ import lombok.NonNull;
 
 @Getter
 public class PasswordResetRequest extends GenericMessageRequest {
-  public static final String PASSWORD_RESET_TEMPLATE = "PASSWORD_RESET_TEMPLATE";
+  /** This is the name of the template within the Message service */
+  public static final String PASSWORD_RESET_TEMPLATE = "RESET_PASSWORD";
+
   private String fullName;
   private String passwordLink;
 
