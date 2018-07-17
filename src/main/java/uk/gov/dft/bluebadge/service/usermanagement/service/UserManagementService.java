@@ -37,7 +37,7 @@ public class UserManagementService {
   UserManagementService(
       UserManagementRepository repository,
       MessageApiClient messageApiClient,
-      @Value("${la-webapp.email-link-uri}") String laWebappEmailLinkURI) {
+      @Value("${blue-badge.la-webapp.email-link-uri}") String laWebappEmailLinkURI) {
     this.repository = repository;
     this.messageApiClient = messageApiClient;
     this.laWebappEmailLinkURI = laWebappEmailLinkURI;

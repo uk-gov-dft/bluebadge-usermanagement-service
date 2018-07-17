@@ -1,3 +1,18 @@
+blue-badge:
+  auth-server:
+    url: http://localhost:8380/bbb_auth
+    client-id: bbb_user_management_id
+     ***REMOVED***
+  messageservice:
+    servicehost:
+      host: localhost
+      port: 8480
+      scheme: http
+      connectiontimeout: 6000
+      requesttimeout: 6000
+      contextpath: /uk-gov-dft/message-service/1.0.0
+  la-webapp:
+    email-link-uri: http://localhost:8080/set***REMOVED***/
 
 logging:
   level:
@@ -35,15 +50,4 @@ server:
 
 springfox.documentation.swagger.v2.path: /api-docs
 
-messageservice:
-  servicehost:
-    host: localhost
-    port: 8480
-    scheme: http
-    connectiontimeout: 6000
-    requesttimeout: 6000
-    contextpath: /uk-gov-dft/message-service/1.0.0
-
-la-webapp:
-  email-link-uri: http://localhost:8080/set***REMOVED***/
 
