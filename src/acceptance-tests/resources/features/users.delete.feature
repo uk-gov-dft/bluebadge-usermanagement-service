@@ -3,6 +3,8 @@ Feature: Verify users Delete
 
   Background:
     * url baseUrl
+    * def result = callonce read('./oauth2.feature')
+    * header Authorization = 'Bearer ' + result.accessToken
 
   Scenario: Verify delete not exists
     Given path 'users/-100000'

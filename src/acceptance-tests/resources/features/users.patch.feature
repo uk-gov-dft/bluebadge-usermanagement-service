@@ -3,6 +3,8 @@ Feature: Verify users update
 
   Background:
     * url baseUrl
+    * def result = callonce read('./oauth2.feature')
+    * header Authorization = 'Bearer ' + result.accessToken
 
   Scenario: Update password
     Given path 'user/password/4175e31c-9c0c-41c0-9afb-40dc0a89b9c5'
