@@ -16,9 +16,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.Password;
 import uk.gov.dft.bluebadge.service.client.messageservice.MessageApiClient;
+import uk.gov.dft.bluebadge.service.client.messageservice.model.NewUserRequest;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetRequest;
+import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetSuccessRequest;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.LocalAuthorityRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.LocalAuthorityEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException;
@@ -29,12 +33,15 @@ public class UserManagementServiceTest {
   private UserManagementService service;
 
   @Mock private UserManagementRepository repository;
+  @Mock private LocalAuthorityRepository localAuthorityRepository;
   @Mock private MessageApiClient messageApiClient;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    service = new UserManagementService(repository, messageApiClient, WEBAPP_URI);
+    service =
+        new UserManagementService(
+            repository, localAuthorityRepository, messageApiClient, WEBAPP_URI);
   }
 
   @Test
@@ -44,10 +51,12 @@ public class UserManagementServiceTest {
     user.setName("test");
     user.setId(-1);
     user.setEmailAddress("ggg");
+    user.setLocalAuthorityId(99);
+    LocalAuthorityEntity localAuthority = new LocalAuthorityEntity();
+    localAuthority.setName("Bob");
 
     when(repository.emailAddressAlreadyUsed(user)).thenReturn(false);
-    when(messageApiClient.sendPasswordResetEmail(any(PasswordResetRequest.class)))
-        .thenReturn(UUID.randomUUID());
+    when(localAuthorityRepository.retrieveLocalAuthorityById(99)).thenReturn(localAuthority);
 
     // When user is created
     service.createUser(user);
@@ -57,11 +66,12 @@ public class UserManagementServiceTest {
     // And user is created
     verify(repository, times(1)).createUser(user);
     // And password reset email is created
-    verify(messageApiClient, times(1)).sendPasswordResetEmail(any(PasswordResetRequest.class));
+    verify(messageApiClient, times(1)).sendEmailLinkMessage(any(NewUserRequest.class));
     // And user is set inactive
     verify(repository, times(1)).updateUserToInactive(-1);
     // And email_link is created
     verify(repository, times(1)).createEmailLink(any(EmailLink.class));
+    verify(localAuthorityRepository, times(1)).retrieveLocalAuthorityById(99);
   }
 
   @Test(expected = BadRequestException.class)
@@ -73,7 +83,7 @@ public class UserManagementServiceTest {
     user.setEmailAddress("ggg");
 
     when(repository.emailAddressAlreadyUsed(user)).thenReturn(true);
-    when(messageApiClient.sendPasswordResetEmail(any(PasswordResetRequest.class)))
+    when(messageApiClient.sendEmailLinkMessage(any(PasswordResetRequest.class)))
         .thenReturn(UUID.randomUUID());
 
     // When user is created
@@ -84,7 +94,7 @@ public class UserManagementServiceTest {
     // And user is not created
     verify(repository, never()).createUser(user);
     // And password reset email is not created
-    verify(messageApiClient, never()).sendPasswordResetEmail(any(PasswordResetRequest.class));
+    verify(messageApiClient, never()).sendEmailLinkMessage(any(PasswordResetRequest.class));
     // And user is not set inactive
     verify(repository, never()).updateUserToInactive(-1);
     // And email_link is not created
@@ -99,7 +109,7 @@ public class UserManagementServiceTest {
     user.setName("test");
     user.setId(-1);
 
-    when(messageApiClient.sendPasswordResetEmail(any(PasswordResetRequest.class)))
+    when(messageApiClient.sendEmailLinkMessage(any(PasswordResetRequest.class)))
         .thenReturn(UUID.randomUUID());
 
     when(repository.retrieveUserById(-1)).thenReturn(Optional.of(user));
@@ -109,7 +119,7 @@ public class UserManagementServiceTest {
     // Then password reset email is created
     ArgumentCaptor<PasswordResetRequest> passwordRequest =
         ArgumentCaptor.forClass(PasswordResetRequest.class);
-    verify(messageApiClient, times(1)).sendPasswordResetEmail(passwordRequest.capture());
+    verify(messageApiClient, times(1)).sendEmailLinkMessage(passwordRequest.capture());
     assertThat(passwordRequest).isNotNull();
     assertThat(passwordRequest.getValue()).isNotNull();
     assertThat( ***REMOVED***);
@@ -201,10 +211,14 @@ public class UserManagementServiceTest {
             .uuid(uuid.toString())
             .isActive(true)
             .build();
+    UserEntity userEntity = new UserEntity();
+    userEntity.setName("Jane Test");
+    userEntity.setEmailAddress("janetest@email.com");
 
     when(repository.updatePassword(any())).thenReturn(1);
     when(repository.updateEmailLinkToInvalid(uuid.toString())).thenReturn(1);
     when(repository.retrieveEmailLinkWithUuid(uuid.toString())).thenReturn(link);
+    when(repository.retrieveUserById(-1)).thenReturn(Optional.of(userEntity));
 
     // When update password requested
     service.updatePassword(uuid.toString(), password);
@@ -213,6 +227,15 @@ public class UserManagementServiceTest {
     verify(repository, times(1)).updateEmailLinkToInvalid(uuid.toString());
     // And the password is stored
     verify(repository, times(1)).updatePassword(any());
+
+    ArgumentCaptor<PasswordResetSuccessRequest> passwordSuccessRequest =
+        ArgumentCaptor.forClass(PasswordResetSuccessRequest.class);
+    verify(messageApiClient, times(1))
+        .sendPasswordResetSuccessMessage(passwordSuccessRequest.capture());
+    assertThat(passwordSuccessRequest).isNotNull();
+    assertThat(passwordSuccessRequest.getValue()).isNotNull();
+    assertThat( ***REMOVED***);
+    assertThat( ***REMOVED***);
   }
 
   @Test(expected = BadRequestException.class)

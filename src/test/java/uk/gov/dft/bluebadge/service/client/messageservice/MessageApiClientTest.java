@@ -26,7 +26,9 @@ import uk.gov.dft.bluebadge.service.ApplicationContextTests;
 import uk.gov.dft.bluebadge.service.client.RestTemplateFactory;
 import uk.gov.dft.bluebadge.service.client.TestServiceConfiguration;
 import uk.gov.dft.bluebadge.service.client.common.ServiceConfiguration;
+import uk.gov.dft.bluebadge.service.client.messageservice.model.NewUserRequest;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetRequest;
+import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetSuccessRequest;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.UuidResponse;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.UuidResponseData;
 
@@ -60,19 +62,65 @@ public class MessageApiClientTest extends ApplicationContextTests {
     mockServer
         .expect(once(), requestTo(serviceConfiguration.getUrlPrefix() + SEND_MESSAGE_URL))
         .andExpect(method(HttpMethod.POST))
-        .andExpect(jsonPath("template", equalTo(PasswordResetRequest.PASSWORD_RESET_TEMPLATE)))
+        .andExpect(jsonPath("template", equalTo("RESET_PASSWORD")))
         .andExpect(jsonPath("emailAddress", equalTo("bob@bob.com")))
-        .andExpect(jsonPath("attributes.name", equalTo("bob")))
+        .andExpect(jsonPath("attributes.fullName", equalTo("bob")))
         .andExpect(jsonPath("attributes. ***REMOVED***)))
         .andRespond(withSuccess(om.writeValueAsString(uuidResponse), MediaType.APPLICATION_JSON));
 
     PasswordResetRequest passwordResetRequest =
         PasswordResetRequest.builder()
             .emailAddress("bob@bob.com")
-            .name("bob")
+            .fullName("bob")
             . ***REMOVED***)
             .build();
-    UUID uuid = client.sendPasswordResetEmail(passwordResetRequest);
+    UUID uuid = client.sendEmailLinkMessage(passwordResetRequest);
+
+    assertThat(uuid).isNotNull();
+    assertThat(uuid.toString()).isEqualTo(uuidResponse.getData().getUuid());
+  }
+
+  @SneakyThrows
+  @Test
+  public void whenNewUserRequest_thenGenericMessageSent_andAttributesSet() {
+    mockServer
+        .expect(once(), requestTo(serviceConfiguration.getUrlPrefix() + SEND_MESSAGE_URL))
+        .andExpect(method(HttpMethod.POST))
+        .andExpect(jsonPath("template", equalTo("NEW_USER")))
+        .andExpect(jsonPath("emailAddress", equalTo("bob@bob.com")))
+        .andExpect(jsonPath("attributes.fullName", equalTo("bob")))
+        .andExpect(jsonPath("attributes.localAuthority", equalTo("Cumbria")))
+        .andExpect(jsonPath("attributes. ***REMOVED***)))
+        .andRespond(withSuccess(om.writeValueAsString(uuidResponse), MediaType.APPLICATION_JSON));
+
+    NewUserRequest newUserRequest =
+        NewUserRequest.builder()
+            .emailAddress("bob@bob.com")
+            .localAuthority("Cumbria")
+            .fullName("bob")
+            . ***REMOVED***)
+            .build();
+    UUID uuid = client.sendEmailLinkMessage(newUserRequest);
+
+    assertThat(uuid).isNotNull();
+    assertThat(uuid.toString()).isEqualTo(uuidResponse.getData().getUuid());
+  }
+
+  @SneakyThrows
+  @Test
+  public void whenPasswordResetSuccessRequest_thenGenericMessageSent_andAttributesSet() {
+    mockServer
+        .expect(once(), requestTo(serviceConfiguration.getUrlPrefix() + SEND_MESSAGE_URL))
+        .andExpect(method(HttpMethod.POST))
+        .andExpect(jsonPath("template", equalTo("PASSWORD_RESET_SUCCESS")))
+        .andExpect(jsonPath("emailAddress", equalTo("bob@bob.com")))
+        .andExpect(jsonPath("attributes.fullName", equalTo("bob")))
+        .andRespond(withSuccess(om.writeValueAsString(uuidResponse), MediaType.APPLICATION_JSON));
+
+    PasswordResetSuccessRequest passwordResetSuccessRequest =
+        PasswordResetSuccessRequest.builder().emailAddress("bob@bob.com").fullName("bob").build();
+
+    UUID uuid = client.sendPasswordResetSuccessMessage(passwordResetSuccessRequest);
 
     assertThat(uuid).isNotNull();
     assertThat(uuid.toString()).isEqualTo(uuidResponse.getData().getUuid());

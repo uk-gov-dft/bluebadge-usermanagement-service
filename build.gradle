@@ -66,6 +66,12 @@ sourceSets {
     }
 }
 
+idea{
+    module{
+        testSourceDirs += file('src/acceptance-tests/java')
+    }
+}
+
 configurations {
     acceptanceTestsCompile.extendsFrom testCompile
     acceptanceTestsRuntime.extendsFrom testRuntime
@@ -111,11 +117,12 @@ dependencies {
     testCompileOnly ('org.projectlombok:lombok:1.16.22')
 
     //	Acceptance test
-    testCompile group: 'com.intuit.karate', name: 'karate-apache', version: '0.7.0.2'
-    testCompile group: 'com.intuit.karate', name: 'karate-junit4', version: '0.7.0.2'
-    testCompile group: 'info.cukes', name: 'cucumber-java', version:'1.2.5'
-    testCompile group: 'info.cukes', name: 'cucumber-junit', version:'1.2.5'
-    testCompile group: 'info.cukes', name: 'cucumber-spring', version:'1.2.5'
+    acceptanceTestsCompile group: 'com.intuit.karate', name: 'karate-apache', version: '0.7.0.2'
+    acceptanceTestsCompile group: 'com.intuit.karate', name: 'karate-junit4', version: '0.7.0.2'
+    acceptanceTestsCompile group: 'info.cukes', name: 'cucumber-java', version:'1.2.5'
+    acceptanceTestsCompile group: 'info.cukes', name: 'cucumber-junit', version:'1.2.5'
+    acceptanceTestsCompile group: 'info.cukes', name: 'cucumber-spring', version:'1.2.5'
+    acceptanceTestsCompileOnly ('org.projectlombok:lombok:1.16.22')
 }
 
 task acceptanceTests(type:Test){
