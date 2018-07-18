@@ -15,7 +15,7 @@ node {
         // Set Environment Vairable if the CI env variable is set.
         if (env.CI) {
             environment {
-                spring.datasource.url = 'jdbc:postgresql://postgresql:5432/bb_dev?currentSchema=usermanagement'
+                SPRING_APPLICATION_JSON = '{"spring":{"datasource":{"url":"jdbc:postgresql://postgresql:5432/bb_dev?currentSchema=usermanagement"}}}'
             }
         }
         try {
