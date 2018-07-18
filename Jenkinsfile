@@ -13,8 +13,8 @@ node {
 
     stage ('Gradle build') {
         // Set Environment Vairable if the CI env variable is set.
-        environment {
-            SPRING_APPLICATION_JSON = '{"spring":{"datasource":{"url":"jdbc:postgresql://postgresql:5432/bb_dev?currentSchema=usermanagement"}}}'
+        script {
+            env.SPRING_APPLICATION_JSON = '{"spring":{"datasource":{"url":"jdbc:postgresql://postgresql:5432/bb_dev?currentSchema=usermanagement"}}}'
         }
         try {
             sh './gradlew clean build bootJar createDatabaseSchemaZip artifactoryPublish artifactoryDeploy'
