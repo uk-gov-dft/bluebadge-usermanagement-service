@@ -12,6 +12,12 @@ node {
      }
 
     stage ('Gradle build') {
+        // Set Environment Vairable if the CI env variable is set.
+        if (env.CI) {
+            environment {
+                spring.datasource.url = 'jdbc:postgresql://postgresql:5432/bb_dev?currentSchema=usermanagement'
+            }
+        }
         try {
             sh './gradlew clean build bootJar createDatabaseSchemaZip artifactoryPublish artifactoryDeploy'
             // sh 'bash scripts/upload-artifacts.sh'
