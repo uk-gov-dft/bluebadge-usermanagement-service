@@ -8,7 +8,7 @@ import uk.gov.dft.bluebadge.service.client.common.ServiceConfiguration;
 @Configuration
 public class ApiConfig {
 
-  @ConfigurationProperties("messageservice.servicehost")
+  @ConfigurationProperties("blue-badge.messageservice.servicehost")
   @Bean
   public ServiceConfiguration messageServiceConfiguration() {
     return ServiceConfiguration.builder().build();
