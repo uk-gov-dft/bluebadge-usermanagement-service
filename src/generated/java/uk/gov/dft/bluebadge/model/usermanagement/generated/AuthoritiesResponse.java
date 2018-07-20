@@ -1,7 +1,6 @@
 package uk.gov.dft.bluebadge.model.usermanagement.generated;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
