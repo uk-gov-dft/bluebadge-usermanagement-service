@@ -26,6 +26,8 @@
           AND (UPPER(u.name) LIKE UPPER(#{name}) OR UPPER(u.email_address)
             LIKE UPPER(#{emailAddress}))
         </if>
+        ORDER BY u.name ASC
+        LIMIT 50
     </select>
 
     <select id="emailAddressAlreadyUsed" resultType="boolean" parameterType="UserEntity">

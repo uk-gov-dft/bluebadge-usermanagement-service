@@ -2,9 +2,9 @@ package uk.gov.dft.bluebadge.service.usermanagement.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
+import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +65,36 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     List<UserEntity> users = userManagementRepository.findUsers(params);
     assertThat(users).extracting("localAuthorityId").containsOnly(2);
     assertThat(users).extracting("name").containsOnly("Sampath");
+  }
+
+  @Test
+  public void findUsers_byAuthorityIdAndName_ShouldReturn50FirstResultsOrderByNameAscendingOrder() {
+    final int FIRST_ID = 200000;
+    final int LAST_ID = FIRST_ID + 100;
+    final int RESULTS_LIMIT = 50;
+
+    List<UserEntity> userEntityList = Lists.newArrayList();
+    for (int id = LAST_ID; id > FIRST_ID; id--) {
+      UserEntity userEntity =
+          createUserExample(id, "Jane" + id, "jane" + id + "@jane.com", 45, 2, "LA Admin");
+      userManagementRepository.createUser(userEntity);
+      userEntityList.add(userEntity);
+    }
+    UserEntity params = new UserEntity();
+    params.setLocalAuthorityId(45);
+    params.setName("Jane%");
+    List<UserEntity> users = userManagementRepository.findUsers(params);
+
+    for (int id = LAST_ID; id > FIRST_ID; id--) {
+      userManagementRepository.deleteUser(id);
+    }
+
+    Collections.sort(userEntityList, (u1, u2) -> u1.getName().compareTo(u2.getName()));
+    List<UserEntity> expectedUerEntityList =
+        userEntityList.stream().limit(RESULTS_LIMIT).collect(Collectors.toList());
+
+    assertThat(users).hasSize(RESULTS_LIMIT);
+    assertThat(users).isEqualTo(expectedUerEntityList);
   }
 
   @Test
@@ -233,6 +263,18 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     assertThat(userEntity.getLocalAuthorityId()).isEqualTo(2);
     assertThat(userEntity.getRoleId()).isEqualTo(2);
     assertThat(userEntity.getRoleName()).isEqualTo("LA Admin");
+    return userEntity;
+  }
+
+  private UserEntity createUserExample(
+      int id, String name, String emailAddress, int localAuthority, int roleId, String roleName) {
+    UserEntity userEntity = new UserEntity();
+    userEntity.setId(id);
+    userEntity.setName(name);
+    userEntity.setEmailAddress(emailAddress);
+    userEntity.setLocalAuthorityId(localAuthority);
+    userEntity.setRoleId(roleId);
+    userEntity.setRoleName(roleName);
     return userEntity;
   }
 }
