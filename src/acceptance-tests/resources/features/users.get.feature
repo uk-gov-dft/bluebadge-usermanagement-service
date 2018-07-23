@@ -3,6 +3,8 @@ Feature: Verify users retrieval
 
   Background:
     * url baseUrl
+    * def result = callonce read('./oauth2.feature')
+    * header Authorization = 'Bearer ' + result.accessToken
 
   Scenario: Verify retrieve all users for an authority
     Given path 'users'
