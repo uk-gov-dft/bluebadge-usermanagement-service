@@ -1,3 +1,4 @@
+SET search_path TO usermanagement;
 -- TODO remove next deletes once they have had time to percolate through environments
 DELETE FROM users WHERE name LIKE '%Sampath%';
 DELETE FROM users WHERE name = 'nobody';
