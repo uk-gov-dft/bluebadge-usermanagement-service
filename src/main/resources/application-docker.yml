@@ -1,0 +1,30 @@
+blue-badge:
+  auth-server:
+    url: http://authorisation-service:8380/bb_auth
+    client-id: bb_user_management_id
+     ***REMOVED***
+  messageservice:
+    servicehost:
+      host: badgemanagement-service
+      port: 8480
+      scheme: http
+      connectiontimeout: 6000
+      requesttimeout: 6000
+      contextpath: /uk-gov-dft/message-service/1.0.0
+  la-webapp:
+    email-link-uri: http://localhost:8080/set***REMOVED***/
+
+logging:
+  level:
+    root: ${APP_LOGGING_LEVEL:-INFO}
+    sample.mybatis.mapper: WARN
+    uk.gov.dft.bluebadge.service: ${APP_LOGGING_LEVEL:-DEBUG}
+
+spring:
+  datasource:
+     ***REMOVED***
+    username: developer
+    url: jdbc:postgresql://postgresql:5432/bb_dev?currentSchema=usermanagement
+
+
+
