@@ -13,14 +13,29 @@ import org.springframework.test.context.jdbc.SqlGroup;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.dft.bluebadge.service.ApplicationContextTests;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.DeleteUserParams;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.RetrieveUserByIdParams;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 
 @RunWith(SpringRunner.class)
 @SqlGroup({@Sql(scripts = "classpath:/test-data.sql")})
 @Transactional
 public class UserManagementRepositoryTest extends ApplicationContextTests {
-  public static final int DEFAULT_USER_ID = -1;
+  private static final int DEFAULT_USER_ID = -1;
+  private static final int DEFAULT_LOCAL_AUTHORITY = 2;
+  private static final int OTHER_LOCAL_AUTHORITY = 45;
+  private static final RetrieveUserByIdParams DEFAULT_RETRIEVE_BY_USER_ID_PARAMS =
+      RetrieveUserByIdParams.builder()
+          .userId(DEFAULT_USER_ID)
+          .localAuthority(DEFAULT_LOCAL_AUTHORITY)
+          .build();
+  private static final DeleteUserParams DEFAULT_DELETE_USER_PARAMS =
+      DeleteUserParams.builder()
+          .userId(DEFAULT_USER_ID)
+          .localAuthority(DEFAULT_LOCAL_AUTHORITY)
+          .build();
+
   public static final String DEFAULT_USER_EMAIL_LINK_UUID = "7d75652a-4e84-41e2-bd82-e5b5933b81da";
 
   @Autowired UserManagementRepository userManagementRepository;
@@ -28,7 +43,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
   @Test
   public void retrieveUserById_exists() throws Exception {
     Optional<UserEntity> maybeUserEntity =
-        userManagementRepository.retrieveUserById(DEFAULT_USER_ID);
+        userManagementRepository.retrieveUserById(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS);
     UserEntity userEntity = checkDefaultUser(maybeUserEntity);
 
     assertThat(userEntity.getPassword()).isNull();
@@ -36,7 +51,13 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
 
   @Test
   public void retrieveUserById_notExists() throws Exception {
-    Optional<UserEntity> maybeUserEntity = userManagementRepository.retrieveUserById(-99999);
+    RetrieveUserByIdParams params =
+        RetrieveUserByIdParams.builder()
+            .userId(-99999)
+            .localAuthority(DEFAULT_LOCAL_AUTHORITY)
+            .build();
+
+    Optional<UserEntity> maybeUserEntity = userManagementRepository.retrieveUserById(params);
     assertThat(maybeUserEntity).isNotNull();
     assertThat(maybeUserEntity.isPresent()).isFalse();
   }
@@ -68,7 +89,8 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
   }
 
   @Test
-  public void findUsers_byAuthorityIdAndName_ShouldReturn50FirstResultsOrderByNameAscendingOrder() {
+  public void
+      findUsers_byAuthorityIdAndName_ShouldReturn50FirstResultsOrderedByNameAscendingOrder() {
     final int FIRST_ID = 200000;
     final int LAST_ID = FIRST_ID + 100;
     final int RESULTS_LIMIT = 50;
@@ -76,17 +98,20 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     List<UserEntity> userEntityList = Lists.newArrayList();
     for (int id = LAST_ID; id > FIRST_ID; id--) {
       UserEntity userEntity =
-          createUserExample(id, "Jane" + id, "jane" + id + "@jane.com", 45, 2, "LA Admin");
+          createUserEntityExample(
+              id, "Jane" + id, "jane" + id + "@jane.com", OTHER_LOCAL_AUTHORITY, 2, "LA Admin");
       userManagementRepository.createUser(userEntity);
       userEntityList.add(userEntity);
     }
     UserEntity params = new UserEntity();
-    params.setLocalAuthorityId(45);
+    params.setLocalAuthorityId(OTHER_LOCAL_AUTHORITY);
     params.setName("Jane%");
     List<UserEntity> users = userManagementRepository.findUsers(params);
 
     for (int id = LAST_ID; id > FIRST_ID; id--) {
-      userManagementRepository.deleteUser(id);
+      DeleteUserParams deleteParams =
+          DeleteUserParams.builder().userId(id).localAuthority(OTHER_LOCAL_AUTHORITY).build();
+      userManagementRepository.deleteUser(deleteParams);
     }
 
     Collections.sort(userEntityList, (u1, u2) -> u1.getName().compareTo(u2.getName()));
@@ -99,20 +124,22 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
 
   @Test
   public void updateUser_fieldsUpdated() throws Exception {
-    UserEntity userEntity = userManagementRepository.retrieveUserById(-1).get();
+    UserEntity userEntity =
+        userManagementRepository.retrieveUserById(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS).get();
     userEntity.setName("Bob");
     userEntity.setEmailAddress("bob@bob.com");
-    userEntity.setLocalAuthorityId(99);
+    userEntity.setLocalAuthorityId(DEFAULT_LOCAL_AUTHORITY);
     userEntity.setRoleId(3);
 
     int i = userManagementRepository.updateUser(userEntity);
     assertThat(i).isEqualTo(1);
 
-    UserEntity updatedUserEntity = userManagementRepository.retrieveUserById(-1).get();
+    UserEntity updatedUserEntity =
+        userManagementRepository.retrieveUserById(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS).get();
     assertThat(updatedUserEntity).isNotSameAs(userEntity);
     assertThat(updatedUserEntity.getName()).isEqualTo("Bob");
     assertThat(updatedUserEntity.getEmailAddress()).isEqualTo("bob@bob.com");
-    assertThat(updatedUserEntity.getLocalAuthorityId()).isEqualTo(99);
+    assertThat(updatedUserEntity.getLocalAuthorityId()).isEqualTo(DEFAULT_LOCAL_AUTHORITY);
     assertThat(updatedUserEntity.getRoleId()).isEqualTo(3);
   }
 
@@ -126,7 +153,8 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
 
   @Test
   public void updatePassword() throws Exception {
-    UserEntity userEntity = userManagementRepository.retrieveUserById(-1).get();
+    UserEntity userEntity =
+        userManagementRepository.retrieveUserById(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS).get();
     userEntity.setPassword("newPassword");
     int i = userManagementRepository.updatePassword(userEntity);
     assertThat(i).isEqualTo(1);
@@ -184,13 +212,13 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     UserEntity userEntity = new UserEntity();
     userEntity.setName("Jane");
     userEntity.setEmailAddress("jane@jane.com");
-    userEntity.setLocalAuthorityId(45);
+    userEntity.setLocalAuthorityId(OTHER_LOCAL_AUTHORITY);
     userEntity.setRoleId(2);
 
     userManagementRepository.createUser(userEntity);
 
     UserEntity search = new UserEntity();
-    search.setLocalAuthorityId(45);
+    search.setLocalAuthorityId(OTHER_LOCAL_AUTHORITY);
     search.setName("Jane");
     search.setEmailAddress("jane@jane.com");
     List<UserEntity> users = userManagementRepository.findUsers(search);
@@ -201,23 +229,26 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     assertThat(updatedUser.getId()).isNotNull();
     assertThat(updatedUser.getName()).isEqualTo("Jane");
     assertThat(updatedUser.getEmailAddress()).isEqualTo("jane@jane.com");
-    assertThat(updatedUser.getLocalAuthorityId()).isEqualTo(45);
+    assertThat(updatedUser.getLocalAuthorityId()).isEqualTo(OTHER_LOCAL_AUTHORITY);
     assertThat(updatedUser.getRoleId()).isEqualTo(2);
     assertThat(updatedUser.getRoleName()).isEqualTo("LA Admin");
   }
 
   @Test
   public void deleteUser() throws Exception {
-    int i = userManagementRepository.deleteUser(-1);
-    assertThat(i).isEqualTo(1);
+    int deletedRecords = userManagementRepository.deleteUser(DEFAULT_DELETE_USER_PARAMS);
+    assertThat(deletedRecords).isEqualTo(1);
 
-    Optional<UserEntity> userEntity = userManagementRepository.retrieveUserById(-1);
-    assertThat(userEntity.isPresent()).isFalse();
+    Optional<UserEntity> userEntity =
+        userManagementRepository.retrieveUserById(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS);
+    assertThat(userEntity).isEmpty();
   }
 
   @Test
   public void deleteUser_notExists() throws Exception {
-    int i = userManagementRepository.deleteUser(-1001);
+    DeleteUserParams deleteParams =
+        DeleteUserParams.builder().userId(-1001).localAuthority(DEFAULT_LOCAL_AUTHORITY).build();
+    int i = userManagementRepository.deleteUser(deleteParams);
     assertThat(i).isEqualTo(0);
   }
 
@@ -266,7 +297,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     return userEntity;
   }
 
-  private UserEntity createUserExample(
+  private UserEntity createUserEntityExample(
       int id, String name, String emailAddress, int localAuthority, int roleId, String roleName) {
     UserEntity userEntity = new UserEntity();
     userEntity.setId(id);
