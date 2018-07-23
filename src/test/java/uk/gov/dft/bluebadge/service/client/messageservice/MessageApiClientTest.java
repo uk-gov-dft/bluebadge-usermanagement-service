@@ -22,6 +22,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 import uk.gov.dft.bluebadge.service.ApplicationContextTests;
 import uk.gov.dft.bluebadge.service.client.RestTemplateFactory;
 import uk.gov.dft.bluebadge.service.client.TestServiceConfiguration;
@@ -34,23 +35,20 @@ import uk.gov.dft.bluebadge.service.client.messageservice.model.UuidResponseData
 
 @RunWith(MockitoJUnitRunner.class)
 public class MessageApiClientTest extends ApplicationContextTests {
-  @Mock private RestTemplateFactory mockRestTemplateFactory;
+  public static final String TEST_URI = "http://justtesting:7777/test";
 
   private MessageApiClient client;
   private MockRestServiceServer mockServer;
   private ObjectMapper om = new ObjectMapper();
   private UuidResponse uuidResponse;
-  private ServiceConfiguration serviceConfiguration;
 
   @Before
   public void setUp() throws Exception {
     RestTemplate restTemplate = new RestTemplate();
+    restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(TEST_URI));
     mockServer = MockRestServiceServer.bindTo(restTemplate).build();
-    when(mockRestTemplateFactory.getInstance()).thenReturn(restTemplate);
 
-    serviceConfiguration = TestServiceConfiguration.full().contextpath("testMessageClient").build();
-
-    client = new MessageApiClient(serviceConfiguration, mockRestTemplateFactory);
+    client = new MessageApiClient(restTemplate);
 
     UUID uuid = UUID.randomUUID();
     uuidResponse = new UuidResponse().data(new UuidResponseData().uuid(uuid.toString()));
@@ -60,7 +58,7 @@ public class MessageApiClientTest extends ApplicationContextTests {
   @Test
   public void whenPasswordResetRequest_thenGenericMessageSent_andAttributesSet() {
     mockServer
-        .expect(once(), requestTo(serviceConfiguration.getUrlPrefix() + SEND_MESSAGE_URL))
+        .expect(once(), requestTo(TEST_URI + SEND_MESSAGE_URL))
         .andExpect(method(HttpMethod.POST))
         .andExpect(jsonPath("template", equalTo("RESET_PASSWORD")))
         .andExpect(jsonPath("emailAddress", equalTo("bob@bob.com")))
@@ -84,7 +82,7 @@ public class MessageApiClientTest extends ApplicationContextTests {
   @Test
   public void whenNewUserRequest_thenGenericMessageSent_andAttributesSet() {
     mockServer
-        .expect(once(), requestTo(serviceConfiguration.getUrlPrefix() + SEND_MESSAGE_URL))
+        .expect(once(), requestTo(TEST_URI + SEND_MESSAGE_URL))
         .andExpect(method(HttpMethod.POST))
         .andExpect(jsonPath("template", equalTo("NEW_USER")))
         .andExpect(jsonPath("emailAddress", equalTo("bob@bob.com")))
@@ -110,7 +108,7 @@ public class MessageApiClientTest extends ApplicationContextTests {
   @Test
   public void whenPasswordResetSuccessRequest_thenGenericMessageSent_andAttributesSet() {
     mockServer
-        .expect(once(), requestTo(serviceConfiguration.getUrlPrefix() + SEND_MESSAGE_URL))
+        .expect(once(), requestTo(TEST_URI + SEND_MESSAGE_URL))
         .andExpect(method(HttpMethod.POST))
         .andExpect(jsonPath("template", equalTo("PASSWORD_RESET_SUCCESS")))
         .andExpect(jsonPath("emailAddress", equalTo("bob@bob.com")))
