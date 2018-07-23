@@ -1,12 +1,9 @@
 blue-badge:
   auth-server:
-    url: http://authorisation-service:8080/bb_auth
-    client-id: bb_user_management_id
-     ***REMOVED***
+    url: http://authorisation-service:8380/bb_auth
   messageservice:
     servicehost:
       host: message-service
-      port: 8080
   la-webapp:
       email-link-uri: ${LA-WEBAPP_URL}/set***REMOVED***/
 
@@ -18,8 +15,6 @@ logging:
 
 spring:
   datasource:
-     ***REMOVED***
-    username: developer
     url: jdbc:postgresql://postgresql:5432/bb_dev?currentSchema=usermanagement
 
 
