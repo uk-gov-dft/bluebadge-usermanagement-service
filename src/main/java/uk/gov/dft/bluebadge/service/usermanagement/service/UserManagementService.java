@@ -195,7 +195,7 @@ public class UserManagementService {
     log.debug("Updated user {}", userEntity.getId());
   }
 
-  // localAuthority? Yes
+  // localAuthority? No
   /** Update user password. */
   public void updatePassword(String uuid, Password passwords) {
 
@@ -236,10 +236,8 @@ public class UserManagementService {
     if (userManagementRepository.updatePassword(user) == 0) {
       throw new NotFoundException("user", UPDATE);
     }
-    // TODO: Check with Rob if we can know the localAuthority:
-    // 1 Maybe we need a retrieve user without local authority, if we do not care about it in this method
-    // 2 If we do care, maybe we have to check before we try to update the password.
-    RetrieveUserByIdParams params = getRetrieveUserByIdParams(link.getUserId());
+    RetrieveUserByIdParams params =
+        RetrieveUserByIdParams.builder().userId(link.getUserId()).build();
     Optional<UserEntity> userEntity = userManagementRepository.retrieveUserById(params);
     PasswordResetSuccessRequest passwordResetSuccessRequest =
         PasswordResetSuccessRequest.builder()

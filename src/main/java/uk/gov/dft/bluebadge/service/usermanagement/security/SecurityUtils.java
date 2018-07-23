@@ -5,7 +5,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.User;
 
-// TODO: Review with Stephen what we need and what we dont.
 @Component
 public class SecurityUtils {
   private User getCurrentUserDetails() {
@@ -17,7 +16,7 @@ public class SecurityUtils {
     }
 
     User userData = new User();
-    userData.setLocalAuthorityId(22);
+    userData.setLocalAuthorityId(2);
     userData.setEmailAddress(authentication.getName());
     userData.setName("TODO SecurityUtils");
     // @see uk.gov.dft.bluebadge.webapp.la.controller.CreateANewUserController.submit()
