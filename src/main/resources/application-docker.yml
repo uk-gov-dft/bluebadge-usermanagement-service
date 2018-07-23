@@ -5,14 +5,13 @@ blue-badge:
      ***REMOVED***
   messageservice:
     servicehost:
-      host: badgemanagement-service
+      host: message-service
       port: 8480
       scheme: http
       connectiontimeout: 6000
       requesttimeout: 6000
-      contextpath: /uk-gov-dft/message-service/1.0.0
   la-webapp:
-    email-link-uri: http://localhost:8080/set***REMOVED***/
+      email-link-uri: ${LA-WEBAPP_URL}/set***REMOVED***/
 
 logging:
   level:
