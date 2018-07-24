@@ -3,6 +3,8 @@ Feature: Verify users update
 
   Background:
     * url baseUrl
+    * def result = callonce read('./oauth2.feature')
+    * header Authorization = 'Bearer ' + result.accessToken
 
   Scenario: Update User Missing email and name as only spaces
     Given path 'users/-1'
