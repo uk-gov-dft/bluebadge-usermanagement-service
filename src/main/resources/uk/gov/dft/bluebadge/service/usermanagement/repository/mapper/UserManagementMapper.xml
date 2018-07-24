@@ -24,14 +24,15 @@
             , r.description AS roleName
         FROM users u
         INNER JOIN roles r ON u.role_id = r.id
-        WHERE u.local_authority_id = #{localAuthorityId}
-        <if test="name != null">
-          AND (UPPER(u.name) LIKE UPPER(#{name}) OR UPPER(u.email_address)
-            LIKE UPPER(#{emailAddress}))
-        </if>
-        <if test="localAuthorityId != null">
-            AND u.local_authority_id = #{localAuthorityId}
-        </if>
+        <where>
+            <if test="localAuthorityId != null">
+                AND u.local_authority_id = #{localAuthorityId}
+            </if>
+            <if test="name != null">
+              AND (UPPER(u.name) LIKE UPPER(#{name}) OR UPPER(u.email_address)
+                LIKE UPPER(#{emailAddress}))
+            </if>
+        </where>
         ORDER BY u.name ASC
         LIMIT 50
     </select>

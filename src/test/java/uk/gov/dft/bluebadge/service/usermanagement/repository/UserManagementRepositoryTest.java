@@ -23,17 +23,19 @@ import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 @Transactional
 public class UserManagementRepositoryTest extends ApplicationContextTests {
   private static final int DEFAULT_USER_ID = -1;
-  private static final int DEFAULT_LOCAL_AUTHORITY = 2;
-  private static final int OTHER_LOCAL_AUTHORITY = 45;
+  private static final int DEFAULT_LOCAL_AUTHORITY_ID = 2;
+  private static final int OTHER_LOCAL_AUTHORITY_ID = 45;
   private static final RetrieveUserByIdParams DEFAULT_RETRIEVE_BY_USER_ID_PARAMS =
       RetrieveUserByIdParams.builder()
           .userId(DEFAULT_USER_ID)
-          .localAuthority(DEFAULT_LOCAL_AUTHORITY)
+          .localAuthority(DEFAULT_LOCAL_AUTHORITY_ID)
           .build();
+  private static final RetrieveUserByIdParams NO_LOCAL_AUTHORITY_RETRIEVE_BY_USER_ID_PARAMS =
+      RetrieveUserByIdParams.builder().userId(DEFAULT_USER_ID).localAuthority(null).build();
   private static final DeleteUserParams DEFAULT_DELETE_USER_PARAMS =
       DeleteUserParams.builder()
           .userId(DEFAULT_USER_ID)
-          .localAuthority(DEFAULT_LOCAL_AUTHORITY)
+          .localAuthority(DEFAULT_LOCAL_AUTHORITY_ID)
           .build();
 
   public static final String DEFAULT_USER_EMAIL_LINK_UUID = "7d75652a-4e84-41e2-bd82-e5b5933b81da";
@@ -50,11 +52,32 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
   }
 
   @Test
+  public void retrieveUserById_existsAndNoLocalAuthorityProvided() throws Exception {
+    Optional<UserEntity> maybeUserEntity =
+        userManagementRepository.retrieveUserById(NO_LOCAL_AUTHORITY_RETRIEVE_BY_USER_ID_PARAMS);
+    UserEntity userEntity = checkDefaultUser(maybeUserEntity);
+
+    assertThat(userEntity.getPassword()).isNull();
+  }
+
+  @Test
+  public void retrieveUserById_existsInDifferentLocalAuthority() throws Exception {
+    RetrieveUserByIdParams params =
+        RetrieveUserByIdParams.builder()
+            .userId(DEFAULT_USER_ID)
+            .localAuthority(OTHER_LOCAL_AUTHORITY_ID)
+            .build();
+    Optional<UserEntity> maybeUserEntity = userManagementRepository.retrieveUserById(params);
+
+    assertThat(maybeUserEntity).isEmpty();
+  }
+
+  @Test
   public void retrieveUserById_notExists() throws Exception {
     RetrieveUserByIdParams params =
         RetrieveUserByIdParams.builder()
             .userId(-99999)
-            .localAuthority(DEFAULT_LOCAL_AUTHORITY)
+            .localAuthority(DEFAULT_LOCAL_AUTHORITY_ID)
             .build();
 
     Optional<UserEntity> maybeUserEntity = userManagementRepository.retrieveUserById(params);
@@ -99,18 +122,18 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     for (int id = LAST_ID; id > FIRST_ID; id--) {
       UserEntity userEntity =
           createUserEntityExample(
-              id, "Jane" + id, "jane" + id + "@jane.com", OTHER_LOCAL_AUTHORITY, 2, "LA Admin");
+              id, "Jane" + id, "jane" + id + "@jane.com", OTHER_LOCAL_AUTHORITY_ID, 2, "LA Admin");
       userManagementRepository.createUser(userEntity);
       userEntityList.add(userEntity);
     }
     UserEntity params = new UserEntity();
-    params.setLocalAuthorityId(OTHER_LOCAL_AUTHORITY);
+    params.setLocalAuthorityId(OTHER_LOCAL_AUTHORITY_ID);
     params.setName("Jane%");
     List<UserEntity> users = userManagementRepository.findUsers(params);
 
     for (int id = LAST_ID; id > FIRST_ID; id--) {
       DeleteUserParams deleteParams =
-          DeleteUserParams.builder().userId(id).localAuthority(OTHER_LOCAL_AUTHORITY).build();
+          DeleteUserParams.builder().userId(id).localAuthority(OTHER_LOCAL_AUTHORITY_ID).build();
       userManagementRepository.deleteUser(deleteParams);
     }
 
@@ -128,7 +151,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
         userManagementRepository.retrieveUserById(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS).get();
     userEntity.setName("Bob");
     userEntity.setEmailAddress("bob@bob.com");
-    userEntity.setLocalAuthorityId(DEFAULT_LOCAL_AUTHORITY);
+    userEntity.setLocalAuthorityId(DEFAULT_LOCAL_AUTHORITY_ID);
     userEntity.setRoleId(3);
 
     int i = userManagementRepository.updateUser(userEntity);
@@ -139,7 +162,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     assertThat(updatedUserEntity).isNotSameAs(userEntity);
     assertThat(updatedUserEntity.getName()).isEqualTo("Bob");
     assertThat(updatedUserEntity.getEmailAddress()).isEqualTo("bob@bob.com");
-    assertThat(updatedUserEntity.getLocalAuthorityId()).isEqualTo(DEFAULT_LOCAL_AUTHORITY);
+    assertThat(updatedUserEntity.getLocalAuthorityId()).isEqualTo(DEFAULT_LOCAL_AUTHORITY_ID);
     assertThat(updatedUserEntity.getRoleId()).isEqualTo(3);
   }
 
@@ -212,13 +235,13 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     UserEntity userEntity = new UserEntity();
     userEntity.setName("Jane");
     userEntity.setEmailAddress("jane@jane.com");
-    userEntity.setLocalAuthorityId(OTHER_LOCAL_AUTHORITY);
+    userEntity.setLocalAuthorityId(OTHER_LOCAL_AUTHORITY_ID);
     userEntity.setRoleId(2);
 
     userManagementRepository.createUser(userEntity);
 
     UserEntity search = new UserEntity();
-    search.setLocalAuthorityId(OTHER_LOCAL_AUTHORITY);
+    search.setLocalAuthorityId(OTHER_LOCAL_AUTHORITY_ID);
     search.setName("Jane");
     search.setEmailAddress("jane@jane.com");
     List<UserEntity> users = userManagementRepository.findUsers(search);
@@ -229,7 +252,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     assertThat(updatedUser.getId()).isNotNull();
     assertThat(updatedUser.getName()).isEqualTo("Jane");
     assertThat(updatedUser.getEmailAddress()).isEqualTo("jane@jane.com");
-    assertThat(updatedUser.getLocalAuthorityId()).isEqualTo(OTHER_LOCAL_AUTHORITY);
+    assertThat(updatedUser.getLocalAuthorityId()).isEqualTo(OTHER_LOCAL_AUTHORITY_ID);
     assertThat(updatedUser.getRoleId()).isEqualTo(2);
     assertThat(updatedUser.getRoleName()).isEqualTo("LA Admin");
   }
@@ -245,9 +268,25 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
   }
 
   @Test
+  public void deleteUser_existsInDifferentLocalAuthority() throws Exception {
+    DeleteUserParams deleteParams =
+        DeleteUserParams.builder()
+            .userId(DEFAULT_USER_ID)
+            .localAuthority(OTHER_LOCAL_AUTHORITY_ID)
+            .build();
+
+    int deletedRecords = userManagementRepository.deleteUser(deleteParams);
+    assertThat(deletedRecords).isEqualTo(0);
+
+    Optional<UserEntity> userEntity =
+        userManagementRepository.retrieveUserById(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS);
+    assertThat(userEntity).isPresent();
+  }
+
+  @Test
   public void deleteUser_notExists() throws Exception {
     DeleteUserParams deleteParams =
-        DeleteUserParams.builder().userId(-1001).localAuthority(DEFAULT_LOCAL_AUTHORITY).build();
+        DeleteUserParams.builder().userId(-1001).localAuthority(DEFAULT_LOCAL_AUTHORITY_ID).build();
     int i = userManagementRepository.deleteUser(deleteParams);
     assertThat(i).isEqualTo(0);
   }

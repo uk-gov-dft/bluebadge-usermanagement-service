@@ -124,8 +124,6 @@ public class UserManagementService {
     return emailLink;
   }
 
-  // localAuthority? Yes
-
   /**
    * Requests reset of a users password via message service.
    *
@@ -144,8 +142,6 @@ public class UserManagementService {
     requestEmailLinkMessage(userEntity, (ue, el) -> buildPasswordRequestDetails(ue, el));
   }
 
-  // localAuthority? Yes
-
   /**
    * Delete a user.
    *
@@ -153,13 +149,11 @@ public class UserManagementService {
    */
   public void deleteUser(int id) {
     DeleteUserParams params = getDeleteUserParams(id);
-
     if (userManagementRepository.deleteUser(params) == 0) {
       throw new NotFoundException("user", DELETE);
     }
   }
 
-  // localAuthority? Dont do anything in this story.
   public List<UserEntity> retrieveUsersByAuthorityId(int authorityId, String nameFilter) {
     if (null != nameFilter) {
       nameFilter = "%" + nameFilter + "%";
@@ -170,8 +164,6 @@ public class UserManagementService {
     queryParams.setEmailAddress(nameFilter);
     return userManagementRepository.findUsers(queryParams);
   }
-
-  // localAuthority? Yes
 
   /**
    * Update user entity.
@@ -195,8 +187,6 @@ public class UserManagementService {
     }
     log.debug("Updated user {}", userEntity.getId());
   }
-
-  // localAuthority? No
 
   /** Update user password. */
   public void updatePassword(String uuid, Password passwords) {
@@ -249,7 +239,6 @@ public class UserManagementService {
     messageApiClient.sendPasswordResetSuccessMessage(passwordResetSuccessRequest);
   }
 
-  // localAuthority? No (nobody is login t that point).
   public UserEntity retrieveUserUsingUuid(String uuid) {
 
     Optional<UserEntity> userEntity = userManagementRepository.retrieveUserUsingEmailLinkUuid(uuid);

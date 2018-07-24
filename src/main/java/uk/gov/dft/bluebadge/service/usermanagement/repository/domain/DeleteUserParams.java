@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @Builder
 public class DeleteUserParams {
-  int userId;
-  int localAuthority;
+  Integer userId;
+  Integer localAuthority;
 }
