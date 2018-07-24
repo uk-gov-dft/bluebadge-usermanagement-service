@@ -14,6 +14,8 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import uk.gov.dft.bluebadge.common.security.SecurityUtils;
+import uk.gov.dft.bluebadge.common.security.model.LocalAuthority;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.Password;
 import uk.gov.dft.bluebadge.service.client.messageservice.MessageApiClient;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.NewUserRequest;
@@ -22,23 +24,36 @@ import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetSuc
 import uk.gov.dft.bluebadge.service.usermanagement.repository.LocalAuthorityRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.*;
-import uk.gov.dft.bluebadge.service.usermanagement.security.SecurityUtils;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException;
 
 public class UserManagementServiceTest {
   private static final int DEFAULT_USER_ID = -1;
-  private static final int DEFAULT_LOCAL_AUTHORITY = 2;
-  private static final int OTHER_LOCAL_AUTHORITY = 99;
+  private static final int DEFAULT_LOCAL_AUTHORITY_ID = 2;
+  private static final String DEFAULT_LOCAL_AUTHORITY_SHORTCODE = "MANC";
+  private static final LocalAuthority DEFAULT_LOCAL_AUTHORITY =
+      LocalAuthority.builder()
+          .id(DEFAULT_LOCAL_AUTHORITY_ID)
+          .shortCode(DEFAULT_LOCAL_AUTHORITY_SHORTCODE)
+          .build();
+  private static final int OTHER_LOCAL_AUTHORITY_ID = 99;
+  private static final int ANOTHER_LOCAL_AUTHORITY_ID = 1;
+  private static final String ANOTHER_LOCAL_AUTHORITY_SHORTCODE = "MANC";
+  private static final LocalAuthority ANOTHER_LOCAL_AUTHORITY =
+      LocalAuthority.builder()
+          .id(ANOTHER_LOCAL_AUTHORITY_ID)
+          .shortCode(ANOTHER_LOCAL_AUTHORITY_SHORTCODE)
+          .build();
+
   private static final RetrieveUserByIdParams DEFAULT_RETRIEVE_BY_USER_ID_PARAMS =
       RetrieveUserByIdParams.builder()
           .userId(DEFAULT_USER_ID)
-          .localAuthority(DEFAULT_LOCAL_AUTHORITY)
+          .localAuthority(DEFAULT_LOCAL_AUTHORITY_ID)
           .build();
   private static final DeleteUserParams DEFAULT_DELETE_USER_PARAMS =
       DeleteUserParams.builder()
           .userId(DEFAULT_USER_ID)
-          .localAuthority(DEFAULT_LOCAL_AUTHORITY)
+          .localAuthority(DEFAULT_LOCAL_AUTHORITY_ID)
           .build();
 
   private static final String WEBAPP_URI = "http://somewhere";
@@ -55,7 +70,7 @@ public class UserManagementServiceTest {
     service =
         new UserManagementService(
             repository, localAuthorityRepository, messageApiClient, WEBAPP_URI, securityUtils);
-    when(securityUtils.getLocalAuthority()).thenReturn(DEFAULT_LOCAL_AUTHORITY);
+    when(securityUtils.getCurrentLocalAuthority()).thenReturn(DEFAULT_LOCAL_AUTHORITY);
   }
 
   @Test
@@ -65,13 +80,13 @@ public class UserManagementServiceTest {
     user.setName("test");
     user.setId(-1);
     user.setEmailAddress("ggg");
-    user.setLocalAuthorityId(OTHER_LOCAL_AUTHORITY);
+    user.setLocalAuthorityId(OTHER_LOCAL_AUTHORITY_ID);
     LocalAuthorityEntity localAuthority = new LocalAuthorityEntity();
     localAuthority.setName("Bob");
 
-    when(securityUtils.getLocalAuthority()).thenReturn(OTHER_LOCAL_AUTHORITY);
+    when(securityUtils.getCurrentLocalAuthority()).thenReturn(DEFAULT_LOCAL_AUTHORITY);
     when(repository.emailAddressAlreadyUsed(user)).thenReturn(false);
-    when(localAuthorityRepository.retrieveLocalAuthorityById(OTHER_LOCAL_AUTHORITY))
+    when(localAuthorityRepository.retrieveLocalAuthorityById(OTHER_LOCAL_AUTHORITY_ID))
         .thenReturn(localAuthority);
 
     // When user is created
@@ -87,7 +102,7 @@ public class UserManagementServiceTest {
     verify(repository, times(1)).updateUserToInactive(-1);
     // And email_link is created
     verify(repository, times(1)).createEmailLink(any(EmailLink.class));
-    verify(localAuthorityRepository, times(1)).retrieveLocalAuthorityById(OTHER_LOCAL_AUTHORITY);
+    verify(localAuthorityRepository, times(1)).retrieveLocalAuthorityById(OTHER_LOCAL_AUTHORITY_ID);
   }
 
   @Test(expected = BadRequestException.class)
@@ -178,7 +193,8 @@ public class UserManagementServiceTest {
 
   @Test
   public void updateUser_ok() {
-    when(securityUtils.getLocalAuthority()).thenReturn(1);
+    when(securityUtils.getCurrentLocalAuthority()).thenReturn(ANOTHER_LOCAL_AUTHORITY);
+
     UserEntity user = new UserEntity();
     user.setId(1);
     user.setLocalAuthorityId(1);
@@ -201,7 +217,7 @@ public class UserManagementServiceTest {
 
   @Test(expected = NotFoundException.class)
   public void updateUser_no_user() {
-    when(securityUtils.getLocalAuthority()).thenReturn(1);
+    when(securityUtils.getCurrentLocalAuthority()).thenReturn(ANOTHER_LOCAL_AUTHORITY);
     UserEntity user = new UserEntity();
     user.setId(1);
     user.setLocalAuthorityId(1);

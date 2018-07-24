@@ -1,8 +1,6 @@
 package uk.gov.dft.bluebadge.service.usermanagement.service;
 
-import static uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException.Operation.DELETE;
-import static uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException.Operation.RETRIEVE;
-import static uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException.Operation.UPDATE;
+import static uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException.Operation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.dft.bluebadge.common.api.model.ErrorErrors;
+import uk.gov.dft.bluebadge.common.security.SecurityUtils;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.Password;
 import uk.gov.dft.bluebadge.service.client.messageservice.MessageApiClient;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.GenericMessageRequest;
@@ -25,7 +24,6 @@ import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetSuc
 import uk.gov.dft.bluebadge.service.usermanagement.repository.LocalAuthorityRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.*;
-import uk.gov.dft.bluebadge.service.usermanagement.security.SecurityUtils;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException;
 
@@ -127,6 +125,7 @@ public class UserManagementService {
   }
 
   // localAuthority? Yes
+
   /**
    * Requests reset of a users password via message service.
    *
@@ -146,6 +145,7 @@ public class UserManagementService {
   }
 
   // localAuthority? Yes
+
   /**
    * Delete a user.
    *
@@ -172,6 +172,7 @@ public class UserManagementService {
   }
 
   // localAuthority? Yes
+
   /**
    * Update user entity.
    *
@@ -196,6 +197,7 @@ public class UserManagementService {
   }
 
   // localAuthority? No
+
   /** Update user password. */
   public void updatePassword(String uuid, Password passwords) {
 
@@ -258,12 +260,12 @@ public class UserManagementService {
   }
 
   private RetrieveUserByIdParams getRetrieveUserByIdParams(int userId) {
-    int localAuthority = securityUtils.getLocalAuthority();
+    int localAuthority = securityUtils.getCurrentLocalAuthority().getId();
     return RetrieveUserByIdParams.builder().userId(userId).localAuthority(localAuthority).build();
   }
 
   private DeleteUserParams getDeleteUserParams(int userId) {
-    int localAuthority = securityUtils.getLocalAuthority();
+    int localAuthority = securityUtils.getCurrentLocalAuthority().getId();
     return DeleteUserParams.builder().userId(userId).localAuthority(localAuthority).build();
   }
 
@@ -298,7 +300,7 @@ public class UserManagementService {
   private List<ErrorErrors> localAuthorityValidateUser(UserEntity userEntity) {
     List<ErrorErrors> errorsList = null;
 
-    int localAuthority = securityUtils.getLocalAuthority();
+    int localAuthority = securityUtils.getCurrentLocalAuthority().getId();
     if (localAuthority != userEntity.getLocalAuthorityId()) {
       ErrorErrors error = new ErrorErrors();
       error
