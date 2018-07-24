@@ -37,6 +37,12 @@ public class UserManagementServiceTest {
           .shortCode(DEFAULT_LOCAL_AUTHORITY_SHORTCODE)
           .build();
   private static final int OTHER_LOCAL_AUTHORITY_ID = 99;
+  private static final String OTHER_LOCAL_AUTHORITY_SHORTCODE = "BRI";
+  private static final LocalAuthority OTHER_LOCAL_AUTHORITY =
+      LocalAuthority.builder()
+          .id(OTHER_LOCAL_AUTHORITY_ID)
+          .shortCode(OTHER_LOCAL_AUTHORITY_SHORTCODE)
+          .build();
   private static final int ANOTHER_LOCAL_AUTHORITY_ID = 1;
   private static final String ANOTHER_LOCAL_AUTHORITY_SHORTCODE = "MANC";
   private static final LocalAuthority ANOTHER_LOCAL_AUTHORITY =
@@ -50,6 +56,8 @@ public class UserManagementServiceTest {
           .userId(DEFAULT_USER_ID)
           .localAuthority(DEFAULT_LOCAL_AUTHORITY_ID)
           .build();
+  private static final RetrieveUserByIdParams RETRIEVE_BY_USER_ID_PARAMS_NO_LOCALAUTHORITY =
+      RetrieveUserByIdParams.builder().userId(DEFAULT_USER_ID).build();
   private static final DeleteUserParams DEFAULT_DELETE_USER_PARAMS =
       DeleteUserParams.builder()
           .userId(DEFAULT_USER_ID)
@@ -84,7 +92,7 @@ public class UserManagementServiceTest {
     LocalAuthorityEntity localAuthority = new LocalAuthorityEntity();
     localAuthority.setName("Bob");
 
-    when(securityUtils.getCurrentLocalAuthority()).thenReturn(DEFAULT_LOCAL_AUTHORITY);
+    when(securityUtils.getCurrentLocalAuthority()).thenReturn(OTHER_LOCAL_AUTHORITY);
     when(repository.emailAddressAlreadyUsed(user)).thenReturn(false);
     when(localAuthorityRepository.retrieveLocalAuthorityById(OTHER_LOCAL_AUTHORITY_ID))
         .thenReturn(localAuthority);
@@ -266,7 +274,7 @@ public class UserManagementServiceTest {
     when(repository.updatePassword(any())).thenReturn(1);
     when(repository.updateEmailLinkToInvalid(uuid.toString())).thenReturn(1);
     when(repository.retrieveEmailLinkWithUuid(uuid.toString())).thenReturn(link);
-    when(repository.retrieveUserById(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS))
+    when(repository.retrieveUserById(RETRIEVE_BY_USER_ID_PARAMS_NO_LOCALAUTHORITY))
         .thenReturn(Optional.of(userEntity));
 
     // When update password requested
