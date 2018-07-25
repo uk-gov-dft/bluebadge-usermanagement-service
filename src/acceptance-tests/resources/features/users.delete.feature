@@ -19,3 +19,8 @@ Feature: Verify users Delete
     Given path 'users/-5'
     When method DELETE
     Then status 200
+
+  Scenario: Verify delete user in different local authority than current user's
+    Given path 'users/-6'
+    When method DELETE
+    Then status 404

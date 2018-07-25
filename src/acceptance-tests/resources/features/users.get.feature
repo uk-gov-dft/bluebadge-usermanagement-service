@@ -6,6 +6,17 @@ Feature: Verify users retrieval
     * def result = callonce read('./oauth2.feature')
     * header Authorization = 'Bearer ' + result.accessToken
 
+  Scenario: Verify retrieve one user by user id
+    Given path 'users/-7'
+    When method GET
+    Then status 200
+    And match $.data contains {id:-7, name:"get test", emailAddress:"gettest@dft.gov.uk", roleId:2, roleName:"#notnull"}
+
+  Scenario: Verify retrieve one user by user id when local authority is different from current users's
+    Given path 'users/-6'
+    When method GET
+    Then status 404
+
   Scenario: Verify retrieve all users for an authority
     Given path 'users'
     And param authorityId = 2
@@ -52,5 +63,10 @@ Feature: Verify users retrieval
 
   Scenario: Verify user not exists password reset.
     Given path 'users/-9999/passwordReset'
+    When method GET
+    Then status 404
+
+  Scenario: Verify user exists but in another local authority different from current user's, password reset.
+    Given path 'users/-6/passwordReset'
     When method GET
     Then status 404

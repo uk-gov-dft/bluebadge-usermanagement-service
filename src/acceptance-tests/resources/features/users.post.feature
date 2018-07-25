@@ -28,6 +28,13 @@ Feature: Verify users create
     Then status 400
     And match $.error.errors contains {field:"emailAddress", reason:"#notnull", message:"AlreadyExists.user.emailAddress", location:"#null", locationType:"#null"}
 
+  Scenario: Create User All valid except local authority id different from current users's
+    Given path 'users'
+    And request { name:"asdfgh", emailAddress:"abcnobodydifferentlocalauthority@dft.gov.uk", localAuthorityId: 3, roleId: 2 }
+    When method POST
+    Then status 400
+    And match $.error.errors contains {field:"localAuthority", reason:"#notnull", message:"NotSameAsCurrentUsers.user.localAuthority", location:"#null", locationType:"#null"}
+
   Scenario: Create user invalid name format
     Given path 'users'
     And request { name:"as1dfgh", emailAddress:"@dft.gov.uk", localAuthorityId: 2 }

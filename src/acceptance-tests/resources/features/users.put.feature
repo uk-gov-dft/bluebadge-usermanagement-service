@@ -28,6 +28,13 @@ Feature: Verify users update
     Then status 400
     And match $.error.errors contains {field:"emailAddress", reason:"#notnull", message:"AlreadyExists.user.emailAddress", location:"#null", locationType:"#null"}
 
+  Scenario: Update User All valid except local authority different from current user's
+    Given path 'users/-1'
+    And request {id: -1, name:"asdfgh", emailAddress:"abcnobodydifferentlocalauthority@dft.gov.uk", localAuthorityId: 3, roleId: 2 }
+    When method PUT
+    Then status 400
+    And match $.error.errors contains {field:"localAuthority", reason:"#notnull", message:"NotSameAsCurrentUsers.user.localAuthority", location:"#null", locationType:"#null"}
+
   Scenario: Update user invalid name format
     Given path 'users/-1'
     And request {id: -1, name:"as1dfgh", emailAddress:"@dft.gov.uk", localAuthorityId: 2 }

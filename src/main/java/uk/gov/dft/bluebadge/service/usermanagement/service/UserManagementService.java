@@ -1,6 +1,8 @@
 package uk.gov.dft.bluebadge.service.usermanagement.service;
 
-import static uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException.Operation.*;
+import static uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException.Operation.DELETE;
+import static uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException.Operation.RETRIEVE;
+import static uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException.Operation.UPDATE;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +25,11 @@ import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetReq
 import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetSuccessRequest;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.LocalAuthorityRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepository;
-import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.*;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.DeleteUserParams;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.LocalAuthorityEntity;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.RetrieveUserByIdParams;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException;
 
