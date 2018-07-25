@@ -1,0 +1,21 @@
+blue-badge:
+  auth-server:
+    url: http://authorisation-service:8380/bb_auth
+  messageservice:
+    servicehost:
+      host: message-service
+  la-webapp:
+      email-link-uri: ${LA-WEBAPP_URL}/set***REMOVED***/
+
+logging:
+  level:
+    root: ${APP_LOGGING_LEVEL:-INFO}
+    sample.mybatis.mapper: WARN
+    uk.gov.dft.bluebadge.service: ${APP_LOGGING_LEVEL:-DEBUG}
+
+spring:
+  datasource:
+    url: jdbc:postgresql://postgresql:5432/bb_dev?currentSchema=usermanagement
+
+
+
