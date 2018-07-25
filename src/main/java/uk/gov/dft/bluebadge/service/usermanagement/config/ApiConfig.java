@@ -20,16 +20,16 @@ public class ApiConfig {
   }
 
   /**
-   * OAuth rest template configured with a token forwarding context. So if a bearer token
-   * is found on the security context, then it is used for the rest template.
+   * OAuth rest template configured with a token forwarding context. So if a bearer token is found
+   * on the security context, then it is used for the rest template.
    */
   @Bean("messageServiceRestTemplate")
   RestTemplate messageServiceRestTemplate(
       ClientCredentialsResourceDetails clientCredentialsResourceDetails,
       ServiceConfiguration userManagementApiConfig) {
     OAuth2RestTemplate result =
-        new OAuth2RestTemplate(clientCredentialsResourceDetails,
-            new TokenForwardingClientContext());
+        new OAuth2RestTemplate(
+            clientCredentialsResourceDetails, new TokenForwardingClientContext());
     HttpComponentsClientHttpRequestFactory requestFactory =
         new HttpComponentsClientHttpRequestFactory();
     result.setRequestFactory(requestFactory);
