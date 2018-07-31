@@ -8,7 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.DeleteUserParams;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.RetrieveUserByIdParams;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 
 /** Provides CRUD operations on UserEntity entity + user management. */
@@ -26,13 +28,15 @@ public class UserManagementRepository {
   /**
    * Retrieve a single UserEntity by id.
    *
-   * @param id PK of UserEntity to select.
+   * @param params userId and localAuthorityPK of UserEntity to select.
    * @return The retrieved UserEntity.
    */
-  public Optional<UserEntity> retrieveUserById(int id) {
-    UserEntity userEntity = this.sqlSession.selectOne("retrieveUserById", id);
+  public Optional<UserEntity> retrieveUserById(RetrieveUserByIdParams params) {
+    Assert.notNull(params, "params cannot be null");
+    Assert.notNull(params.getUserId(), "params.userId cannot be null");
+    UserEntity userEntity = this.sqlSession.selectOne("retrieveUserById", params);
     if (null == userEntity) {
-      LOGGER.info("Attempt to retrieve UserEntity id:{} that does not exist.", id);
+      LOGGER.info("Attempt to retrieve UserEntity params:{} that does not exist.", params);
     }
     return Optional.ofNullable(userEntity);
   }
@@ -120,15 +124,15 @@ public class UserManagementRepository {
   /**
    * Delete a UserEntity.
    *
-   * @param id PK of UserEntity to delete.
+   * @param params userId and local authority.
    * @return Delete count
    */
-  public int deleteUser(int id) {
-    int result = sqlSession.delete("deleteUser", id);
+  public int deleteUser(DeleteUserParams params) {
+    int result = sqlSession.delete("deleteUser", params);
     if (0 == result) {
-      LOGGER.info("Attempt to delete UserEntity id: {} that did not exist.", id);
+      LOGGER.info("Attempt to delete UserEntity params: {} that did not exist.", params);
     } else {
-      LOGGER.debug("Deleted UserEntity id: {}.", id);
+      LOGGER.debug("Deleted UserEntity params: {}.", params);
     }
     return result;
   }

@@ -2,7 +2,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="uk.gov.dft.bluebadge.service.usermanagement.repository.mapper.UserManagementMapper">
-    <select id="retrieveUserById" resultType="UserEntity" parameterType="Integer">
+    <select id="retrieveUserById" resultType="UserEntity" parameterType="RetrieveUserByIdParams">
         SELECT u.id, u.name
             , u.local_authority_id AS localAuthorityId
             , u.email_address AS emailAddress
@@ -10,7 +10,10 @@
             , r.description AS roleName
         FROM users u
         INNER JOIN roles r ON u.role_id = r.id
-        WHERE u.id = #{id}
+        WHERE u.id = #{userId}
+        <if test="localAuthority != null">
+            AND u.local_authority_id = #{localAuthority}
+        </if>
     </select>
 
     <select id="findUsers" resultType="UserEntity" parameterType="UserEntity">
@@ -21,11 +24,17 @@
             , r.description AS roleName
         FROM users u
         INNER JOIN roles r ON u.role_id = r.id
-        WHERE u.local_authority_id = #{localAuthorityId}
-        <if test="name != null">
-          AND (UPPER(u.name) LIKE UPPER(#{name}) OR UPPER(u.email_address)
-            LIKE UPPER(#{emailAddress}))
-        </if>
+        <where>
+            <if test="localAuthorityId != null">
+                AND u.local_authority_id = #{localAuthorityId}
+            </if>
+            <if test="name != null">
+              AND (UPPER(u.name) LIKE UPPER(#{name}) OR UPPER(u.email_address)
+                LIKE UPPER(#{emailAddress}))
+            </if>
+        </where>
+        ORDER BY u.name ASC
+        LIMIT 50
     </select>
 
     <select id="emailAddressAlreadyUsed" resultType="boolean" parameterType="UserEntity">
@@ -97,9 +106,12 @@
         VALUES (#{name}, #{localAuthorityId}, #{emailAddress}, #{roleId})
     </insert>
 
-    <delete id="deleteUser" parameterType="Integer">
+    <delete id="deleteUser" parameterType="DeleteUserParams">
         DELETE FROM users
-        WHERE id = #{id}
+        WHERE id = #{userId}
+        <if test="localAuthority != null">
+            AND local_authority_id = #{localAuthority}
+        </if>
     </delete>
 
 </mapper>

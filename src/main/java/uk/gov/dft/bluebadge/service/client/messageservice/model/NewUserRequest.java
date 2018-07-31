@@ -2,10 +2,12 @@ package uk.gov.dft.bluebadge.service.client.messageservice.model;
 
 import com.google.common.collect.ImmutableMap;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 
 @Getter
+@EqualsAndHashCode
 public class NewUserRequest extends GenericMessageRequest {
   /** This is the name of the template within the Message service */
   public static final String NEW_USER_TEMPLATE = "NEW_USER";

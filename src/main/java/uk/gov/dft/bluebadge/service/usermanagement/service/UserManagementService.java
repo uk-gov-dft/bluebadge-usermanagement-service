@@ -16,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.dft.bluebadge.common.api.model.ErrorErrors;
+import uk.gov.dft.bluebadge.common.security.SecurityUtils;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.Password;
 import uk.gov.dft.bluebadge.service.client.messageservice.MessageApiClient;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.GenericMessageRequest;
@@ -24,8 +25,10 @@ import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetReq
 import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetSuccessRequest;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.LocalAuthorityRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepository;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.DeleteUserParams;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.LocalAuthorityEntity;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.RetrieveUserByIdParams;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException;
@@ -39,23 +42,27 @@ public class UserManagementService {
   private final LocalAuthorityRepository localAuthorityRepository;
   private final MessageApiClient messageApiClient;
   private final String laWebappEmailLinkURI;
+  private final SecurityUtils securityUtils;
 
   @Autowired
   UserManagementService(
       UserManagementRepository repository,
       LocalAuthorityRepository localAuthorityRepository,
       MessageApiClient messageApiClient,
-      @Value("${blue-badge.la-webapp.email-link-uri}") String laWebappEmailLinkURI) {
+      @Value("${blue-badge.la-webapp.email-link-uri}") String laWebappEmailLinkURI,
+      SecurityUtils securityUtils) {
     this.userManagementRepository = repository;
     this.localAuthorityRepository = localAuthorityRepository;
     this.messageApiClient = messageApiClient;
     this.laWebappEmailLinkURI = laWebappEmailLinkURI;
+    this.securityUtils = securityUtils;
   }
 
-  public UserEntity retrieveUserById(Integer userId) {
-    Optional<UserEntity> userEntity = userManagementRepository.retrieveUserById(userId);
+  public UserEntity retrieveUserById(int userId) {
+    RetrieveUserByIdParams params = getRetrieveUserByIdParams(userId);
+    Optional<UserEntity> userEntity = userManagementRepository.retrieveUserById(params);
     if (!userEntity.isPresent()) {
-      log.info("Request to retrieve user id:{} that did not exist", userId);
+      log.info("Request to retrieve user params:{} that did not exist", params);
       throw new NotFoundException("user", RETRIEVE);
     }
     return userEntity.get();
@@ -72,6 +79,11 @@ public class UserManagementService {
     if (null != businessErrors) {
       log.debug("Business validation failed for user:{}", userEntity.getName());
       throw new BadRequestException(businessErrors);
+    }
+    List<ErrorErrors> localAuthorityErrors = localAuthorityValidateUser(userEntity);
+    if (null != localAuthorityErrors) {
+      log.debug("Local authority validation failed for user:{}", userEntity.getName());
+      throw new BadRequestException(localAuthorityErrors);
     }
     userManagementRepository.createUser(userEntity);
     requestEmailLinkMessage(userEntity, (ue, el) -> buildNewUserRequestDetails(ue, el));
@@ -125,7 +137,8 @@ public class UserManagementService {
    */
   public void requestPasswordResetEmail(int userId) {
     log.debug("Resetting password for user:{}", userId);
-    Optional<UserEntity> optionalUserEntity = userManagementRepository.retrieveUserById(userId);
+    RetrieveUserByIdParams params = getRetrieveUserByIdParams(userId);
+    Optional<UserEntity> optionalUserEntity = userManagementRepository.retrieveUserById(params);
     UserEntity userEntity;
     if (optionalUserEntity.isPresent()) {
       userEntity = optionalUserEntity.get();
@@ -141,7 +154,8 @@ public class UserManagementService {
    * @param id PK of user to delete.
    */
   public void deleteUser(int id) {
-    if (userManagementRepository.deleteUser(id) == 0) {
+    DeleteUserParams params = getDeleteUserParams(id);
+    if (userManagementRepository.deleteUser(params) == 0) {
       throw new NotFoundException("user", DELETE);
     }
   }
@@ -158,28 +172,6 @@ public class UserManagementService {
   }
 
   /**
-   * Apply business validation (non bean).
-   *
-   * @param userEntity User Entity bean.
-   * @return List of errors or null if validation ok.
-   */
-  private List<ErrorErrors> businessValidateUser(UserEntity userEntity) {
-    List<ErrorErrors> errorsList = null;
-
-    if (userManagementRepository.emailAddressAlreadyUsed(userEntity)) {
-      ErrorErrors error = new ErrorErrors();
-      error
-          .field("emailAddress")
-          .message("AlreadyExists.user.emailAddress")
-          .reason("Email Address already used.");
-      errorsList = new ArrayList<>();
-      errorsList.add(error);
-    }
-
-    return errorsList;
-  }
-
-  /**
    * Update user entity.
    *
    * @param userEntity Entity to update.
@@ -190,9 +182,16 @@ public class UserManagementService {
     if (null != businessErrors) {
       throw new BadRequestException(businessErrors);
     }
+    List<ErrorErrors> localAuthorityErrors = localAuthorityValidateUser(userEntity);
+    if (null != localAuthorityErrors) {
+      log.debug("Local authority validation failed for user:{}", userEntity.getName());
+      throw new BadRequestException(localAuthorityErrors);
+    }
+
     if (userManagementRepository.updateUser(userEntity) == 0) {
       throw new NotFoundException("user", UPDATE);
     }
+    log.debug("Updated user {}", userEntity.getId());
   }
 
   /** Update user password. */
@@ -235,8 +234,9 @@ public class UserManagementService {
     if (userManagementRepository.updatePassword(user) == 0) {
       throw new NotFoundException("user", UPDATE);
     }
-
-    Optional<UserEntity> userEntity = userManagementRepository.retrieveUserById(link.getUserId());
+    RetrieveUserByIdParams params =
+        RetrieveUserByIdParams.builder().userId(link.getUserId()).build();
+    Optional<UserEntity> userEntity = userManagementRepository.retrieveUserById(params);
     PasswordResetSuccessRequest passwordResetSuccessRequest =
         PasswordResetSuccessRequest.builder()
             .emailAddress(userEntity.get().getEmailAddress())
@@ -252,5 +252,60 @@ public class UserManagementService {
       throw new NotFoundException("user", RETRIEVE);
     }
     return userEntity.get();
+  }
+
+  private RetrieveUserByIdParams getRetrieveUserByIdParams(int userId) {
+    int localAuthority = securityUtils.getCurrentLocalAuthority().getId();
+    return RetrieveUserByIdParams.builder().userId(userId).localAuthority(localAuthority).build();
+  }
+
+  private DeleteUserParams getDeleteUserParams(int userId) {
+    int localAuthority = securityUtils.getCurrentLocalAuthority().getId();
+    return DeleteUserParams.builder().userId(userId).localAuthority(localAuthority).build();
+  }
+
+  /**
+   * Apply business validation (non bean).
+   *
+   * @param userEntity User Entity bean.
+   * @return List of errors or null if validation ok.
+   */
+  private List<ErrorErrors> businessValidateUser(UserEntity userEntity) {
+    List<ErrorErrors> errorsList = null;
+
+    if (userManagementRepository.emailAddressAlreadyUsed(userEntity)) {
+      ErrorErrors error = new ErrorErrors();
+      error
+          .field("emailAddress")
+          .message("AlreadyExists.user.emailAddress")
+          .reason("Email Address already used.");
+      errorsList = new ArrayList<>();
+      errorsList.add(error);
+    }
+
+    return errorsList;
+  }
+
+  /**
+   * Checks if current user's local authority is same as userEntity's.
+   *
+   * @param userEntity User Entity bean.
+   * @return List of errors or null if validation ok.
+   */
+  private List<ErrorErrors> localAuthorityValidateUser(UserEntity userEntity) {
+    List<ErrorErrors> errorsList = null;
+
+    int localAuthority = securityUtils.getCurrentLocalAuthority().getId();
+    if (localAuthority != userEntity.getLocalAuthorityId()) {
+      ErrorErrors error = new ErrorErrors();
+      error
+          .field("localAuthority")
+          .message("NotSameAsCurrentUsers.user.localAuthority")
+          .reason("Current user's local authority does not match userEntity's.");
+      errorsList = new ArrayList<>();
+      errorsList.add(error);
+    }
+
+    return errorsList;
   }
 }
