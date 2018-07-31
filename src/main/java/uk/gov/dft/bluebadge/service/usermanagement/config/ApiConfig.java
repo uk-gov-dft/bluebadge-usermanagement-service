@@ -6,17 +6,20 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-import uk.gov.dft.bluebadge.service.client.common.ServiceConfiguration;
+import uk.gov.dft.bluebadge.common.api.common.ServiceConfiguration;
+import uk.gov.dft.bluebadge.common.security.TokenForwardingClientContext;
 
 @Configuration
 public class ApiConfig {
 
   @ConfigurationProperties("blue-badge.messageservice.servicehost")
   @Bean
+  @Validated
   public ServiceConfiguration messageServiceConfiguration() {
-    return ServiceConfiguration.builder().build();
+    return new ServiceConfiguration();
   }
 
   /**
