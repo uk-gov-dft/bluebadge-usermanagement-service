@@ -14,6 +14,8 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import uk.gov.dft.bluebadge.common.security.SecurityUtils;
 import uk.gov.dft.bluebadge.common.security.model.LocalAuthority;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.Password;
@@ -74,13 +76,19 @@ public class UserManagementServiceTest {
 
   private UserEntity user1;
   private LocalAuthorityEntity localAuthority1;
+  private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
     service =
         new UserManagementService(
-            repository, localAuthorityRepository, messageApiClient, WEBAPP_URI, securityUtils);
+            repository,
+            localAuthorityRepository,
+            messageApiClient,
+            WEBAPP_URI,
+            securityUtils,
+            passwordEncoder);
     when(securityUtils.getCurrentLocalAuthority()).thenReturn(DEFAULT_LOCAL_AUTHORITY);
 
     user1 = new UserEntity();
@@ -99,6 +107,7 @@ public class UserManagementServiceTest {
     when(repository.emailAddressAlreadyUsed(user1)).thenReturn(false);
     when(localAuthorityRepository.retrieveLocalAuthorityById(OTHER_LOCAL_AUTHORITY_ID))
         .thenReturn(localAuthority1);
+    String preCreatePassword = user1.getPassword();
 
     // When user is created
     service.createUser(user1);
@@ -114,6 +123,9 @@ public class UserManagementServiceTest {
     // And email_link is created
     verify(repository, times(1)).createEmailLink(any(EmailLink.class));
     verify(localAuthorityRepository, times(1)).retrieveLocalAuthorityById(OTHER_LOCAL_AUTHORITY_ID);
+
+    assertThat(user1.getPassword()).isNotNull();
+    assertThat(user1.getPassword()).isNotEqualTo(preCreatePassword);
   }
 
   @Test(expected = BadRequestException.class)
@@ -308,8 +320,9 @@ public class UserManagementServiceTest {
   public void updatePassword_ok() {
     // Given the new password is valid
     Password password = new Password();
-     ***REMOVED***);
-     ***REMOVED***);
+    String plainPassword = "12345678";
+    password.setPassword(plainPassword);
+    password.setPasswordConfirm(plainPassword);
     UUID uuid = UUID.randomUUID();
     EmailLink link =
         EmailLink.builder()
@@ -333,8 +346,18 @@ public class UserManagementServiceTest {
 
     // Then the email link is set inactive
     verify(repository, times(1)).updateEmailLinkToInvalid(uuid.toString());
+
     // And the password is stored
-    verify(repository, times(1)).updatePassword(any());
+    ArgumentCaptor<UserEntity> userEntityArgumentCaptor = ArgumentCaptor.forClass(UserEntity.class);
+    verify(repository, times(1)).updatePassword(userEntityArgumentCaptor.capture());
+    assertThat(userEntityArgumentCaptor).isNotNull();
+    assertThat(userEntityArgumentCaptor.getValue()).isNotNull();
+    assertThat(userEntityArgumentCaptor.getValue().getPassword()).isNotNull();
+    assertThat(userEntityArgumentCaptor.getValue().getPassword()).isNotEqualTo(plainPassword);
+    assertThat(
+            passwordEncoder.matches(
+                plainPassword, userEntityArgumentCaptor.getValue().getPassword()))
+        .isTrue();
 
     ArgumentCaptor<PasswordResetSuccessRequest> passwordSuccessRequest =
         ArgumentCaptor.forClass(PasswordResetSuccessRequest.class);
