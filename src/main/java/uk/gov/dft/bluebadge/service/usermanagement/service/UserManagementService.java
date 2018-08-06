@@ -12,7 +12,7 @@ import java.util.function.BiFunction;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.dft.bluebadge.common.api.model.ErrorErrors;
@@ -43,6 +43,7 @@ public class UserManagementService {
   private final MessageApiClient messageApiClient;
   private final String laWebappEmailLinkURI;
   private final SecurityUtils securityUtils;
+  private final PasswordEncoder passwordEncoder;
 
   @Autowired
   UserManagementService(
@@ -50,12 +51,14 @@ public class UserManagementService {
       LocalAuthorityRepository localAuthorityRepository,
       MessageApiClient messageApiClient,
       @Value("${blue-badge.la-webapp.email-link-uri}") String laWebappEmailLinkURI,
-      SecurityUtils securityUtils) {
+      SecurityUtils securityUtils,
+      PasswordEncoder passwordEncoder) {
     this.userManagementRepository = repository;
     this.localAuthorityRepository = localAuthorityRepository;
     this.messageApiClient = messageApiClient;
     this.laWebappEmailLinkURI = laWebappEmailLinkURI;
     this.securityUtils = securityUtils;
+    this.passwordEncoder = passwordEncoder;
   }
 
   public UserEntity retrieveUserById(int userId) {
@@ -85,9 +88,15 @@ public class UserManagementService {
       log.debug("Local authority validation failed for user:{}", userEntity.getName());
       throw new BadRequestException(localAuthorityErrors);
     }
+    createInitialPassword(userEntity);
     userManagementRepository.createUser(userEntity);
     requestEmailLinkMessage(userEntity, (ue, el) -> buildNewUserRequestDetails(ue, el));
     log.debug("Created user {}", userEntity.getId());
+  }
+
+  private void createInitialPassword(UserEntity userEntity) {
+    String initialPassword = passwordEncoder.encode(UUID.randomUUID().toString());
+    userEntity.setPassword(initialPassword);
   }
 
   private void requestEmailLinkMessage(
@@ -224,7 +233,7 @@ public class UserManagementService {
       throw new BadRequestException(error);
     }
 
-    String hash = BCrypt.hashpw(password, BCrypt.gensalt());
+    String hash = passwordEncoder.encode(password);
     UserEntity user = new UserEntity();
     user.setId(link.getUserId());
     user.setPassword(hash);

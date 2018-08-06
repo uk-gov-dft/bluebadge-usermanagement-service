@@ -142,7 +142,11 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
 
     Collections.sort(userEntityList, (u1, u2) -> u1.getName().compareTo(u2.getName()));
     List<UserEntity> expectedUerEntityList =
-        userEntityList.stream().limit(RESULTS_LIMIT).collect(Collectors.toList());
+        userEntityList
+            .stream()
+            .limit(RESULTS_LIMIT)
+            .peek(u -> u.setPassword(null))
+            .collect(Collectors.toList());
 
     assertThat(users).hasSize(RESULTS_LIMIT);
     assertThat(users).isEqualTo(expectedUerEntityList);
@@ -240,6 +244,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     userEntity.setEmailAddress("jane@jane.com");
     userEntity.setLocalAuthorityId(OTHER_LOCAL_AUTHORITY_ID);
     userEntity.setRoleId(2);
+    userEntity.setPassword("the_password");
 
     userManagementRepository.createUser(userEntity);
 
@@ -258,6 +263,8 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     assertThat(updatedUser.getLocalAuthorityId()).isEqualTo(OTHER_LOCAL_AUTHORITY_ID);
     assertThat(updatedUser.getRoleId()).isEqualTo(2);
     assertThat(updatedUser.getRoleName()).isEqualTo("LA Admin");
+    // Password should never be retrieved
+    assertThat(updatedUser.getPassword()).isNull();
   }
 
   @Test
@@ -348,6 +355,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     userEntity.setLocalAuthorityId(localAuthority);
     userEntity.setRoleId(roleId);
     userEntity.setRoleName(roleName);
+    userEntity.setPassword(UUID.randomUUID().toString());
     return userEntity;
   }
 }
