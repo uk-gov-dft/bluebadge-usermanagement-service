@@ -8,10 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
-import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.DeleteUserParams;
-import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
-import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.RetrieveUserByIdParams;
-import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.*;
 
 /** Provides CRUD operations on UserEntity entity + user management. */
 @SuppressWarnings("WeakerAccess")
@@ -64,9 +61,9 @@ public class UserManagementRepository {
     Assert.notNull(user, "updateUser called with null entity to update");
     int result = sqlSession.update("updateUser", user);
     if (0 == result) {
-      LOGGER.info("Attempt to update UserEntity id: {} that does not exist.", user.getId());
+      LOGGER.info("Attempt to update UserEntity id: {} that does not exist.", user.getUuid());
     } else {
-      LOGGER.debug("Updated UserEntity id: {}.", user.getId());
+      LOGGER.debug("Updated UserEntity id: {}.", user.getUuid());
     }
     return result;
   }
@@ -74,6 +71,7 @@ public class UserManagementRepository {
   public int updateEmailLinkToInvalid(String uuid) {
     return sqlSession.update("updateEmailLinkToInvalid", uuid);
   }
+
   /**
    * Update Password a UserEntity.
    *
@@ -84,9 +82,9 @@ public class UserManagementRepository {
     Assert.notNull(user, "updatePassword called with null entity to update");
     int result = sqlSession.update("updatePassword", user);
     if (0 == result) {
-      LOGGER.info("Attempt to update UserEntity id: {} that does not exist.", user.getId());
+      LOGGER.info("Attempt to update UserEntity id: {} that does not exist.", user.getUuid());
     } else {
-      LOGGER.debug("Updated UserEntity id: {}.", user.getId());
+      LOGGER.debug("Updated UserEntity id: {}.", user.getUuid());
     }
     return result;
   }
@@ -117,7 +115,7 @@ public class UserManagementRepository {
    */
   public void createUser(UserEntity user) {
     Assert.notNull(user, "createUser called with null entity to update");
-    LOGGER.info("Created UserEntity id: {}.", user.getId());
+    LOGGER.info("Created UserEntity id: {}.", user.getUuid());
     sqlSession.insert("createUser", user);
   }
 
@@ -151,7 +149,7 @@ public class UserManagementRepository {
     sqlSession.insert("createEmailLink", emailLink);
   }
 
-  public int updateUserToInactive(Integer id) {
-    return sqlSession.update("updateUserToInactive", id);
+  public int updateUserToInactive(UuidAuthorityCodeParams params) {
+    return sqlSession.update("updateUserToInactive", params);
   }
 }

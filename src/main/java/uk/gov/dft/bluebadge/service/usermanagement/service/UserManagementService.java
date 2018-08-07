@@ -23,15 +23,11 @@ import uk.gov.dft.bluebadge.service.client.messageservice.model.GenericMessageRe
 import uk.gov.dft.bluebadge.service.client.messageservice.model.NewUserRequest;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetRequest;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetSuccessRequest;
-import uk.gov.dft.bluebadge.service.usermanagement.repository.LocalAuthorityRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepository;
-import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.DeleteUserParams;
-import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
-import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.LocalAuthorityEntity;
-import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.RetrieveUserByIdParams;
-import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.*;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException;
+import uk.gov.dft.bluebadge.service.usermanagement.service.referencedata.ReferenceDataService;
 
 @Service
 @Transactional
@@ -39,29 +35,29 @@ import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundExc
 public class UserManagementService {
 
   private final UserManagementRepository userManagementRepository;
-  private final LocalAuthorityRepository localAuthorityRepository;
   private final MessageApiClient messageApiClient;
   private final String laWebappEmailLinkURI;
   private final SecurityUtils securityUtils;
   private final PasswordEncoder passwordEncoder;
+  private ReferenceDataService referenceDataService;
 
   @Autowired
   UserManagementService(
       UserManagementRepository repository,
-      LocalAuthorityRepository localAuthorityRepository,
       MessageApiClient messageApiClient,
       @Value("${blue-badge.la-webapp.email-link-uri}") String laWebappEmailLinkURI,
       SecurityUtils securityUtils,
-      PasswordEncoder passwordEncoder) {
+      PasswordEncoder passwordEncoder,
+      ReferenceDataService referenceDataService) {
     this.userManagementRepository = repository;
-    this.localAuthorityRepository = localAuthorityRepository;
     this.messageApiClient = messageApiClient;
     this.laWebappEmailLinkURI = laWebappEmailLinkURI;
     this.securityUtils = securityUtils;
     this.passwordEncoder = passwordEncoder;
+    this.referenceDataService = referenceDataService;
   }
 
-  public UserEntity retrieveUserById(int userId) {
+  public UserEntity retrieveUserById(UUID userId) {
     RetrieveUserByIdParams params = getRetrieveUserByIdParams(userId);
     Optional<UserEntity> userEntity = userManagementRepository.retrieveUserById(params);
     if (!userEntity.isPresent()) {
@@ -91,7 +87,7 @@ public class UserManagementService {
     createInitialPassword(userEntity);
     userManagementRepository.createUser(userEntity);
     requestEmailLinkMessage(userEntity, (ue, el) -> buildNewUserRequestDetails(ue, el));
-    log.debug("Created user {}", userEntity.getId());
+    log.debug("Created user {}", userEntity.getUuid());
   }
 
   private void createInitialPassword(UserEntity userEntity) {
@@ -105,8 +101,9 @@ public class UserManagementService {
     EmailLink emailLink = createEmailLink(userEntity);
     GenericMessageRequest messageDetails = messageDetailsFunc.apply(userEntity, emailLink);
     messageApiClient.sendEmailLinkMessage(messageDetails);
-    userManagementRepository.updateUserToInactive(userEntity.getId());
-    log.debug("Successfully changed password for user:{}", userEntity.getId());
+    userManagementRepository.updateUserToInactive(
+        UuidAuthorityCodeParams.builder().uuid(userEntity.getUuid()).build());
+    log.debug("Successfully changed password for user:{}", userEntity.getUuid());
   }
 
   private PasswordResetRequest buildPasswordRequestDetails(UserEntity ue, EmailLink el) {
@@ -119,7 +116,10 @@ public class UserManagementService {
 
   private NewUserRequest buildNewUserRequestDetails(UserEntity ue, EmailLink el) {
     LocalAuthorityEntity localAuthority =
-        localAuthorityRepository.retrieveLocalAuthorityById(ue.getLocalAuthorityId());
+        LocalAuthorityEntity.builder()
+            .code(ue.getLocalAuthorityId())
+            .name(referenceDataService.getLocalAuthorityName(ue.getLocalAuthorityId()))
+            .build();
     return NewUserRequest.builder()
         .emailAddress(ue.getEmailAddress())
         .fullName(ue.getName())
@@ -133,7 +133,7 @@ public class UserManagementService {
         EmailLink.builder()
             .webappUri(this.laWebappEmailLinkURI)
             .uuid(UUID.randomUUID().toString())
-            .userId(userEntity.getId())
+            .userUuid(userEntity.getUuid())
             .build();
     userManagementRepository.createEmailLink(emailLink);
     return emailLink;
@@ -144,7 +144,7 @@ public class UserManagementService {
    *
    * @param userId The user PK.
    */
-  public void requestPasswordResetEmail(int userId) {
+  public void requestPasswordResetEmail(UUID userId) {
     log.debug("Resetting password for user:{}", userId);
     RetrieveUserByIdParams params = getRetrieveUserByIdParams(userId);
     Optional<UserEntity> optionalUserEntity = userManagementRepository.retrieveUserById(params);
@@ -162,14 +162,14 @@ public class UserManagementService {
    *
    * @param id PK of user to delete.
    */
-  public void deleteUser(int id) {
+  public void deleteUser(UUID id) {
     DeleteUserParams params = getDeleteUserParams(id);
     if (userManagementRepository.deleteUser(params) == 0) {
       throw new NotFoundException("user", DELETE);
     }
   }
 
-  public List<UserEntity> retrieveUsersByAuthorityId(int authorityId, String nameFilter) {
+  public List<UserEntity> retrieveUsersByAuthorityId(String authorityId, String nameFilter) {
     if (null != nameFilter) {
       nameFilter = "%" + nameFilter + "%";
     }
@@ -200,7 +200,7 @@ public class UserManagementService {
     if (userManagementRepository.updateUser(userEntity) == 0) {
       throw new NotFoundException("user", UPDATE);
     }
-    log.debug("Updated user {}", userEntity.getId());
+    log.debug("Updated user {}", userEntity.getUuid());
   }
 
   /** Update user password. */
@@ -235,7 +235,7 @@ public class UserManagementService {
 
     String hash = passwordEncoder.encode(password);
     UserEntity user = new UserEntity();
-    user.setId(link.getUserId());
+    user.setUuid(link.getUserUuid());
     user.setPassword(hash);
 
     userManagementRepository.updateEmailLinkToInvalid(uuid);
@@ -244,7 +244,7 @@ public class UserManagementService {
       throw new NotFoundException("user", UPDATE);
     }
     RetrieveUserByIdParams params =
-        RetrieveUserByIdParams.builder().userId(link.getUserId()).build();
+        RetrieveUserByIdParams.builder().userId(link.getUserUuid()).build();
     Optional<UserEntity> userEntity = userManagementRepository.retrieveUserById(params);
     PasswordResetSuccessRequest passwordResetSuccessRequest =
         PasswordResetSuccessRequest.builder()
@@ -263,14 +263,14 @@ public class UserManagementService {
     return userEntity.get();
   }
 
-  private RetrieveUserByIdParams getRetrieveUserByIdParams(int userId) {
-    int localAuthority = securityUtils.getCurrentLocalAuthority().getId();
+  private RetrieveUserByIdParams getRetrieveUserByIdParams(UUID userId) {
+    String localAuthority = securityUtils.getCurrentLocalAuthority().getShortCode();
     return RetrieveUserByIdParams.builder().userId(userId).localAuthority(localAuthority).build();
   }
 
-  private DeleteUserParams getDeleteUserParams(int userId) {
-    int localAuthority = securityUtils.getCurrentLocalAuthority().getId();
-    return DeleteUserParams.builder().userId(userId).localAuthority(localAuthority).build();
+  private DeleteUserParams getDeleteUserParams(UUID userUuid) {
+    String localAuthority = securityUtils.getCurrentLocalAuthority().getShortCode();
+    return DeleteUserParams.builder().userUuid(userUuid).localAuthority(localAuthority).build();
   }
 
   /**
@@ -304,7 +304,7 @@ public class UserManagementService {
   private List<ErrorErrors> localAuthorityValidateUser(UserEntity userEntity) {
     List<ErrorErrors> errorsList = null;
 
-    int localAuthority = securityUtils.getCurrentLocalAuthority().getId();
+    String localAuthority = securityUtils.getCurrentLocalAuthority().getShortCode();
     if (localAuthority != userEntity.getLocalAuthorityId()) {
       ErrorErrors error = new ErrorErrors();
       error

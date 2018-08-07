@@ -134,7 +134,7 @@ public interface AuthoritiesApi {
   )
   default ResponseEntity<Void> updateAuthority(
       @ApiParam(value = "ID of the authority.", required = true) @PathVariable("authorityId")
-          Integer authorityId) {
+          String authorityId) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
     } else {
       log.warn(

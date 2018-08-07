@@ -104,7 +104,7 @@ public interface UsersApi {
   )
   default ResponseEntity<Void> deleteUser(
       @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
-          Integer userId) {
+          String userId) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
     } else {
       log.warn(
@@ -146,7 +146,7 @@ public interface UsersApi {
           @ApiParam(value = "To Be Removed. LA id will passed in token", required = true)
           @Valid
           @RequestParam(value = "authorityId", required = true)
-          Integer authorityId) {
+          String authorityId) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
       if (getAcceptHeader().get().contains("application/json")) {
         try {
@@ -186,7 +186,7 @@ public interface UsersApi {
   )
   default ResponseEntity<Void> requestPasswordReset(
       @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
-          Integer userId) {
+          String userId) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
     } else {
       log.warn(
@@ -217,7 +217,7 @@ public interface UsersApi {
   )
   default ResponseEntity<UserResponse> retrieveUser(
       @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
-          Integer userId) {
+          String userId) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
       if (getAcceptHeader().get().contains("application/json")) {
         try {
@@ -305,7 +305,7 @@ public interface UsersApi {
   )
   default ResponseEntity<UserResponse> updateUser(
       @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
-          Integer userId,
+          String userId,
       @ApiParam(value = "") @Valid @RequestBody User user) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
       if (getAcceptHeader().get().contains("application/json")) {

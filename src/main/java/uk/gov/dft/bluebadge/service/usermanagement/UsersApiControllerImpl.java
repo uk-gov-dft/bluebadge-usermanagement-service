@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiParam;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -90,10 +91,10 @@ public class UsersApiControllerImpl implements UsersApi {
   @Override
   public ResponseEntity<UserResponse> retrieveUser(
       @ApiParam(value = "Numeric ID of the user to get.", required = true) @PathVariable("userId")
-          Integer userId) {
+          String userId) {
     UserResponse userResponse = new UserResponse();
 
-    UserEntity userEntity = service.retrieveUserById(userId);
+    UserEntity userEntity = service.retrieveUserById(UUID.fromString(userId));
     userResponse.setData(userConverter.convertToModel(userEntity));
 
     return ResponseEntity.ok(userResponse);
@@ -131,7 +132,7 @@ public class UsersApiControllerImpl implements UsersApi {
           @ApiParam(value = "To Be Removed. LA id will passed in token", required = true)
           @Valid
           @RequestParam(value = "authorityId", required = true)
-          Integer authorityId) {
+          String authorityId) {
 
     log.info("Finding users for authority {}, with filter:{}", authorityId, name);
     List<UserEntity> userEntityList =
@@ -144,7 +145,7 @@ public class UsersApiControllerImpl implements UsersApi {
   @Override
   public ResponseEntity<UserResponse> updateUser(
       @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
-          Integer userId,
+          String userId,
       @ApiParam() @Valid @RequestBody User user) {
     UserEntity entity = userConverter.convertToEntity(user);
     UserResponse userResponse = new UserResponse();
@@ -158,17 +159,17 @@ public class UsersApiControllerImpl implements UsersApi {
   public ResponseEntity<Void> deleteUser(
       @ApiParam(value = "Numeric ID of the user to remove.", required = true)
           @PathVariable("userId")
-          Integer userId) {
+          String userId) {
     Assert.notNull(userId, "User id must be provided for delete.");
-    service.deleteUser(userId);
+    service.deleteUser(UUID.fromString(userId));
     return ResponseEntity.ok().build();
   }
 
   @Override
   public ResponseEntity<Void> requestPasswordReset(
       @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
-          Integer userId) {
-    service.requestPasswordResetEmail(userId);
+          String userId) {
+    service.requestPasswordResetEmail(UUID.fromString(userId));
     return ResponseEntity.ok().build();
   }
 }

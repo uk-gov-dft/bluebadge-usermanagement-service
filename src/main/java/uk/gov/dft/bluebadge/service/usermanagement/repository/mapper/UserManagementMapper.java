@@ -4,6 +4,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UuidAuthorityCodeParams;
 
 @SuppressWarnings("unused")
 @Mapper
@@ -12,11 +13,11 @@ public interface UserManagementMapper {
 
   List<UserEntity> retrieveUsersByAuthorityId(UserEntity userEntity);
 
-  void updateUser(UserEntity userEntity);
+  int updateUser(UserEntity userEntity);
 
   void createUser(UserEntity userEntity);
 
-  void updatePassword(UserEntity userEntity);
+  int updatePassword(UserEntity userEntity);
 
   void deleteUser(int id);
 
@@ -26,7 +27,7 @@ public interface UserManagementMapper {
 
   void createEmailLink(EmailLink emailLink);
 
-  void updateEmailLinkToInvalid(String uuid);
+  int updateEmailLinkToInvalid(String uuid);
 
-  void updateUserToInactive(Integer id);
+  int updateUserToInactive(UuidAuthorityCodeParams params);
 }

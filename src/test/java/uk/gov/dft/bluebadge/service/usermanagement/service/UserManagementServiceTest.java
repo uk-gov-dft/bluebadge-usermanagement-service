@@ -23,14 +23,15 @@ import uk.gov.dft.bluebadge.service.client.messageservice.MessageApiClient;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.NewUserRequest;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetRequest;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetSuccessRequest;
-import uk.gov.dft.bluebadge.service.usermanagement.repository.LocalAuthorityRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.*;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException;
+import uk.gov.dft.bluebadge.service.usermanagement.service.referencedata.ReferenceDataService;
 
 public class UserManagementServiceTest {
   private static final int DEFAULT_USER_ID = -1;
+  private static final UUID DEFAULT_USER_UUID = UUID.randomUUID();
   private static final int DEFAULT_LOCAL_AUTHORITY_ID = 2;
   private static final String DEFAULT_LOCAL_AUTHORITY_SHORT_CODE = "MANC";
   private static final LocalAuthority DEFAULT_LOCAL_AUTHORITY =
@@ -55,24 +56,24 @@ public class UserManagementServiceTest {
 
   private static final RetrieveUserByIdParams DEFAULT_RETRIEVE_BY_USER_ID_PARAMS =
       RetrieveUserByIdParams.builder()
-          .userId(DEFAULT_USER_ID)
-          .localAuthority(DEFAULT_LOCAL_AUTHORITY_ID)
+          .userId(DEFAULT_USER_UUID)
+          .localAuthority(DEFAULT_LOCAL_AUTHORITY_SHORT_CODE)
           .build();
   private static final RetrieveUserByIdParams RETRIEVE_BY_USER_ID_PARAMS_NO_LOCAL_AUTHORITY =
-      RetrieveUserByIdParams.builder().userId(DEFAULT_USER_ID).build();
+      RetrieveUserByIdParams.builder().userId(DEFAULT_USER_UUID).build();
   private static final DeleteUserParams DEFAULT_DELETE_USER_PARAMS =
       DeleteUserParams.builder()
-          .userId(DEFAULT_USER_ID)
-          .localAuthority(DEFAULT_LOCAL_AUTHORITY_ID)
+          .userUuid(DEFAULT_USER_UUID)
+          .localAuthority(DEFAULT_LOCAL_AUTHORITY_SHORT_CODE)
           .build();
 
   private static final String WEBAPP_URI = "http://somewhere";
   private UserManagementService service;
 
   @Mock private UserManagementRepository repository;
-  @Mock private LocalAuthorityRepository localAuthorityRepository;
   @Mock private MessageApiClient messageApiClient;
   @Mock private SecurityUtils securityUtils;
+  @Mock private ReferenceDataService referenceDataService;
 
   private UserEntity user1;
   private LocalAuthorityEntity localAuthority1;
@@ -84,20 +85,19 @@ public class UserManagementServiceTest {
     service =
         new UserManagementService(
             repository,
-            localAuthorityRepository,
             messageApiClient,
             WEBAPP_URI,
             securityUtils,
-            passwordEncoder);
+            passwordEncoder,
+            referenceDataService);
     when(securityUtils.getCurrentLocalAuthority()).thenReturn(DEFAULT_LOCAL_AUTHORITY);
 
     user1 = new UserEntity();
     user1.setName("test");
-    user1.setId(DEFAULT_USER_ID);
+    user1.setUuid(DEFAULT_USER_UUID);
     user1.setEmailAddress("ggg");
-    user1.setLocalAuthorityId(OTHER_LOCAL_AUTHORITY_ID);
-    localAuthority1 = new LocalAuthorityEntity();
-    localAuthority1.setName("Bob");
+    user1.setLocalAuthorityId(OTHER_LOCAL_AUTHORITY_SHORT_CODE);
+    localAuthority1 = LocalAuthorityEntity.builder().name("Bob").build();
   }
 
   @Test
@@ -105,8 +105,7 @@ public class UserManagementServiceTest {
 
     when(securityUtils.getCurrentLocalAuthority()).thenReturn(OTHER_LOCAL_AUTHORITY);
     when(repository.emailAddressAlreadyUsed(user1)).thenReturn(false);
-    when(localAuthorityRepository.retrieveLocalAuthorityById(OTHER_LOCAL_AUTHORITY_ID))
-        .thenReturn(localAuthority1);
+
     String preCreatePassword = user1.getPassword();
 
     // When user is created
@@ -119,10 +118,9 @@ public class UserManagementServiceTest {
     // And password reset email is created
     verify(messageApiClient, times(1)).sendEmailLinkMessage(any(NewUserRequest.class));
     // And user is set inactive
-    verify(repository, times(1)).updateUserToInactive(-1);
+    verify(repository, times(1)).updateUserToInactive(any());
     // And email_link is created
     verify(repository, times(1)).createEmailLink(any(EmailLink.class));
-    verify(localAuthorityRepository, times(1)).retrieveLocalAuthorityById(OTHER_LOCAL_AUTHORITY_ID);
 
     assertThat(user1.getPassword()).isNotNull();
     assertThat(user1.getPassword()).isNotEqualTo(preCreatePassword);
@@ -140,7 +138,6 @@ public class UserManagementServiceTest {
     verify(messageApiClient, times(0)).sendEmailLinkMessage(any());
     verify(repository, times(0)).updateUserToInactive(any());
     verify(repository, times(0)).createEmailLink(any(EmailLink.class));
-    verify(localAuthorityRepository, times(0)).retrieveLocalAuthorityById(any());
   }
 
   @Test(expected = BadRequestException.class)
@@ -148,7 +145,7 @@ public class UserManagementServiceTest {
     // Given a new valid user
     UserEntity user = new UserEntity();
     user.setName("test");
-    user.setId(-1);
+    user.setUuid(UUID.randomUUID());
     user.setEmailAddress("ggg");
 
     when(repository.emailAddressAlreadyUsed(user)).thenReturn(true);
@@ -165,7 +162,7 @@ public class UserManagementServiceTest {
     // And password reset email is not created
     verify(messageApiClient, never()).sendEmailLinkMessage(any(PasswordResetRequest.class));
     // And user is not set inactive
-    verify(repository, never()).updateUserToInactive(-1);
+    verify(repository, never()).updateUserToInactive(any());
     // And email_link is not created
     verify(repository, never()).createEmailLink(any(EmailLink.class));
   }
@@ -176,7 +173,7 @@ public class UserManagementServiceTest {
     UserEntity user = new UserEntity();
     user.setEmailAddress("test@email.com");
     user.setName("test");
-    user.setId(-1);
+    user.setUuid(UUID.randomUUID());
 
     when(messageApiClient.sendEmailLinkMessage(any(PasswordResetRequest.class)))
         .thenReturn(UUID.randomUUID());
@@ -184,7 +181,7 @@ public class UserManagementServiceTest {
     when(repository.retrieveUserById(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS))
         .thenReturn(Optional.of(user));
     // When a password change is requested
-    service.requestPasswordResetEmail(-1);
+    service.requestPasswordResetEmail(UUID.randomUUID());
 
     // Then password reset email is created
     ArgumentCaptor<PasswordResetRequest> passwordRequest =
@@ -196,7 +193,7 @@ public class UserManagementServiceTest {
     assertThat( ***REMOVED***);
 
     // And user is set inactive
-    verify(repository).updateUserToInactive(DEFAULT_USER_ID);
+    verify(repository).updateUserToInactive(any());
     // And email_link is created
     verify(repository).createEmailLink(any(EmailLink.class));
   }
@@ -205,7 +202,7 @@ public class UserManagementServiceTest {
   public void requestPasswordResetEmail_no_user() {
     when(repository.retrieveUserById(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS))
         .thenReturn(Optional.empty());
-    service.requestPasswordResetEmail(DEFAULT_USER_ID);
+    service.requestPasswordResetEmail(DEFAULT_USER_UUID);
   }
 
   @Test
@@ -216,7 +213,7 @@ public class UserManagementServiceTest {
         .thenReturn(Optional.of(user));
 
     // When retrieving the user then the user is returned
-    Assert.assertTrue(user.equals(service.retrieveUserById(DEFAULT_USER_ID)));
+    Assert.assertTrue(user.equals(service.retrieveUserById(DEFAULT_USER_UUID)));
   }
 
   @Test(expected = NotFoundException.class)
@@ -227,7 +224,7 @@ public class UserManagementServiceTest {
     when(repository.retrieveUserById(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS))
         .thenReturn(Optional.of(user));
 
-    service.retrieveUserById(DEFAULT_USER_ID);
+    service.retrieveUserById(DEFAULT_USER_UUID);
   }
 
   @Test(expected = NotFoundException.class)
@@ -237,7 +234,7 @@ public class UserManagementServiceTest {
         .thenReturn(Optional.empty());
 
     // When retrieved then NotFoundException
-    service.retrieveUserById(DEFAULT_USER_ID);
+    service.retrieveUserById(DEFAULT_USER_UUID);
   }
 
   @Test
@@ -245,11 +242,11 @@ public class UserManagementServiceTest {
     when(securityUtils.getCurrentLocalAuthority()).thenReturn(ANOTHER_LOCAL_AUTHORITY);
 
     UserEntity user = new UserEntity();
-    user.setId(1);
-    user.setLocalAuthorityId(1);
+    user.setUuid(DEFAULT_USER_UUID);
+    user.setLocalAuthorityId(DEFAULT_LOCAL_AUTHORITY_SHORT_CODE);
     UserEntity expectedUser = new UserEntity();
-    expectedUser.setId(1);
-    expectedUser.setLocalAuthorityId(1);
+    expectedUser.setUuid(DEFAULT_USER_UUID);
+    expectedUser.setLocalAuthorityId(DEFAULT_LOCAL_AUTHORITY_SHORT_CODE);
 
     // Given the user is valid
     when(repository.updateUser(expectedUser)).thenReturn(1);
@@ -268,11 +265,11 @@ public class UserManagementServiceTest {
   public void updateUser_no_user() {
     when(securityUtils.getCurrentLocalAuthority()).thenReturn(ANOTHER_LOCAL_AUTHORITY);
     UserEntity user = new UserEntity();
-    user.setId(1);
-    user.setLocalAuthorityId(1);
+    user.setUuid(DEFAULT_USER_UUID);
+    user.setLocalAuthorityId(DEFAULT_LOCAL_AUTHORITY_SHORT_CODE);
     UserEntity expectedUser = new UserEntity();
-    expectedUser.setId(1);
-    expectedUser.setLocalAuthorityId(1);
+    expectedUser.setUuid(DEFAULT_USER_UUID);
+    expectedUser.setLocalAuthorityId(DEFAULT_LOCAL_AUTHORITY_SHORT_CODE);
     when(repository.updateUser(expectedUser)).thenReturn(0);
     service.updateUser(user);
   }
@@ -282,11 +279,11 @@ public class UserManagementServiceTest {
     when(securityUtils.getCurrentLocalAuthority()).thenReturn(OTHER_LOCAL_AUTHORITY);
 
     UserEntity user = new UserEntity();
-    user.setId(1);
-    user.setLocalAuthorityId(DEFAULT_LOCAL_AUTHORITY_ID);
+    user.setUuid(DEFAULT_USER_UUID);
+    user.setLocalAuthorityId(DEFAULT_LOCAL_AUTHORITY_SHORT_CODE);
     UserEntity expectedUser = new UserEntity();
-    expectedUser.setId(1);
-    expectedUser.setLocalAuthorityId(DEFAULT_LOCAL_AUTHORITY_ID);
+    expectedUser.setUuid(DEFAULT_USER_UUID);
+    expectedUser.setLocalAuthorityId(DEFAULT_LOCAL_AUTHORITY_SHORT_CODE);
 
     // Given the user is valid
     when(repository.updateUser(expectedUser)).thenReturn(1);
@@ -327,7 +324,7 @@ public class UserManagementServiceTest {
     EmailLink link =
         EmailLink.builder()
             .webappUri(WEBAPP_URI)
-            .userId(DEFAULT_USER_ID)
+            .userUuid(DEFAULT_USER_UUID)
             .uuid(uuid.toString())
             .isActive(true)
             .build();
@@ -379,7 +376,7 @@ public class UserManagementServiceTest {
     EmailLink link =
         EmailLink.builder()
             .webappUri(WEBAPP_URI)
-            .userId(DEFAULT_USER_ID)
+            .userUuid(DEFAULT_USER_UUID)
             .uuid(uuid.toString())
             .isActive(false)
             .build();
@@ -436,20 +433,20 @@ public class UserManagementServiceTest {
   @Test
   public void deleteUser() {
     when(repository.deleteUser(DEFAULT_DELETE_USER_PARAMS)).thenReturn(1);
-    service.deleteUser(DEFAULT_USER_ID);
+    service.deleteUser(DEFAULT_USER_UUID);
   }
 
   @Test(expected = NotFoundException.class)
   public void deleteUser_no_user() {
     when(repository.deleteUser(DEFAULT_DELETE_USER_PARAMS)).thenReturn(0);
-    service.deleteUser(DEFAULT_USER_ID);
+    service.deleteUser(DEFAULT_USER_UUID);
   }
 
   @Test
   public void retrieveUsersByAuthorityId() {
     List<UserEntity> userList = new ArrayList<>();
     when(repository.findUsers(any())).thenReturn(userList);
-    service.retrieveUsersByAuthorityId(1, "abc");
+    service.retrieveUsersByAuthorityId(DEFAULT_LOCAL_AUTHORITY_SHORT_CODE, "abc");
   }
 
   @Test
