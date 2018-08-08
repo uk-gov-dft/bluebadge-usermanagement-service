@@ -38,7 +38,7 @@ public class MessageApiClientTest extends ApplicationContextTests {
   private UuidResponse uuidResponse;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     RestTemplate restTemplate = new RestTemplate();
     restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(TEST_URI));
     mockServer = MockRestServiceServer.bindTo(restTemplate).build();

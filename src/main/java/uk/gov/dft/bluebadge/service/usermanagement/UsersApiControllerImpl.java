@@ -131,18 +131,18 @@ public class UsersApiControllerImpl implements UsersApi {
   @Override
   public ResponseEntity<UsersResponse> findUsers(
       @ApiParam(value = "Name or email address fragment to filter on.")
-      @Valid
-      @RequestParam(value = "name", required = false)
+          @Valid
+          @RequestParam(value = "name", required = false)
           Optional<String> name,
       @NotNull
-      @ApiParam(value = "To Be Removed. LA id will passed in token", required = true)
-      @Valid
-      @RequestParam(value = "authorityShortCode")
+          @ApiParam(value = "To Be Removed. LA id will passed in token", required = true)
+          @Valid
+          @RequestParam(value = "authorityShortCode")
           String authorityShortCode) {
 
     log.info("Finding users for authority {}, with filter:{}", authorityShortCode, name);
     List<UserEntity> userEntityList =
-        service.retrieveUsersByAuthorityId(authorityShortCode, name.orElse(null));
+        service.retrieveUsersByAuthorityCode(authorityShortCode, name.orElse(null));
 
     return ResponseEntity.ok(
         new UsersResponse().data(userConverter.convertToModelList(userEntityList)));

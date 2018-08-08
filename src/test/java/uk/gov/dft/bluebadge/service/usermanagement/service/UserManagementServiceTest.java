@@ -178,7 +178,7 @@ public class UserManagementServiceTest {
     when(messageApiClient.sendEmailLinkMessage(any(PasswordResetRequest.class)))
         .thenReturn(UUID.randomUUID());
 
-    when(repository.retrieveUserById(any())).thenReturn(Optional.of(user));
+    when(repository.retrieveUserByUuid(any())).thenReturn(Optional.of(user));
     // When a password change is requested
     service.requestPasswordResetEmail(UUID.randomUUID());
 
@@ -199,7 +199,7 @@ public class UserManagementServiceTest {
 
   @Test(expected = NotFoundException.class)
   public void requestPasswordResetEmail_no_user() {
-    when(repository.retrieveUserById(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS))
+    when(repository.retrieveUserByUuid(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS))
         .thenReturn(Optional.empty());
     service.requestPasswordResetEmail(DEFAULT_USER_UUID);
   }
@@ -208,7 +208,7 @@ public class UserManagementServiceTest {
   public void retrieveUserById_ok() {
     // Given the user exists
     UserEntity user = new UserEntity();
-    when(repository.retrieveUserById(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS))
+    when(repository.retrieveUserByUuid(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS))
         .thenReturn(Optional.of(user));
 
     // When retrieving the user then the user is returned
@@ -220,7 +220,7 @@ public class UserManagementServiceTest {
     when(securityUtils.getCurrentLocalAuthority()).thenReturn(OTHER_LOCAL_AUTHORITY);
 
     UserEntity user = new UserEntity();
-    when(repository.retrieveUserById(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS))
+    when(repository.retrieveUserByUuid(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS))
         .thenReturn(Optional.of(user));
 
     service.retrieveUserById(DEFAULT_USER_UUID);
@@ -229,7 +229,7 @@ public class UserManagementServiceTest {
   @Test(expected = NotFoundException.class)
   public void retrieveUserById_notExists() {
     // Given the user does not exist
-    when(repository.retrieveUserById(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS))
+    when(repository.retrieveUserByUuid(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS))
         .thenReturn(Optional.empty());
 
     // When retrieved then NotFoundException
@@ -334,7 +334,7 @@ public class UserManagementServiceTest {
     when(repository.updatePassword(any())).thenReturn(1);
     when(repository.updateEmailLinkToInvalid(uuid.toString())).thenReturn(1);
     when(repository.retrieveEmailLinkWithUuid(uuid.toString())).thenReturn(link);
-    when(repository.retrieveUserById(RETRIEVE_BY_USER_ID_PARAMS_NO_LOCAL_AUTHORITY))
+    when(repository.retrieveUserByUuid(RETRIEVE_BY_USER_ID_PARAMS_NO_LOCAL_AUTHORITY))
         .thenReturn(Optional.of(userEntity));
 
     // When update password requested
@@ -445,7 +445,7 @@ public class UserManagementServiceTest {
   public void retrieveUsersByAuthorityId() {
     List<UserEntity> userList = new ArrayList<>();
     when(repository.findUsers(any())).thenReturn(userList);
-    service.retrieveUsersByAuthorityId(DEFAULT_LOCAL_AUTHORITY_SHORT_CODE, "abc");
+    service.retrieveUsersByAuthorityCode(DEFAULT_LOCAL_AUTHORITY_SHORT_CODE, "abc");
   }
 
   @Test

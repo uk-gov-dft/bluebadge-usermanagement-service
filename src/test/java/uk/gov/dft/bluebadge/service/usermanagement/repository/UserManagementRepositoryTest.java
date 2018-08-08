@@ -43,7 +43,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
   @Test
   public void retrieveUserById_exists() {
     Optional<UserEntity> maybeUserEntity =
-        userManagementRepository.retrieveUserById(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS);
+        userManagementRepository.retrieveUserByUuid(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS);
     UserEntity userEntity = checkDefaultUser(maybeUserEntity);
 
     assertThat(userEntity.getPassword()).isNull();
@@ -52,7 +52,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
   @Test
   public void retrieveUserById_existsAndNoLocalAuthorityProvided() {
     Optional<UserEntity> maybeUserEntity =
-        userManagementRepository.retrieveUserById(NO_LOCAL_AUTHORITY_RETRIEVE_BY_USER_ID_PARAMS);
+        userManagementRepository.retrieveUserByUuid(NO_LOCAL_AUTHORITY_RETRIEVE_BY_USER_ID_PARAMS);
     UserEntity userEntity = checkDefaultUser(maybeUserEntity);
 
     assertThat(userEntity.getPassword()).isNull();
@@ -65,7 +65,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
             .uuid(DEFAULT_USER_UUID)
             .authorityCode(OTHER_LOCAL_AUTHORITY_CODE)
             .build();
-    Optional<UserEntity> maybeUserEntity = userManagementRepository.retrieveUserById(params);
+    Optional<UserEntity> maybeUserEntity = userManagementRepository.retrieveUserByUuid(params);
 
     assertThat(maybeUserEntity).isEmpty();
   }
@@ -78,13 +78,13 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
             .authorityCode(DEFAULT_LOCAL_AUTHORITY_CODE)
             .build();
 
-    Optional<UserEntity> maybeUserEntity = userManagementRepository.retrieveUserById(params);
+    Optional<UserEntity> maybeUserEntity = userManagementRepository.retrieveUserByUuid(params);
     assertThat(maybeUserEntity).isNotNull();
     assertThat(maybeUserEntity.isPresent()).isFalse();
   }
 
   @Test
-  public void findUsers_byAuthorityId() {
+  public void findUsers_byAuthorityCode() {
     UserEntity params = new UserEntity();
     params.setAuthorityCode(DEFAULT_LOCAL_AUTHORITY_CODE);
     List<UserEntity> users = userManagementRepository.findUsers(params);
@@ -92,7 +92,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
   }
 
   @Test
-  public void findUsers_byAuthorityId_noResults() {
+  public void findUsers_byAuthorityCode_noResults() {
     UserEntity params = new UserEntity();
     params.setAuthorityCode("ABCD");
     List<UserEntity> users = userManagementRepository.findUsers(params);
@@ -100,7 +100,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
   }
 
   @Test
-  public void findUsers_byAuthorityIdAndName() {
+  public void findUsers_byAuthorityCodeAndName() {
     UserEntity params = new UserEntity();
     params.setAuthorityCode(DEFAULT_LOCAL_AUTHORITY_CODE);
     params.setName("Sampath");
@@ -112,7 +112,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
 
   @Test
   public void
-      findUsers_byAuthorityIdAndName_ShouldReturn50FirstResultsOrderedByNameAscendingOrder() {
+      findUsers_byAuthorityCodeAndName_ShouldReturn50FirstResultsOrderedByNameAscendingOrder() {
     final int FIRST_ID = 200000;
     final int LAST_ID = FIRST_ID + 100;
     final int RESULTS_LIMIT = 50;
@@ -150,7 +150,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
   @Test
   public void updateUser_fieldsUpdated() {
     UserEntity userEntity =
-        userManagementRepository.retrieveUserById(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS).get();
+        userManagementRepository.retrieveUserByUuid(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS).get();
     userEntity.setName("Bob");
     userEntity.setEmailAddress("bob@bob.com");
     userEntity.setAuthorityCode(DEFAULT_LOCAL_AUTHORITY_CODE);
@@ -160,7 +160,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     assertThat(i).isEqualTo(1);
 
     UserEntity updatedUserEntity =
-        userManagementRepository.retrieveUserById(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS).get();
+        userManagementRepository.retrieveUserByUuid(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS).get();
     assertThat(updatedUserEntity).isNotSameAs(userEntity);
     assertThat(updatedUserEntity.getName()).isEqualTo("Bob");
     assertThat(updatedUserEntity.getEmailAddress()).isEqualTo("bob@bob.com");
@@ -179,7 +179,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
   @Test
   public void updatePassword() {
     UserEntity userEntity =
-        userManagementRepository.retrieveUserById(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS).get();
+        userManagementRepository.retrieveUserByUuid(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS).get();
     userEntity.setPassword("newPassword");
     int i = userManagementRepository.updatePassword(userEntity);
     assertThat(i).isEqualTo(1);
@@ -269,7 +269,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     assertThat(deletedRecords).isEqualTo(1);
 
     Optional<UserEntity> userEntity =
-        userManagementRepository.retrieveUserById(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS);
+        userManagementRepository.retrieveUserByUuid(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS);
     assertThat(userEntity).isEmpty();
   }
 
@@ -285,7 +285,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     assertThat(deletedRecords).isEqualTo(0);
 
     Optional<UserEntity> userEntity =
-        userManagementRepository.retrieveUserById(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS);
+        userManagementRepository.retrieveUserByUuid(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS);
     assertThat(userEntity).isPresent();
   }
 

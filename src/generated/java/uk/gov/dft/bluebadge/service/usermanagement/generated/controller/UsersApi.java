@@ -10,12 +10,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.io.IOException;
-import java.util.Optional;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -30,6 +24,13 @@ import uk.gov.dft.bluebadge.model.usermanagement.generated.Password;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.User;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.UserResponse;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.UsersResponse;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import java.io.IOException;
+import java.util.Optional;
 
 @Api(value = "Users", description = "the Users API")
 public interface UsersApi {
@@ -49,24 +50,24 @@ public interface UsersApi {
   }
 
   @ApiOperation(
-    value = "Create a user",
-    nickname = "createUser",
-    notes = "Create a user",
-    response = UserResponse.class,
-    tags = {
-      "Users",
-    }
+      value = "Create a user",
+      nickname = "createUser",
+      notes = "Create a user",
+      response = UserResponse.class,
+      tags = {
+          "Users",
+      }
   )
   @ApiResponses(
-    value = {
-      @ApiResponse(code = 200, message = "OK", response = UserResponse.class),
-      @ApiResponse(code = 400, message = "Bad request", response = CommonResponse.class)
-    }
+      value = {
+          @ApiResponse(code = 200, message = "OK", response = UserResponse.class),
+          @ApiResponse(code = 400, message = "Bad request", response = CommonResponse.class)
+      }
   )
   @RequestMapping(
-    value = "/users",
-    produces = {"application/json"},
-    method = RequestMethod.POST
+      value = "/users",
+      produces = {"application/json"},
+      method = RequestMethod.POST
   )
   default ResponseEntity<UserResponse> createUser(
       @ApiParam(value = "") @Valid @RequestBody User user) {
@@ -89,28 +90,28 @@ public interface UsersApi {
   }
 
   @ApiOperation(
-    value = "Removes a User from a Local Authority",
-    nickname = "deleteUser",
-    notes = "Removes a User from a Local Authority",
-    tags = {
-      "Users",
-    }
+      value = "Removes a User from a Local Authority",
+      nickname = "deleteUser",
+      notes = "Removes a User from a Local Authority",
+      tags = {
+          "Users",
+      }
   )
   @ApiResponses(
-    value = {
-      @ApiResponse(code = 200, message = "Resource Successfully Removed"),
-      @ApiResponse(code = 404, message = "User not found.", response = CommonResponse.class)
-    }
+      value = {
+          @ApiResponse(code = 200, message = "Resource Successfully Removed"),
+          @ApiResponse(code = 404, message = "User not found.", response = CommonResponse.class)
+      }
   )
   @RequestMapping(
-    value = "/users/{uuid}",
-    produces = {"application/json"},
-    method = RequestMethod.DELETE
+      value = "/users/{uuid}",
+      produces = {"application/json"},
+      method = RequestMethod.DELETE
   )
   default ResponseEntity<Void> deleteUser(
       @Pattern(regexp = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
-          @ApiParam(value = "UUID of the user.", required = true)
-          @PathVariable("uuid")
+      @ApiParam(value = "UUID of the user.", required = true)
+      @PathVariable("uuid")
           String uuid) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
     } else {
@@ -121,38 +122,38 @@ public interface UsersApi {
   }
 
   @ApiOperation(
-    value = "List of all Users",
-    nickname = "findUsers",
-    notes = "Returns a list of Users ",
-    response = UsersResponse.class,
-    tags = {
-      "Users",
-    }
+      value = "List of all Users",
+      nickname = "findUsers",
+      notes = "Returns a list of Users ",
+      response = UsersResponse.class,
+      tags = {
+          "Users",
+      }
   )
   @ApiResponses(
-    value = {
-      @ApiResponse(
-        code = 200,
-        message = "An array Zero, One or many users",
-        response = UsersResponse.class
-      ),
-      @ApiResponse(code = 200, message = "Unexpected error", response = CommonResponse.class)
-    }
+      value = {
+          @ApiResponse(
+              code = 200,
+              message = "An array Zero, One or many users",
+              response = UsersResponse.class
+          ),
+          @ApiResponse(code = 200, message = "Unexpected error", response = CommonResponse.class)
+      }
   )
   @RequestMapping(
-    value = "/users",
-    produces = {"application/json"},
-    method = RequestMethod.GET
+      value = "/users",
+      produces = {"application/json"},
+      method = RequestMethod.GET
   )
   default ResponseEntity<UsersResponse> findUsers(
       @ApiParam(value = "Name or email address fragment to filter on.")
-          @Valid
-          @RequestParam(value = "name", required = false)
+      @Valid
+      @RequestParam(value = "name", required = false)
           Optional<String> name,
       @NotNull
-          @ApiParam(value = "To Be Removed. LA id will passed in token", required = true)
-          @Valid
-          @RequestParam(value = "authorityShortCode", required = true)
+      @ApiParam(value = "To Be Removed. LA id will passed in token", required = true)
+      @Valid
+      @RequestParam(value = "authorityShortCode", required = true)
           String authorityShortCode) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
       if (getAcceptHeader().get().contains("application/json")) {
@@ -173,28 +174,28 @@ public interface UsersApi {
   }
 
   @ApiOperation(
-    value = "Request password reset for user.",
-    nickname = "requestPasswordReset",
-    notes = "Email user with password reset link.",
-    tags = {
-      "Users",
-    }
+      value = "Request password reset for user.",
+      nickname = "requestPasswordReset",
+      notes = "Email user with password reset link.",
+      tags = {
+          "Users",
+      }
   )
   @ApiResponses(
-    value = {
-      @ApiResponse(code = 200, message = "OK"),
-      @ApiResponse(code = 400, message = "Bad request.", response = CommonResponse.class)
-    }
+      value = {
+          @ApiResponse(code = 200, message = "OK"),
+          @ApiResponse(code = 400, message = "Bad request.", response = CommonResponse.class)
+      }
   )
   @RequestMapping(
-    value = "/users/{uuid}/passwordReset",
-    produces = {"application/json"},
-    method = RequestMethod.GET
+      value = "/users/{uuid}/passwordReset",
+      produces = {"application/json"},
+      method = RequestMethod.GET
   )
   default ResponseEntity<Void> requestPasswordReset(
       @Pattern(regexp = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
-          @ApiParam(value = "Uuid of the user.", required = true)
-          @PathVariable("uuid")
+      @ApiParam(value = "Uuid of the user.", required = true)
+      @PathVariable("uuid")
           String uuid) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
     } else {
@@ -205,29 +206,29 @@ public interface UsersApi {
   }
 
   @ApiOperation(
-    value = "Retrieve a specific user",
-    nickname = "retrieveUser",
-    notes = "Retrieve a user and their roles",
-    response = UserResponse.class,
-    tags = {
-      "Users",
-    }
+      value = "Retrieve a specific user",
+      nickname = "retrieveUser",
+      notes = "Retrieve a user and their roles",
+      response = UserResponse.class,
+      tags = {
+          "Users",
+      }
   )
   @ApiResponses(
-    value = {
-      @ApiResponse(code = 200, message = "OK", response = UserResponse.class),
-      @ApiResponse(code = 404, message = "User not found.", response = CommonResponse.class)
-    }
+      value = {
+          @ApiResponse(code = 200, message = "OK", response = UserResponse.class),
+          @ApiResponse(code = 404, message = "User not found.", response = CommonResponse.class)
+      }
   )
   @RequestMapping(
-    value = "/users/{uuid}",
-    produces = {"application/json"},
-    method = RequestMethod.GET
+      value = "/users/{uuid}",
+      produces = {"application/json"},
+      method = RequestMethod.GET
   )
   default ResponseEntity<UserResponse> retrieveUser(
       @Pattern(regexp = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
-          @ApiParam(value = "UUID of the user.", required = true)
-          @PathVariable("uuid")
+      @ApiParam(value = "UUID of the user.", required = true)
+      @PathVariable("uuid")
           String uuid) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
       if (getAcceptHeader().get().contains("application/json")) {
@@ -248,30 +249,30 @@ public interface UsersApi {
   }
 
   @ApiOperation(
-    value = "Update password reset for user.",
-    nickname = "updatePassword",
-    notes = "Update password reset for user.",
-    response = UserResponse.class,
-    tags = {
-      "Users",
-    }
+      value = "Update password reset for user.",
+      nickname = "updatePassword",
+      notes = "Update password reset for user.",
+      response = UserResponse.class,
+      tags = {
+          "Users",
+      }
   )
   @ApiResponses(
-    value = {
-      @ApiResponse(code = 200, message = "OK", response = UserResponse.class),
-      @ApiResponse(code = 400, message = "Bad request.", response = CommonResponse.class),
-      @ApiResponse(code = 404, message = "User not found.", response = CommonResponse.class)
-    }
+      value = {
+          @ApiResponse(code = 200, message = "OK", response = UserResponse.class),
+          @ApiResponse(code = 400, message = "Bad request.", response = CommonResponse.class),
+          @ApiResponse(code = 404, message = "User not found.", response = CommonResponse.class)
+      }
   )
   @RequestMapping(
-    value = "/user/password/{uuid}",
-    produces = {"application/json"},
-    method = RequestMethod.PATCH
+      value = "/user/password/{uuid}",
+      produces = {"application/json"},
+      method = RequestMethod.PATCH
   )
   default ResponseEntity<UserResponse> updatePassword(
       @Pattern(regexp = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
-          @ApiParam(value = "UUID for password reset.", required = true)
-          @PathVariable("uuid")
+      @ApiParam(value = "UUID for password reset.", required = true)
+      @PathVariable("uuid")
           String uuid,
       @ApiParam(value = "") @Valid @RequestBody Password password) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -293,34 +294,34 @@ public interface UsersApi {
   }
 
   @ApiOperation(
-    value = "Update a user.",
-    nickname = "updateUser",
-    notes = "Update a user.",
-    response = UserResponse.class,
-    tags = {
-      "Users",
-    }
+      value = "Update a user.",
+      nickname = "updateUser",
+      notes = "Update a user.",
+      response = UserResponse.class,
+      tags = {
+          "Users",
+      }
   )
   @ApiResponses(
-    value = {
-      @ApiResponse(
-        code = 200,
-        message = "Resource valid and updated if exists.",
-        response = UserResponse.class
-      ),
-      @ApiResponse(code = 400, message = "Bad request", response = CommonResponse.class),
-      @ApiResponse(code = 404, message = "User not found.", response = CommonResponse.class)
-    }
+      value = {
+          @ApiResponse(
+              code = 200,
+              message = "Resource valid and updated if exists.",
+              response = UserResponse.class
+          ),
+          @ApiResponse(code = 400, message = "Bad request", response = CommonResponse.class),
+          @ApiResponse(code = 404, message = "User not found.", response = CommonResponse.class)
+      }
   )
   @RequestMapping(
-    value = "/users/{uuid}",
-    produces = {"application/json"},
-    method = RequestMethod.PUT
+      value = "/users/{uuid}",
+      produces = {"application/json"},
+      method = RequestMethod.PUT
   )
   default ResponseEntity<UserResponse> updateUser(
       @Pattern(regexp = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
-          @ApiParam(value = "UUID of the user.", required = true)
-          @PathVariable("uuid")
+      @ApiParam(value = "UUID of the user.", required = true)
+      @PathVariable("uuid")
           String uuid,
       @ApiParam(value = "") @Valid @RequestBody User user) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {

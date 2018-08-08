@@ -24,7 +24,10 @@ import uk.gov.dft.bluebadge.service.client.messageservice.model.NewUserRequest;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetRequest;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetSuccessRequest;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepository;
-import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.*;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.LocalAuthorityEntity;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UuidAuthorityCodeParams;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.referencedata.ReferenceDataService;
@@ -58,8 +61,8 @@ public class UserManagementService {
   }
 
   public UserEntity retrieveUserById(UUID userUuid) {
-    UuidAuthorityCodeParams params = getRetrieveUserByIdParams(userUuid);
-    Optional<UserEntity> userEntity = userManagementRepository.retrieveUserById(params);
+    UuidAuthorityCodeParams params = getUuidAuthorityCodeParams(userUuid);
+    Optional<UserEntity> userEntity = userManagementRepository.retrieveUserByUuid(params);
     if (!userEntity.isPresent()) {
       log.info("Request to retrieve user params:{} that did not exist", params);
       throw new NotFoundException("user", RETRIEVE);
@@ -86,7 +89,7 @@ public class UserManagementService {
     }
     createInitialPassword(userEntity);
     userManagementRepository.createUser(userEntity);
-    requestEmailLinkMessage(userEntity, (ue, el) -> buildNewUserRequestDetails(ue, el));
+    requestEmailLinkMessage(userEntity, this::buildNewUserRequestDetails);
     log.debug("Created user {}", userEntity.getUuid());
   }
 
@@ -146,35 +149,35 @@ public class UserManagementService {
    */
   public void requestPasswordResetEmail(UUID userUuid) {
     log.debug("Resetting password for user:{}", userUuid);
-    UuidAuthorityCodeParams params = getRetrieveUserByIdParams(userUuid);
-    Optional<UserEntity> optionalUserEntity = userManagementRepository.retrieveUserById(params);
+    UuidAuthorityCodeParams params = getUuidAuthorityCodeParams(userUuid);
+    Optional<UserEntity> optionalUserEntity = userManagementRepository.retrieveUserByUuid(params);
     UserEntity userEntity;
     if (optionalUserEntity.isPresent()) {
       userEntity = optionalUserEntity.get();
     } else {
       throw new NotFoundException("user", RETRIEVE);
     }
-    requestEmailLinkMessage(userEntity, (ue, el) -> buildPasswordRequestDetails(ue, el));
+    requestEmailLinkMessage(userEntity, this::buildPasswordRequestDetails);
   }
 
   /**
    * Delete a user.
    *
-   * @param id PK of user to delete.
+   * @param uuid PK of user to delete.
    */
-  public void deleteUser(UUID id) {
-    UuidAuthorityCodeParams params = getDeleteUserParams(id);
+  public void deleteUser(UUID uuid) {
+    UuidAuthorityCodeParams params = getUuidAuthorityCodeParams(uuid);
     if (userManagementRepository.deleteUser(params) == 0) {
       throw new NotFoundException("user", DELETE);
     }
   }
 
-  public List<UserEntity> retrieveUsersByAuthorityId(String authorityId, String nameFilter) {
+  public List<UserEntity> retrieveUsersByAuthorityCode(String authorityCode, String nameFilter) {
     if (null != nameFilter) {
       nameFilter = "%" + nameFilter + "%";
     }
     UserEntity queryParams = new UserEntity();
-    queryParams.setAuthorityCode(authorityId);
+    queryParams.setAuthorityCode(authorityCode);
     queryParams.setName(nameFilter);
     queryParams.setEmailAddress(nameFilter);
     return userManagementRepository.findUsers(queryParams);
@@ -245,13 +248,16 @@ public class UserManagementService {
     }
     UuidAuthorityCodeParams params =
         UuidAuthorityCodeParams.builder().uuid(link.getUserUuid()).build();
-    Optional<UserEntity> userEntity = userManagementRepository.retrieveUserById(params);
-    PasswordResetSuccessRequest passwordResetSuccessRequest =
-        PasswordResetSuccessRequest.builder()
-            .emailAddress(userEntity.get().getEmailAddress())
-            .fullName(userEntity.get().getName())
-            .build();
-    messageApiClient.sendPasswordResetSuccessMessage(passwordResetSuccessRequest);
+    Optional<UserEntity> userEntity = userManagementRepository.retrieveUserByUuid(params);
+    // The user entity really should be present as we just updated the password.
+    if (userEntity.isPresent()) {
+      PasswordResetSuccessRequest passwordResetSuccessRequest =
+          PasswordResetSuccessRequest.builder()
+              .emailAddress(userEntity.get().getEmailAddress())
+              .fullName(userEntity.get().getName())
+              .build();
+      messageApiClient.sendPasswordResetSuccessMessage(passwordResetSuccessRequest);
+    }
   }
 
   public UserEntity retrieveUserUsingUuid(String uuid) {
@@ -263,12 +269,7 @@ public class UserManagementService {
     return userEntity.get();
   }
 
-  private UuidAuthorityCodeParams getRetrieveUserByIdParams(UUID userUuid) {
-    String localAuthority = securityUtils.getCurrentLocalAuthority().getShortCode();
-    return UuidAuthorityCodeParams.builder().uuid(userUuid).authorityCode(localAuthority).build();
-  }
-
-  private UuidAuthorityCodeParams getDeleteUserParams(UUID userUuid) {
+  private UuidAuthorityCodeParams getUuidAuthorityCodeParams(UUID userUuid) {
     String localAuthority = securityUtils.getCurrentLocalAuthority().getShortCode();
     return UuidAuthorityCodeParams.builder().uuid(userUuid).authorityCode(localAuthority).build();
   }

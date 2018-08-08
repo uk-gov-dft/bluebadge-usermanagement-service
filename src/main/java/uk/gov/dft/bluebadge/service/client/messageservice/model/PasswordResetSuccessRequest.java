@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NonNull;
 
 @Getter
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 public class PasswordResetSuccessRequest extends GenericMessageRequest {
   /** This is the name of the template within the Message service */
   @SuppressWarnings("squid:S2068")

@@ -9,11 +9,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.*;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.mapper.UserManagementMapper;
 
 /** Provides CRUD operations on UserEntity entity + user management. */
 @SuppressWarnings("WeakerAccess")
 @Component
-public class UserManagementRepository {
+public class UserManagementRepository implements UserManagementMapper {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(UserManagementRepository.class);
   private final SqlSession sqlSession;
@@ -25,13 +26,13 @@ public class UserManagementRepository {
   /**
    * Retrieve a single UserEntity by id.
    *
-   * @param params userId and localAuthorityPK of UserEntity to select.
+   * @param params userUuid and localAuthorityPK of UserEntity to select.
    * @return The retrieved UserEntity.
    */
-  public Optional<UserEntity> retrieveUserById(UuidAuthorityCodeParams params) {
+  public Optional<UserEntity> retrieveUserByUuid(UuidAuthorityCodeParams params) {
     Assert.notNull(params, "params cannot be null");
     Assert.notNull(params.getUuid(), "params.uuid cannot be null");
-    UserEntity userEntity = this.sqlSession.selectOne("retrieveUserById", params);
+    UserEntity userEntity = this.sqlSession.selectOne("retrieveUserByUuid", params);
     if (null == userEntity) {
       LOGGER.info("Attempt to retrieve UserEntity params:{} that does not exist.", params);
     }
@@ -111,7 +112,6 @@ public class UserManagementRepository {
    * Create a UserEntity.
    *
    * @param user UserEntity to create.
-   * @return Insert count.
    */
   public void createUser(UserEntity user) {
     Assert.notNull(user, "createUser called with null entity to update");
@@ -122,7 +122,7 @@ public class UserManagementRepository {
   /**
    * Delete a UserEntity.
    *
-   * @param params userId and local authority.
+   * @param params userUuid and local authority.
    * @return Delete count
    */
   public int deleteUser(UuidAuthorityCodeParams params) {

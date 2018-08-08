@@ -1,6 +1,7 @@
 package uk.gov.dft.bluebadge.service.client.referencedataservice;
 
 import java.util.List;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -41,6 +42,7 @@ public class ReferenceDataApiClient {
             .getBody();
 
     log.debug("Reference data successfully loaded.");
-    return response.getData();
+
+    return Objects.requireNonNull(response).getData();
   }
 }

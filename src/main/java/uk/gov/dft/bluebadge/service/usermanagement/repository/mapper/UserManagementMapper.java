@@ -1,6 +1,7 @@
 package uk.gov.dft.bluebadge.service.usermanagement.repository.mapper;
 
 import java.util.List;
+import java.util.Optional;
 import org.apache.ibatis.annotations.Mapper;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
@@ -9,9 +10,10 @@ import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UuidAuthori
 @SuppressWarnings("unused")
 @Mapper
 public interface UserManagementMapper {
-  UserEntity retrieveUserById(int id);
 
-  List<UserEntity> retrieveUsersByAuthorityId(UserEntity userEntity);
+  Optional<UserEntity> retrieveUserByUuid(UuidAuthorityCodeParams id);
+
+  List<UserEntity> findUsers(UserEntity userEntity);
 
   int updateUser(UserEntity userEntity);
 
@@ -19,7 +21,7 @@ public interface UserManagementMapper {
 
   int updatePassword(UserEntity userEntity);
 
-  void deleteUser(int id);
+  int deleteUser(UuidAuthorityCodeParams id);
 
   boolean emailAddressAlreadyUsed(UserEntity userEntity);
 
