@@ -12,8 +12,7 @@ public class UserEntity implements Serializable {
   private static final long serialVersionUID = 1L;
 
   private UUID uuid;
-  private Integer userId;
-  private String localAuthorityId;
+  private String authorityCode;
   private String name;
   private String emailAddress;
   private Integer roleId;

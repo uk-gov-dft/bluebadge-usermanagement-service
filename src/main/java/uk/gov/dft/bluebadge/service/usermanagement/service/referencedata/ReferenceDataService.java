@@ -46,6 +46,9 @@ public class ReferenceDataService {
   public String getLocalAuthorityName(String shortCode) {
     init();
     ReferenceData authority = authorities.get(shortCode);
-    return authority.getDescription();
+    if (null != authority) {
+      return authority.getDescription();
+    }
+    return null;
   }
 }

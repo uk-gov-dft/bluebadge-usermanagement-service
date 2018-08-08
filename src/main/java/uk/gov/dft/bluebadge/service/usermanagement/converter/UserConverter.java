@@ -9,9 +9,9 @@ public class UserConverter implements BiConverter<UserEntity, User> {
   @Override
   public UserEntity convertToEntity(User model) {
     UserEntity userEntity = new UserEntity();
-    userEntity.setUuid(UUID.fromString(model.getId()));
+    userEntity.setUuid(UUID.fromString(model.getUuid()));
     userEntity.setEmailAddress(model.getEmailAddress());
-    userEntity.setLocalAuthorityId(model.getLocalAuthorityShortCode());
+    userEntity.setAuthorityCode(model.getLocalAuthorityShortCode());
     userEntity.setName(model.getName());
     userEntity.setRoleId(model.getRoleId());
     userEntity.setRoleName(model.getRoleName());
@@ -21,8 +21,8 @@ public class UserConverter implements BiConverter<UserEntity, User> {
   @Override
   public User convertToModel(UserEntity entity) {
     User user = new User();
-    user.setId(entity.getUuid().toString());
-    user.setLocalAuthorityShortCode(entity.getLocalAuthorityId());
+    user.setUuid(entity.getUuid().toString());
+    user.setLocalAuthorityShortCode(entity.getAuthorityCode());
     user.setName(entity.getName());
     user.setEmailAddress(entity.getEmailAddress());
     user.setRoleId(entity.getRoleId());

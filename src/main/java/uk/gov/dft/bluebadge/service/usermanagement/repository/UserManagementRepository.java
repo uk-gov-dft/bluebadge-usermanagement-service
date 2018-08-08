@@ -28,9 +28,9 @@ public class UserManagementRepository {
    * @param params userId and localAuthorityPK of UserEntity to select.
    * @return The retrieved UserEntity.
    */
-  public Optional<UserEntity> retrieveUserById(RetrieveUserByIdParams params) {
+  public Optional<UserEntity> retrieveUserById(UuidAuthorityCodeParams params) {
     Assert.notNull(params, "params cannot be null");
-    Assert.notNull(params.getUserId(), "params.userId cannot be null");
+    Assert.notNull(params.getUuid(), "params.uuid cannot be null");
     UserEntity userEntity = this.sqlSession.selectOne("retrieveUserById", params);
     if (null == userEntity) {
       LOGGER.info("Attempt to retrieve UserEntity params:{} that does not exist.", params);
@@ -125,7 +125,7 @@ public class UserManagementRepository {
    * @param params userId and local authority.
    * @return Delete count
    */
-  public int deleteUser(DeleteUserParams params) {
+  public int deleteUser(UuidAuthorityCodeParams params) {
     int result = sqlSession.delete("deleteUser", params);
     if (0 == result) {
       LOGGER.info("Attempt to delete UserEntity params: {} that did not exist.", params);

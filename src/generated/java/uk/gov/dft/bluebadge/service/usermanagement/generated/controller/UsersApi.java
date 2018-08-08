@@ -5,12 +5,17 @@
 package uk.gov.dft.bluebadge.service.usermanagement.generated.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import java.io.IOException;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import javax.validation.constraints.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -20,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import uk.gov.dft.bluebadge.model.usermanagement.generated.CommonResponse;
+import uk.gov.dft.bluebadge.common.api.model.CommonResponse;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.Password;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.User;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.UserResponse;
@@ -98,13 +103,15 @@ public interface UsersApi {
     }
   )
   @RequestMapping(
-    value = "/users/{userId}",
+    value = "/users/{uuid}",
     produces = {"application/json"},
     method = RequestMethod.DELETE
   )
   default ResponseEntity<Void> deleteUser(
-      @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
-          String userId) {
+      @Pattern(regexp = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
+          @ApiParam(value = "UUID of the user.", required = true)
+          @PathVariable("uuid")
+          String uuid) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
     } else {
       log.warn(
@@ -145,8 +152,8 @@ public interface UsersApi {
       @NotNull
           @ApiParam(value = "To Be Removed. LA id will passed in token", required = true)
           @Valid
-          @RequestParam(value = "authorityId", required = true)
-          String authorityId) {
+          @RequestParam(value = "authorityShortCode", required = true)
+          String authorityShortCode) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
       if (getAcceptHeader().get().contains("application/json")) {
         try {
@@ -180,13 +187,15 @@ public interface UsersApi {
     }
   )
   @RequestMapping(
-    value = "/users/{userId}/passwordReset",
+    value = "/users/{uuid}/passwordReset",
     produces = {"application/json"},
     method = RequestMethod.GET
   )
   default ResponseEntity<Void> requestPasswordReset(
-      @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
-          String userId) {
+      @Pattern(regexp = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
+          @ApiParam(value = "Uuid of the user.", required = true)
+          @PathVariable("uuid")
+          String uuid) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
     } else {
       log.warn(
@@ -211,13 +220,15 @@ public interface UsersApi {
     }
   )
   @RequestMapping(
-    value = "/users/{userId}",
+    value = "/users/{uuid}",
     produces = {"application/json"},
     method = RequestMethod.GET
   )
   default ResponseEntity<UserResponse> retrieveUser(
-      @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
-          String userId) {
+      @Pattern(regexp = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
+          @ApiParam(value = "UUID of the user.", required = true)
+          @PathVariable("uuid")
+          String uuid) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
       if (getAcceptHeader().get().contains("application/json")) {
         try {
@@ -248,7 +259,8 @@ public interface UsersApi {
   @ApiResponses(
     value = {
       @ApiResponse(code = 200, message = "OK", response = UserResponse.class),
-      @ApiResponse(code = 400, message = "Bad request.", response = CommonResponse.class)
+      @ApiResponse(code = 400, message = "Bad request.", response = CommonResponse.class),
+      @ApiResponse(code = 404, message = "User not found.", response = CommonResponse.class)
     }
   )
   @RequestMapping(
@@ -257,7 +269,9 @@ public interface UsersApi {
     method = RequestMethod.PATCH
   )
   default ResponseEntity<UserResponse> updatePassword(
-      @ApiParam(value = "UUID for  ***REMOVED***)
+      @Pattern(regexp = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
+          @ApiParam(value = "UUID for password reset.", required = true)
+          @PathVariable("uuid")
           String uuid,
       @ApiParam(value = "") @Valid @RequestBody Password password) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -299,13 +313,15 @@ public interface UsersApi {
     }
   )
   @RequestMapping(
-    value = "/users/{userId}",
+    value = "/users/{uuid}",
     produces = {"application/json"},
     method = RequestMethod.PUT
   )
   default ResponseEntity<UserResponse> updateUser(
-      @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
-          String userId,
+      @Pattern(regexp = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
+          @ApiParam(value = "UUID of the user.", required = true)
+          @PathVariable("uuid")
+          String uuid,
       @ApiParam(value = "") @Valid @RequestBody User user) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
       if (getAcceptHeader().get().contains("application/json")) {

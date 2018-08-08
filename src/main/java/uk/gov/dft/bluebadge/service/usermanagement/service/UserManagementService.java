@@ -57,8 +57,8 @@ public class UserManagementService {
     this.referenceDataService = referenceDataService;
   }
 
-  public UserEntity retrieveUserById(UUID userId) {
-    RetrieveUserByIdParams params = getRetrieveUserByIdParams(userId);
+  public UserEntity retrieveUserById(UUID userUuid) {
+    UuidAuthorityCodeParams params = getRetrieveUserByIdParams(userUuid);
     Optional<UserEntity> userEntity = userManagementRepository.retrieveUserById(params);
     if (!userEntity.isPresent()) {
       log.info("Request to retrieve user params:{} that did not exist", params);
@@ -117,8 +117,8 @@ public class UserManagementService {
   private NewUserRequest buildNewUserRequestDetails(UserEntity ue, EmailLink el) {
     LocalAuthorityEntity localAuthority =
         LocalAuthorityEntity.builder()
-            .code(ue.getLocalAuthorityId())
-            .name(referenceDataService.getLocalAuthorityName(ue.getLocalAuthorityId()))
+            .code(ue.getAuthorityCode())
+            .name(referenceDataService.getLocalAuthorityName(ue.getAuthorityCode()))
             .build();
     return NewUserRequest.builder()
         .emailAddress(ue.getEmailAddress())
@@ -142,11 +142,11 @@ public class UserManagementService {
   /**
    * Requests reset of a users password via message service.
    *
-   * @param userId The user PK.
+   * @param userUuid The user PK.
    */
-  public void requestPasswordResetEmail(UUID userId) {
-    log.debug("Resetting password for user:{}", userId);
-    RetrieveUserByIdParams params = getRetrieveUserByIdParams(userId);
+  public void requestPasswordResetEmail(UUID userUuid) {
+    log.debug("Resetting password for user:{}", userUuid);
+    UuidAuthorityCodeParams params = getRetrieveUserByIdParams(userUuid);
     Optional<UserEntity> optionalUserEntity = userManagementRepository.retrieveUserById(params);
     UserEntity userEntity;
     if (optionalUserEntity.isPresent()) {
@@ -163,7 +163,7 @@ public class UserManagementService {
    * @param id PK of user to delete.
    */
   public void deleteUser(UUID id) {
-    DeleteUserParams params = getDeleteUserParams(id);
+    UuidAuthorityCodeParams params = getDeleteUserParams(id);
     if (userManagementRepository.deleteUser(params) == 0) {
       throw new NotFoundException("user", DELETE);
     }
@@ -174,7 +174,7 @@ public class UserManagementService {
       nameFilter = "%" + nameFilter + "%";
     }
     UserEntity queryParams = new UserEntity();
-    queryParams.setLocalAuthorityId(authorityId);
+    queryParams.setAuthorityCode(authorityId);
     queryParams.setName(nameFilter);
     queryParams.setEmailAddress(nameFilter);
     return userManagementRepository.findUsers(queryParams);
@@ -243,8 +243,8 @@ public class UserManagementService {
     if (userManagementRepository.updatePassword(user) == 0) {
       throw new NotFoundException("user", UPDATE);
     }
-    RetrieveUserByIdParams params =
-        RetrieveUserByIdParams.builder().userId(link.getUserUuid()).build();
+    UuidAuthorityCodeParams params =
+        UuidAuthorityCodeParams.builder().uuid(link.getUserUuid()).build();
     Optional<UserEntity> userEntity = userManagementRepository.retrieveUserById(params);
     PasswordResetSuccessRequest passwordResetSuccessRequest =
         PasswordResetSuccessRequest.builder()
@@ -263,14 +263,14 @@ public class UserManagementService {
     return userEntity.get();
   }
 
-  private RetrieveUserByIdParams getRetrieveUserByIdParams(UUID userId) {
+  private UuidAuthorityCodeParams getRetrieveUserByIdParams(UUID userUuid) {
     String localAuthority = securityUtils.getCurrentLocalAuthority().getShortCode();
-    return RetrieveUserByIdParams.builder().userId(userId).localAuthority(localAuthority).build();
+    return UuidAuthorityCodeParams.builder().uuid(userUuid).authorityCode(localAuthority).build();
   }
 
-  private DeleteUserParams getDeleteUserParams(UUID userUuid) {
+  private UuidAuthorityCodeParams getDeleteUserParams(UUID userUuid) {
     String localAuthority = securityUtils.getCurrentLocalAuthority().getShortCode();
-    return DeleteUserParams.builder().userUuid(userUuid).localAuthority(localAuthority).build();
+    return UuidAuthorityCodeParams.builder().uuid(userUuid).authorityCode(localAuthority).build();
   }
 
   /**
@@ -305,7 +305,7 @@ public class UserManagementService {
     List<ErrorErrors> errorsList = null;
 
     String localAuthority = securityUtils.getCurrentLocalAuthority().getShortCode();
-    if (localAuthority != userEntity.getLocalAuthorityId()) {
+    if (!localAuthority.equals(userEntity.getAuthorityCode())) {
       ErrorErrors error = new ErrorErrors();
       error
           .field("localAuthority")

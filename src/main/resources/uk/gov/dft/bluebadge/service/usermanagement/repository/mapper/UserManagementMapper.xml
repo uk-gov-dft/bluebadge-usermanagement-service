@@ -6,40 +6,39 @@
     <resultMap id="userMap" type="UserEntity">
         <result property="uuid"  column="uuid"
                 typeHandler="uk.gov.dft.bluebadge.common.repository.UuidTypeHandler"/>
-        <result property="userId"    column="userId"     />
         <result property="name" column="name" />
-        <result property="localAuthorityId" column="localAuthorityId" />
+        <result property="authorityCode" column="authorityCode" />
         <result property="roleId" column="roleId" />
         <result property="roleName" column="roleName" />
     </resultMap>
 
-    <select id="retrieveUserById" resultMap="userMap" parameterType="RetrieveUserByIdParams">
+    <select id="retrieveUserById" resultMap="userMap" parameterType="UuidAuthorityCodeParams">
         SELECT u.user_uuid AS uuid
-            , u.id AS userId
             , u.name
-            , u.local_authority_short_code AS localAuthorityId
+            , u.local_authority_short_code AS authorityCode
             , u.email_address AS emailAddress
             , u.role_id AS roleId
             , r.description AS roleName
         FROM users u
         INNER JOIN roles r ON u.role_id = r.id
-        WHERE u.user_uuid = #{userId,javaType=java.util.UUID,jdbcType=OTHER,typeHandler=uk.gov.dft.bluebadge.common.repository.UuidTypeHandler}
-        <if test="localAuthority != null">
-            AND u.local_authority_short_code = #{localAuthority}
+        WHERE u.user_uuid = #{uuid,javaType=java.util.UUID,jdbcType=OTHER,typeHandler=uk.gov.dft.bluebadge.common.repository.UuidTypeHandler}
+        <if test="authorityCode != null">
+            AND u.local_authority_short_code = #{authorityCode}
         </if>
     </select>
 
-    <select id="findUsers" resultType="UserEntity" parameterType="UserEntity">
-        SELECT u.id, u.name
-            , u.local_authority_short_code AS localAuthorityId
+    <select id="findUsers" resultMap="userMap" parameterType="UserEntity">
+        SELECT u.user_uuid AS uuid
+            , u.name
+            , u.local_authority_short_code AS authorityCode
             , u.email_address AS emailAddress
             , u.role_id AS roleId
             , r.description AS roleName
         FROM users u
         INNER JOIN roles r ON u.role_id = r.id
         <where>
-            <if test="localAuthorityId != null">
-                AND u.local_authority_short_code = #{localAuthorityId}
+            <if test="authorityCode != null">
+                AND u.local_authority_short_code = #{authorityCode}
             </if>
             <if test="name != null">
               AND (UPPER(u.name) LIKE UPPER(#{name}) OR UPPER(u.email_address)
@@ -55,7 +54,7 @@
           SELECT 1 FROM users
           WHERE UPPER(email_address) = UPPER(#{emailAddress})
           <if test="uuid != null">
-              AND user_uuid != #{userUuid,javaType=java.util.UUID,jdbcType=OTHER,typeHandler=uk.gov.dft.bluebadge.common.repository.UuidTypeHandler}
+              AND user_uuid != #{uuid,javaType=java.util.UUID,jdbcType=OTHER,typeHandler=uk.gov.dft.bluebadge.common.repository.UuidTypeHandler}
           </if>
         )
     </select>
@@ -65,7 +64,7 @@
         SET
             name = #{name}
             , email_address = #{emailAddress}
-            , local_authority_short_code = #{localAuthorityId}
+            , local_authority_short_code = #{authorityCode}
             , role_id = #{roleId}
         WHERE user_uuid = #{uuid,javaType=java.util.UUID,jdbcType=OTHER,typeHandler=uk.gov.dft.bluebadge.common.repository.UuidTypeHandler}
     </update>
@@ -111,12 +110,13 @@
         WHERE user_uuid = #{uuid,javaType=java.util.UUID,jdbcType=OTHER,typeHandler=uk.gov.dft.bluebadge.common.repository.UuidTypeHandler}
     </update>
 
-    <select id="retrieveUserUsingEmailLinkUuid" parameterType="String" resultType="UserEntity">
-        SELECT u.id, u.name
-            , u.local_authority_short_code AS localAuthorityId
-            , u.email_address AS emailAddress
-            , u.role_id AS roleId
-            , r.description AS roleName
+    <select id="retrieveUserUsingEmailLinkUuid" parameterType="String" resultMap="userMap">
+        SELECT u.user_uuid AS uuid
+        , u.name
+        , u.local_authority_short_code AS authorityCode
+        , u.email_address AS emailAddress
+        , u.role_id AS roleId
+        , r.description AS roleName
         FROM users u
         INNER JOIN email_link e ON u.id = e.user_id
         INNER JOIN roles r ON u.role_id = r.id
@@ -126,15 +126,15 @@
     <insert id="createUser" parameterType="UserEntity"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO users (name, local_authority_short_code, email_address, role_id, password, user_uuid)
-        VALUES (#{name}, #{localAuthorityId}, #{emailAddress}, #{roleId}, #{password}
+        VALUES (#{name}, #{authorityCode}, #{emailAddress}, #{roleId}, #{password}
         , #{uuid,javaType=java.util.UUID,jdbcType=OTHER,typeHandler=uk.gov.dft.bluebadge.common.repository.UuidTypeHandler})
     </insert>
 
-    <delete id="deleteUser" parameterType="DeleteUserParams">
+    <delete id="deleteUser" parameterType="UuidAuthorityCodeParams">
         DELETE FROM users
-        WHERE user_uuid = #{userUuid,javaType=java.util.UUID,jdbcType=OTHER,typeHandler=uk.gov.dft.bluebadge.common.repository.UuidTypeHandler}
-        <if test="localAuthority != null">
-            AND local_authority_short_code = #{localAuthority}
+        WHERE user_uuid = #{uuid,javaType=java.util.UUID,jdbcType=OTHER,typeHandler=uk.gov.dft.bluebadge.common.repository.UuidTypeHandler}
+        <if test="authorityCode != null">
+            AND local_authority_short_code = #{authorityCode}
         </if>
     </delete>
 
