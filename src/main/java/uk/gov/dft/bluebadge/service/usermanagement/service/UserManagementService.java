@@ -78,7 +78,7 @@ public class UserManagementService {
    */
   public void createUser(UserEntity userEntity) {
     List<ErrorErrors> businessErrors = businessValidateUser(userEntity);
-    if (null != businessErrors && !businessErrors.isEmpty()) {
+    if (!businessErrors.isEmpty()) {
       log.debug("Business validation failed for user:{}", userEntity.getName());
       throw new BadRequestException(businessErrors);
     }
@@ -193,7 +193,7 @@ public class UserManagementService {
    */
   public void updateUser(UserEntity userEntity) {
     List<ErrorErrors> businessErrors = businessValidateUser(userEntity);
-    if (null != businessErrors && !businessErrors.isEmpty()) {
+    if (!businessErrors.isEmpty()) {
       throw new BadRequestException(businessErrors);
     }
 
