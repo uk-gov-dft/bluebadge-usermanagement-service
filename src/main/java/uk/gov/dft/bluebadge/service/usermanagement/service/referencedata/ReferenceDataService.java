@@ -39,6 +39,8 @@ public class ReferenceDataService {
       }
       if (!authorities.isEmpty()) {
         isLoaded = true;
+      }else{
+        log.error("No LA reference data found.");
       }
     }
   }
@@ -50,5 +52,10 @@ public class ReferenceDataService {
       return authority.getDescription();
     }
     return null;
+  }
+
+  public boolean isValidLocalAuthorityCode(String code){
+    init();
+    return null != authorities.get(code);
   }
 }

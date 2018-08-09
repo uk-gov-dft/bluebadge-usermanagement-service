@@ -78,15 +78,17 @@ public class UserManagementService {
    */
   public void createUser(UserEntity userEntity) {
     List<ErrorErrors> businessErrors = businessValidateUser(userEntity);
-    if (null != businessErrors) {
+    if (null != businessErrors && !businessErrors.isEmpty()) {
       log.debug("Business validation failed for user:{}", userEntity.getName());
       throw new BadRequestException(businessErrors);
     }
+
     List<ErrorErrors> localAuthorityErrors = localAuthorityValidateUser(userEntity);
     if (null != localAuthorityErrors) {
       log.debug("Local authority validation failed for user:{}", userEntity.getName());
       throw new BadRequestException(localAuthorityErrors);
     }
+
     createInitialPassword(userEntity);
     userManagementRepository.createUser(userEntity);
     requestEmailLinkMessage(userEntity, this::buildNewUserRequestDetails);
@@ -191,9 +193,10 @@ public class UserManagementService {
    */
   public void updateUser(UserEntity userEntity) {
     List<ErrorErrors> businessErrors = businessValidateUser(userEntity);
-    if (null != businessErrors) {
+    if (null != businessErrors && !businessErrors.isEmpty()) {
       throw new BadRequestException(businessErrors);
     }
+
     List<ErrorErrors> localAuthorityErrors = localAuthorityValidateUser(userEntity);
     if (null != localAuthorityErrors) {
       log.debug("Local authority validation failed for user:{}", userEntity.getName());
@@ -281,7 +284,18 @@ public class UserManagementService {
    * @return List of errors or null if validation ok.
    */
   private List<ErrorErrors> businessValidateUser(UserEntity userEntity) {
-    List<ErrorErrors> errorsList = null;
+    List<ErrorErrors> errorsList = new ArrayList<>();
+
+    // Validate authority short code valid
+    if(!referenceDataService.isValidLocalAuthorityCode(userEntity.getAuthorityCode())){
+      ErrorErrors error = new ErrorErrors();
+      error
+          .field("localAuthorityShortCode")
+          .message("Invalid.user.localAuthorityShortCode")
+          .reason("Could not find local authority for short code " + userEntity.getAuthorityCode());
+
+      errorsList.add(error);
+    }
 
     if (userManagementRepository.emailAddressAlreadyUsed(userEntity)) {
       ErrorErrors error = new ErrorErrors();
@@ -289,7 +303,7 @@ public class UserManagementService {
           .field("emailAddress")
           .message("AlreadyExists.user.emailAddress")
           .reason("Email Address already used.");
-      errorsList = new ArrayList<>();
+
       errorsList.add(error);
     }
 
