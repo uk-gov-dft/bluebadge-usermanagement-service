@@ -76,7 +76,7 @@ tasks.withType(Pmd) {
 }
 
 dependencies {
-    compile group: 'uk.gov.dft.bluebadge', name: 'bluebadge-common', version: '0.3.0-SNAPSHOT'
+    compile group: 'uk.gov.dft.bluebadge', name: 'bluebadge-common', version: '0.4.0-feature_BBB-572-JWT-SNAPSHOT', changing: true
 
     compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.9.5'
     compile('org.springframework.boot:spring-boot-starter-web')
