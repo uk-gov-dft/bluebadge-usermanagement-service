@@ -106,6 +106,7 @@ public class UserManagementServiceTest {
     when(repository.emailAddressAlreadyUsed(user1)).thenReturn(false);
     when(referenceDataService.getLocalAuthorityName(OTHER_LOCAL_AUTHORITY_SHORT_CODE))
         .thenReturn("Manchester");
+    when(referenceDataService.isValidLocalAuthorityCode(any())).thenReturn(true);
     String preCreatePassword = user1.getPassword();
 
     // When user is created
@@ -250,7 +251,7 @@ public class UserManagementServiceTest {
     // Given the user is valid
     when(repository.updateUser(expectedUser)).thenReturn(1);
     when(repository.emailAddressAlreadyUsed(expectedUser)).thenReturn(false);
-
+    when(referenceDataService.isValidLocalAuthorityCode(any())).thenReturn(true);
     // When the user is updated
     service.updateUser(user);
 
@@ -262,6 +263,7 @@ public class UserManagementServiceTest {
 
   @Test(expected = NotFoundException.class)
   public void updateUser_no_user() {
+    when(referenceDataService.isValidLocalAuthorityCode(any())).thenReturn(true);
     when(securityUtils.getCurrentLocalAuthority()).thenReturn(ANOTHER_LOCAL_AUTHORITY);
     UserEntity user = new UserEntity();
     user.setUuid(DEFAULT_USER_UUID);
