@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiParam;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -58,13 +60,15 @@ public class UsersApiControllerImpl implements UsersApi {
 
   @Override
   public ResponseEntity<UserResponse> updatePassword(
-      @ApiParam(value = "UUID for  ***REMOVED***)
+      @Pattern(regexp = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
+          @ApiParam(value = "UUID for password reset.", required = true)
+          @PathVariable("uuid")
           String uuid,
-      @ApiParam(value = "") @Valid @RequestBody Password passwords) {
+      @ApiParam() @Valid @RequestBody Password password) {
 
     UserResponse userResponse = new UserResponse();
 
-    service.updatePassword(uuid, passwords);
+    service.updatePassword(uuid, password);
     UserEntity userEntity = service.retrieveUserUsingUuid(uuid);
     userResponse.setData(userConverter.convertToModel(userEntity));
 
@@ -84,16 +88,18 @@ public class UsersApiControllerImpl implements UsersApi {
   /**
    * Retrieve a single user.
    *
-   * @param userId PK of user to retrieve
+   * @param uuid PK of user to retrieve
    * @return The User wrapped in a UserResponse
    */
   @Override
   public ResponseEntity<UserResponse> retrieveUser(
-      @ApiParam(value = "Numeric ID of the user to get.", required = true) @PathVariable("userId")
-          Integer userId) {
+      @Pattern(regexp = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
+          @ApiParam(value = "UUID of the user.", required = true)
+          @PathVariable("uuid")
+          String uuid) {
     UserResponse userResponse = new UserResponse();
 
-    UserEntity userEntity = service.retrieveUserById(userId);
+    UserEntity userEntity = service.retrieveUserById(UUID.fromString(uuid));
     userResponse.setData(userConverter.convertToModel(userEntity));
 
     return ResponseEntity.ok(userResponse);
@@ -107,6 +113,7 @@ public class UsersApiControllerImpl implements UsersApi {
    */
   @Override
   public ResponseEntity<UserResponse> createUser(@ApiParam() @Valid @RequestBody User user) {
+    user.setUuid(UUID.randomUUID().toString());
     UserEntity entity = userConverter.convertToEntity(user);
     UserResponse userResponse = new UserResponse();
 
@@ -118,7 +125,7 @@ public class UsersApiControllerImpl implements UsersApi {
   /**
    * Get a list of Users for a given Local Authority id.
    *
-   * @param authorityId The Local Authority id.
+   * @param authorityShortCode The Local Authority id.
    * @return List of Users
    */
   @Override
@@ -130,12 +137,12 @@ public class UsersApiControllerImpl implements UsersApi {
       @NotNull
           @ApiParam(value = "To Be Removed. LA id will passed in token", required = true)
           @Valid
-          @RequestParam(value = "authorityId", required = true)
-          Integer authorityId) {
+          @RequestParam(value = "authorityShortCode")
+          String authorityShortCode) {
 
-    log.info("Finding users for authority {}, with filter:{}", authorityId, name);
+    log.info("Finding users for authority {}, with filter:{}", authorityShortCode, name);
     List<UserEntity> userEntityList =
-        service.retrieveUsersByAuthorityId(authorityId, name.orElse(null));
+        service.retrieveUsersByAuthorityCode(authorityShortCode, name.orElse(null));
 
     return ResponseEntity.ok(
         new UsersResponse().data(userConverter.convertToModelList(userEntityList)));
@@ -143,8 +150,10 @@ public class UsersApiControllerImpl implements UsersApi {
 
   @Override
   public ResponseEntity<UserResponse> updateUser(
-      @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
-          Integer userId,
+      @Pattern(regexp = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
+          @ApiParam(value = "UUID of the user.", required = true)
+          @PathVariable("uuid")
+          String uuid,
       @ApiParam() @Valid @RequestBody User user) {
     UserEntity entity = userConverter.convertToEntity(user);
     UserResponse userResponse = new UserResponse();
@@ -156,19 +165,22 @@ public class UsersApiControllerImpl implements UsersApi {
 
   @Override
   public ResponseEntity<Void> deleteUser(
-      @ApiParam(value = "Numeric ID of the user to remove.", required = true)
-          @PathVariable("userId")
-          Integer userId) {
-    Assert.notNull(userId, "User id must be provided for delete.");
-    service.deleteUser(userId);
+      @Pattern(regexp = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
+          @ApiParam(value = "UUID of the user.", required = true)
+          @PathVariable("uuid")
+          String uuid) {
+    Assert.notNull(uuid, "User id must be provided for delete.");
+    service.deleteUser(UUID.fromString(uuid));
     return ResponseEntity.ok().build();
   }
 
   @Override
   public ResponseEntity<Void> requestPasswordReset(
-      @ApiParam(value = "Numeric ID of the user.", required = true) @PathVariable("userId")
-          Integer userId) {
-    service.requestPasswordResetEmail(userId);
+      @Pattern(regexp = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
+          @ApiParam(value = "Uuid of the user.", required = true)
+          @PathVariable("uuid")
+          String uuid) {
+    service.requestPasswordResetEmail(UUID.fromString(uuid));
     return ResponseEntity.ok().build();
   }
 }

@@ -13,13 +13,21 @@ blue-badge:
       contextpath: /uk-gov-dft/message-service/1.0.0
   la-webapp:
     email-link-uri: http://localhost:8080/set***REMOVED***/
+  reference-data-service:
+    service-host:
+      host: localhost
+      port: 8580
+      scheme: http
+      connectiontimeout: 6000
+      requesttimeout: 6000
+      contextpath: /uk-gov-dft/reference-data-service/1.0.0
 
 logging:
   level:
     root: ${APP_LOGGING_LEVEL:-INFO}
     sample.mybatis.mapper: WARN
-    uk.gov.dft.bluebadge.service: ${APP_LOGGING_LEVEL:-DEBUG}
-    org.springframework.security: DEBUG
+    uk.gov.dft.bluebadge.service: ${APP_LOGGING_LEVEL:-INFO}
+    org.springframework.security: INFO
 
 management:
   server:

@@ -28,6 +28,7 @@ public class Password {
   @ApiModelProperty(required = true, value = "")
   @NotNull
   @Pattern(regexp = ".{8,}$")
+  @Size(max = 200)
   public String getPassword() {
     return password;
   }
@@ -47,6 +48,8 @@ public class Password {
    * @return passwordConfirm
    */
   @ApiModelProperty(value = "")
+  @Pattern(regexp = ".{8,}$")
+  @Size(max = 200)
   public String getPasswordConfirm() {
     return passwordConfirm;
   }

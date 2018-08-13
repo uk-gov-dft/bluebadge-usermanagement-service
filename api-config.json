@@ -19,8 +19,8 @@
           "description" : "Name or email address fragment to filter on."
         }, {
           "in" : "query",
-          "name" : "authorityId",
-          "type" : "integer",
+          "name" : "authorityShortCode",
+          "type" : "string",
           "required" : true,
           "description" : "To Be Removed. LA id will passed in token"
         } ],
@@ -71,13 +71,14 @@
         }
       }
     },
-    "/users/{userId}/passwordReset" : {
+    "/users/{uuid}/passwordReset" : {
       "parameters" : [ {
         "in" : "path",
-        "name" : "userId",
-        "type" : "integer",
+        "name" : "uuid",
+        "type" : "string",
         "required" : true,
-        "description" : "Numeric ID of the user."
+        "pattern" : "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+        "description" : "Uuid of the user."
       } ],
       "get" : {
         "tags" : [ "Users" ],
@@ -103,6 +104,7 @@
         "name" : "uuid",
         "type" : "string",
         "required" : true,
+        "pattern" : "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
         "description" : "UUID for password reset."
       }, {
         "name" : "password",
@@ -113,10 +115,13 @@
           "properties" : {
             "password" : {
               "type" : "string",
-              "pattern" : ".{8,}$"
+              "pattern" : ".{8,}$",
+              "maxLength" : 200
             },
             "passwordConfirm" : {
-              "type" : "string"
+              "type" : "string",
+              "pattern" : ".{8,}$",
+              "maxLength" : 200
             }
           }
         }
@@ -138,39 +143,9 @@
             "schema" : {
               "$ref" : "#/definitions/CommonResponse"
             }
-          }
-        }
-      }
-    },
-    "/authorities" : {
-      "get" : {
-        "tags" : [ "Authorities" ],
-        "summary" : "Get list of Local Authorities",
-        "operationId" : "retrieveAuthorities",
-        "description" : "List of local authorities for users with cross authority roles.",
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "schema" : {
-              "$ref" : "#/definitions/AuthoritiesResponse"
-            }
-          }
-        }
-      },
-      "post" : {
-        "tags" : [ "Authorities" ],
-        "summary" : "Create an authority.",
-        "operationId" : "createAuthority",
-        "description" : "Create a Local Authority",
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "schema" : {
-              "$ref" : "#/definitions/AuthorityResponse"
-            }
           },
-          "400" : {
-            "description" : "Bad request",
+          "404" : {
+            "description" : "User not found.",
             "schema" : {
               "$ref" : "#/definitions/CommonResponse"
             }
@@ -178,39 +153,14 @@
         }
       }
     },
-    "/authorities/{authorityId}" : {
+    "/users/{uuid}" : {
       "parameters" : [ {
         "in" : "path",
-        "name" : "authorityId",
-        "type" : "integer",
+        "name" : "uuid",
+        "type" : "string",
         "required" : true,
-        "description" : "ID of the authority."
-      } ],
-      "put" : {
-        "tags" : [ "Authorities" ],
-        "operationId" : "updateAuthority",
-        "summary" : "Update an authority.",
-        "description" : "Update an authority.",
-        "responses" : {
-          "200" : {
-            "description" : "OK"
-          },
-          "400" : {
-            "description" : "Bad request.",
-            "schema" : {
-              "$ref" : "#/definitions/CommonResponse"
-            }
-          }
-        }
-      }
-    },
-    "/users/{userId}" : {
-      "parameters" : [ {
-        "in" : "path",
-        "name" : "userId",
-        "type" : "integer",
-        "required" : true,
-        "description" : "Numeric ID of the user."
+        "pattern" : "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+        "description" : "UUID of the user."
       } ],
       "get" : {
         "tags" : [ "Users" ],
@@ -285,34 +235,15 @@
     }
   },
   "definitions" : {
-    "Authority" : {
-      "type" : "object",
-      "required" : [ "id", "name", "shortCode" ],
-      "properties" : {
-        "id" : {
-          "type" : "integer",
-          "example" : 1
-        },
-        "name" : {
-          "type" : "string",
-          "example" : "Shropshire County Council",
-          "description" : "Display name of local authority"
-        },
-        "shortCode" : {
-          "type" : "string",
-          "example" : "SCC",
-          "description" : "Short identifier of LA"
-        }
-      }
-    },
     "User" : {
       "type" : "object",
       "required" : [ "name", "emailAddress", "roleId" ],
       "properties" : {
-        "id" : {
-          "type" : "integer",
+        "uuid" : {
+          "type" : "string",
           "description" : "Unique identifier representing a specific user. Autogenerated on create.",
-          "example" : 1
+          "pattern" : "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+          "example" : "5ec6e1f7-fa22-47e4-9034-8f4a7eb773a5"
         },
         "name" : {
           "type" : "string",
@@ -326,12 +257,14 @@
           "format" : "email",
           "description" : "email address.",
           "example" : "rob.worthington@norealserver.com",
-          "pattern" : ".+\\@.+"
+          "pattern" : ".+\\@.+",
+          "maxLength" : 200
         },
-        "localAuthorityId" : {
-          "type" : "integer",
+        "localAuthorityShortCode" : {
+          "type" : "string",
           "description" : "Id of Local Authority user belongs to",
-          "example" : 2
+          "example" : "BIRM",
+          "maxLength" : 10
         },
         "roleId" : {
           "type" : "integer",
@@ -341,7 +274,8 @@
         "roleName" : {
           "type" : "string",
           "description" : "User role description",
-          "example" : "LA Admin"
+          "example" : "LA Admin",
+          "maxLength" : 20
         }
       }
     },
@@ -370,35 +304,6 @@
         "properties" : {
           "data" : {
             "$ref" : "#/definitions/User"
-          }
-        }
-      } ]
-    },
-    "AuthoritiesResponse" : {
-      "type" : "object",
-      "allOf" : [ {
-        "$ref" : "#/definitions/CommonResponse"
-      }, {
-        "type" : "object",
-        "properties" : {
-          "data" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/definitions/Authority"
-            }
-          }
-        }
-      } ]
-    },
-    "AuthorityResponse" : {
-      "type" : "object",
-      "allOf" : [ {
-        "$ref" : "#/definitions/CommonResponse"
-      }, {
-        "type" : "object",
-        "properties" : {
-          "data" : {
-            "$ref" : "#/definitions/Authority"
           }
         }
       } ]

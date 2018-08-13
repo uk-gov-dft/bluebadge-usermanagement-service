@@ -15,6 +15,15 @@ import uk.gov.dft.bluebadge.common.security.TokenForwardingClientContext;
 @Configuration
 public class ApiConfig {
 
+  @SuppressWarnings("WeakerAccess")
+  @Validated
+  @ConfigurationProperties("blue-badge.reference-data-service.service-host")
+  @Bean
+  public ServiceConfiguration referenceDataServiceConfiguration() {
+    return new ServiceConfiguration();
+  }
+
+  @SuppressWarnings("WeakerAccess")
   @ConfigurationProperties("blue-badge.messageservice.servicehost")
   @Bean
   @Validated
@@ -28,8 +37,7 @@ public class ApiConfig {
    */
   @Bean("messageServiceRestTemplate")
   RestTemplate messageServiceRestTemplate(
-      ClientCredentialsResourceDetails clientCredentialsResourceDetails,
-      ServiceConfiguration userManagementApiConfig) {
+      ClientCredentialsResourceDetails clientCredentialsResourceDetails) {
     OAuth2RestTemplate result =
         new OAuth2RestTemplate(
             clientCredentialsResourceDetails, new TokenForwardingClientContext());
@@ -37,7 +45,21 @@ public class ApiConfig {
         new HttpComponentsClientHttpRequestFactory();
     result.setRequestFactory(requestFactory);
     result.setUriTemplateHandler(
-        new DefaultUriBuilderFactory(userManagementApiConfig.getUrlPrefix()));
+        new DefaultUriBuilderFactory(messageServiceConfiguration().getUrlPrefix()));
+    return result;
+  }
+
+  @Bean("referenceDataServiceRestTemplate")
+  RestTemplate referenceDataServiceRestTemplate(
+      ClientCredentialsResourceDetails clientCredentialsResourceDetails) {
+    OAuth2RestTemplate result =
+        new OAuth2RestTemplate(
+            clientCredentialsResourceDetails, new TokenForwardingClientContext());
+    HttpComponentsClientHttpRequestFactory requestFactory =
+        new HttpComponentsClientHttpRequestFactory();
+    result.setRequestFactory(requestFactory);
+    result.setUriTemplateHandler(
+        new DefaultUriBuilderFactory(referenceDataServiceConfiguration().getUrlPrefix()));
     return result;
   }
 }

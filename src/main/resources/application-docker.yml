@@ -6,7 +6,9 @@ blue-badge:
       host: message-service
   la-webapp:
       email-link-uri: ${LA-WEBAPP_URL}/set***REMOVED***/
-
+  reference-data-service:
+    service-host:
+      host: referencedata-service
 logging:
   level:
     root: ${APP_LOGGING_LEVEL:-INFO}

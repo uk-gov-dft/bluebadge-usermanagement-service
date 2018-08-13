@@ -23,35 +23,35 @@ Feature: Verify users create
 
   Scenario: Create User All valid except email already exists
     Given path 'users'
-    And request { name:"asdfgh", emailAddress:"abcnobody@dft.gov.uk", localAuthorityId: 2, roleId: 2 }
+    And request { name:"asdfgh", emailAddress:"abcnobody@dft.gov.uk", localAuthorityShortCode: "ABERD", roleId: 2 }
     When method POST
     Then status 400
     And match $.error.errors contains {field:"emailAddress", reason:"#notnull", message:"AlreadyExists.user.emailAddress", location:"#null", locationType:"#null"}
 
   Scenario: Create User All valid except local authority id different from current users's
     Given path 'users'
-    And request { name:"asdfgh", emailAddress:"abcnobodydifferentlocalauthority@dft.gov.uk", localAuthorityId: 3, roleId: 2 }
+    And request { name:"asdfgh", emailAddress:"abcnobodydifferentlocalauthority@dft.gov.uk", localAuthorityShortCode: "MANC", roleId: 2 }
     When method POST
     Then status 400
     And match $.error.errors contains {field:"localAuthority", reason:"#notnull", message:"NotSameAsCurrentUsers.user.localAuthority", location:"#null", locationType:"#null"}
 
   Scenario: Create user invalid name format
     Given path 'users'
-    And request { name:"as1dfgh", emailAddress:"@dft.gov.uk", localAuthorityId: 2 }
+    And request { name:"as1dfgh", emailAddress:"@dft.gov.uk", localAuthorityShortCode: "ABERD" }
     When method POST
     Then status 400
     And match $.error.errors contains {field:"name", reason:"#notnull", message:"Pattern.user.name", location:"#null", locationType:"#null"}
 
   Scenario: Create User Invalid email format
     Given path 'users'
-    And request { name:"asdfgh", emailAddress:"@dft.gov.uk", localAuthorityId: 2 }
+    And request { name:"asdfgh", emailAddress:"@dft.gov.uk", localAuthorityShortCode: "ABERD" }
     When method POST
     Then status 400
     And match $.error.errors contains {field:"emailAddress", reason:"#notnull", message:"Pattern.user.emailAddress", location:"#null", locationType:"#null"}
 
   Scenario: Create User All valid
     Given path 'users'
-    And request { name:"Delete Me", emailAddress:"createuservalid@dft.gov.uk", localAuthorityId: 2, roleId: 2 }
+    And request { name:"Delete Me", emailAddress:"createuservalid@dft.gov.uk", localAuthorityShortCode: "ABERD", roleId: 2 }
     When method POST
     Then status 200
-    And match $.data contains {id:"#notnull"}
+    And match $.data contains {uuid:"#notnull"}

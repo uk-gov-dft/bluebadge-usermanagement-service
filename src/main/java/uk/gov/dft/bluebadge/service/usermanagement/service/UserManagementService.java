@@ -23,47 +23,48 @@ import uk.gov.dft.bluebadge.service.client.messageservice.model.GenericMessageRe
 import uk.gov.dft.bluebadge.service.client.messageservice.model.NewUserRequest;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetRequest;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetSuccessRequest;
-import uk.gov.dft.bluebadge.service.usermanagement.repository.LocalAuthorityRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepository;
-import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.DeleteUserParams;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.LocalAuthorityEntity;
-import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.RetrieveUserByIdParams;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UuidAuthorityCodeParams;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException;
+import uk.gov.dft.bluebadge.service.usermanagement.service.referencedata.ReferenceDataService;
 
 @Service
 @Transactional
 @Slf4j
 public class UserManagementService {
 
+  public static final String LOCAL_AUTHORITY_SHORT_CODE = "localAuthorityShortCode";
+  public static final String EMAIL_ADDRESS = "emailAddress";
   private final UserManagementRepository userManagementRepository;
-  private final LocalAuthorityRepository localAuthorityRepository;
   private final MessageApiClient messageApiClient;
   private final String laWebappEmailLinkURI;
   private final SecurityUtils securityUtils;
   private final PasswordEncoder passwordEncoder;
+  private final ReferenceDataService referenceDataService;
 
   @Autowired
   UserManagementService(
       UserManagementRepository repository,
-      LocalAuthorityRepository localAuthorityRepository,
       MessageApiClient messageApiClient,
       @Value("${blue-badge.la-webapp.email-link-uri}") String laWebappEmailLinkURI,
       SecurityUtils securityUtils,
-      PasswordEncoder passwordEncoder) {
+      PasswordEncoder passwordEncoder,
+      ReferenceDataService referenceDataService) {
     this.userManagementRepository = repository;
-    this.localAuthorityRepository = localAuthorityRepository;
     this.messageApiClient = messageApiClient;
     this.laWebappEmailLinkURI = laWebappEmailLinkURI;
     this.securityUtils = securityUtils;
     this.passwordEncoder = passwordEncoder;
+    this.referenceDataService = referenceDataService;
   }
 
-  public UserEntity retrieveUserById(int userId) {
-    RetrieveUserByIdParams params = getRetrieveUserByIdParams(userId);
-    Optional<UserEntity> userEntity = userManagementRepository.retrieveUserById(params);
+  public UserEntity retrieveUserById(UUID userUuid) {
+    UuidAuthorityCodeParams params = getUuidAuthorityCodeParams(userUuid);
+    Optional<UserEntity> userEntity = userManagementRepository.retrieveUserByUuid(params);
     if (!userEntity.isPresent()) {
       log.info("Request to retrieve user params:{} that did not exist", params);
       throw new NotFoundException("user", RETRIEVE);
@@ -79,19 +80,21 @@ public class UserManagementService {
    */
   public void createUser(UserEntity userEntity) {
     List<ErrorErrors> businessErrors = businessValidateUser(userEntity);
-    if (null != businessErrors) {
+    if (!businessErrors.isEmpty()) {
       log.debug("Business validation failed for user:{}", userEntity.getName());
       throw new BadRequestException(businessErrors);
     }
+
     List<ErrorErrors> localAuthorityErrors = localAuthorityValidateUser(userEntity);
     if (null != localAuthorityErrors) {
       log.debug("Local authority validation failed for user:{}", userEntity.getName());
       throw new BadRequestException(localAuthorityErrors);
     }
+
     createInitialPassword(userEntity);
     userManagementRepository.createUser(userEntity);
-    requestEmailLinkMessage(userEntity, (ue, el) -> buildNewUserRequestDetails(ue, el));
-    log.debug("Created user {}", userEntity.getId());
+    requestEmailLinkMessage(userEntity, this::buildNewUserRequestDetails);
+    log.debug("Created user {}", userEntity.getUuid());
   }
 
   private void createInitialPassword(UserEntity userEntity) {
@@ -105,8 +108,9 @@ public class UserManagementService {
     EmailLink emailLink = createEmailLink(userEntity);
     GenericMessageRequest messageDetails = messageDetailsFunc.apply(userEntity, emailLink);
     messageApiClient.sendEmailLinkMessage(messageDetails);
-    userManagementRepository.updateUserToInactive(userEntity.getId());
-    log.debug("Successfully changed password for user:{}", userEntity.getId());
+    userManagementRepository.updateUserToInactive(
+        UuidAuthorityCodeParams.builder().uuid(userEntity.getUuid()).build());
+    log.debug("Successfully changed password for user:{}", userEntity.getUuid());
   }
 
   private PasswordResetRequest buildPasswordRequestDetails(UserEntity ue, EmailLink el) {
@@ -119,7 +123,10 @@ public class UserManagementService {
 
   private NewUserRequest buildNewUserRequestDetails(UserEntity ue, EmailLink el) {
     LocalAuthorityEntity localAuthority =
-        localAuthorityRepository.retrieveLocalAuthorityById(ue.getLocalAuthorityId());
+        LocalAuthorityEntity.builder()
+            .code(ue.getAuthorityCode())
+            .name(referenceDataService.getLocalAuthorityName(ue.getAuthorityCode()))
+            .build();
     return NewUserRequest.builder()
         .emailAddress(ue.getEmailAddress())
         .fullName(ue.getName())
@@ -133,7 +140,7 @@ public class UserManagementService {
         EmailLink.builder()
             .webappUri(this.laWebappEmailLinkURI)
             .uuid(UUID.randomUUID().toString())
-            .userId(userEntity.getId())
+            .userUuid(userEntity.getUuid())
             .build();
     userManagementRepository.createEmailLink(emailLink);
     return emailLink;
@@ -142,39 +149,39 @@ public class UserManagementService {
   /**
    * Requests reset of a users password via message service.
    *
-   * @param userId The user PK.
+   * @param userUuid The user PK.
    */
-  public void requestPasswordResetEmail(int userId) {
-    log.debug("Resetting password for user:{}", userId);
-    RetrieveUserByIdParams params = getRetrieveUserByIdParams(userId);
-    Optional<UserEntity> optionalUserEntity = userManagementRepository.retrieveUserById(params);
+  public void requestPasswordResetEmail(UUID userUuid) {
+    log.debug("Resetting password for user:{}", userUuid);
+    UuidAuthorityCodeParams params = getUuidAuthorityCodeParams(userUuid);
+    Optional<UserEntity> optionalUserEntity = userManagementRepository.retrieveUserByUuid(params);
     UserEntity userEntity;
     if (optionalUserEntity.isPresent()) {
       userEntity = optionalUserEntity.get();
     } else {
       throw new NotFoundException("user", RETRIEVE);
     }
-    requestEmailLinkMessage(userEntity, (ue, el) -> buildPasswordRequestDetails(ue, el));
+    requestEmailLinkMessage(userEntity, this::buildPasswordRequestDetails);
   }
 
   /**
    * Delete a user.
    *
-   * @param id PK of user to delete.
+   * @param uuid PK of user to delete.
    */
-  public void deleteUser(int id) {
-    DeleteUserParams params = getDeleteUserParams(id);
+  public void deleteUser(UUID uuid) {
+    UuidAuthorityCodeParams params = getUuidAuthorityCodeParams(uuid);
     if (userManagementRepository.deleteUser(params) == 0) {
       throw new NotFoundException("user", DELETE);
     }
   }
 
-  public List<UserEntity> retrieveUsersByAuthorityId(int authorityId, String nameFilter) {
+  public List<UserEntity> retrieveUsersByAuthorityCode(String authorityCode, String nameFilter) {
     if (null != nameFilter) {
       nameFilter = "%" + nameFilter + "%";
     }
     UserEntity queryParams = new UserEntity();
-    queryParams.setLocalAuthorityId(authorityId);
+    queryParams.setAuthorityCode(authorityCode);
     queryParams.setName(nameFilter);
     queryParams.setEmailAddress(nameFilter);
     return userManagementRepository.findUsers(queryParams);
@@ -188,9 +195,10 @@ public class UserManagementService {
    */
   public void updateUser(UserEntity userEntity) {
     List<ErrorErrors> businessErrors = businessValidateUser(userEntity);
-    if (null != businessErrors) {
+    if (!businessErrors.isEmpty()) {
       throw new BadRequestException(businessErrors);
     }
+
     List<ErrorErrors> localAuthorityErrors = localAuthorityValidateUser(userEntity);
     if (null != localAuthorityErrors) {
       log.debug("Local authority validation failed for user:{}", userEntity.getName());
@@ -200,7 +208,7 @@ public class UserManagementService {
     if (userManagementRepository.updateUser(userEntity) == 0) {
       throw new NotFoundException("user", UPDATE);
     }
-    log.debug("Updated user {}", userEntity.getId());
+    log.debug("Updated user {}", userEntity.getUuid());
   }
 
   /** Update user password. */
@@ -235,7 +243,7 @@ public class UserManagementService {
 
     String hash = passwordEncoder.encode(password);
     UserEntity user = new UserEntity();
-    user.setId(link.getUserId());
+    user.setUuid(link.getUserUuid());
     user.setPassword(hash);
 
     userManagementRepository.updateEmailLinkToInvalid(uuid);
@@ -243,15 +251,18 @@ public class UserManagementService {
     if (userManagementRepository.updatePassword(user) == 0) {
       throw new NotFoundException("user", UPDATE);
     }
-    RetrieveUserByIdParams params =
-        RetrieveUserByIdParams.builder().userId(link.getUserId()).build();
-    Optional<UserEntity> userEntity = userManagementRepository.retrieveUserById(params);
-    PasswordResetSuccessRequest passwordResetSuccessRequest =
-        PasswordResetSuccessRequest.builder()
-            .emailAddress(userEntity.get().getEmailAddress())
-            .fullName(userEntity.get().getName())
-            .build();
-    messageApiClient.sendPasswordResetSuccessMessage(passwordResetSuccessRequest);
+    UuidAuthorityCodeParams params =
+        UuidAuthorityCodeParams.builder().uuid(link.getUserUuid()).build();
+    Optional<UserEntity> userEntity = userManagementRepository.retrieveUserByUuid(params);
+    // The user entity really should be present as we just updated the password.
+    if (userEntity.isPresent()) {
+      PasswordResetSuccessRequest passwordResetSuccessRequest =
+          PasswordResetSuccessRequest.builder()
+              .emailAddress(userEntity.get().getEmailAddress())
+              .fullName(userEntity.get().getName())
+              .build();
+      messageApiClient.sendPasswordResetSuccessMessage(passwordResetSuccessRequest);
+    }
   }
 
   public UserEntity retrieveUserUsingUuid(String uuid) {
@@ -263,14 +274,9 @@ public class UserManagementService {
     return userEntity.get();
   }
 
-  private RetrieveUserByIdParams getRetrieveUserByIdParams(int userId) {
-    int localAuthority = securityUtils.getCurrentLocalAuthority().getId();
-    return RetrieveUserByIdParams.builder().userId(userId).localAuthority(localAuthority).build();
-  }
-
-  private DeleteUserParams getDeleteUserParams(int userId) {
-    int localAuthority = securityUtils.getCurrentLocalAuthority().getId();
-    return DeleteUserParams.builder().userId(userId).localAuthority(localAuthority).build();
+  private UuidAuthorityCodeParams getUuidAuthorityCodeParams(UUID userUuid) {
+    String localAuthority = securityUtils.getCurrentLocalAuthority().getShortCode();
+    return UuidAuthorityCodeParams.builder().uuid(userUuid).authorityCode(localAuthority).build();
   }
 
   /**
@@ -280,15 +286,26 @@ public class UserManagementService {
    * @return List of errors or null if validation ok.
    */
   private List<ErrorErrors> businessValidateUser(UserEntity userEntity) {
-    List<ErrorErrors> errorsList = null;
+    List<ErrorErrors> errorsList = new ArrayList<>();
+
+    // Validate authority short code valid
+    if (!referenceDataService.isValidLocalAuthorityCode(userEntity.getAuthorityCode())) {
+      ErrorErrors error = new ErrorErrors();
+      error
+          .field(LOCAL_AUTHORITY_SHORT_CODE)
+          .message("Invalid.user.localAuthorityShortCode")
+          .reason("Could not find local authority for short code " + userEntity.getAuthorityCode());
+
+      errorsList.add(error);
+    }
 
     if (userManagementRepository.emailAddressAlreadyUsed(userEntity)) {
       ErrorErrors error = new ErrorErrors();
       error
-          .field("emailAddress")
+          .field(EMAIL_ADDRESS)
           .message("AlreadyExists.user.emailAddress")
           .reason("Email Address already used.");
-      errorsList = new ArrayList<>();
+
       errorsList.add(error);
     }
 
@@ -304,8 +321,8 @@ public class UserManagementService {
   private List<ErrorErrors> localAuthorityValidateUser(UserEntity userEntity) {
     List<ErrorErrors> errorsList = null;
 
-    int localAuthority = securityUtils.getCurrentLocalAuthority().getId();
-    if (localAuthority != userEntity.getLocalAuthorityId()) {
+    String localAuthority = securityUtils.getCurrentLocalAuthority().getShortCode();
+    if (!localAuthority.equals(userEntity.getAuthorityCode())) {
       ErrorErrors error = new ErrorErrors();
       error
           .field("localAuthority")

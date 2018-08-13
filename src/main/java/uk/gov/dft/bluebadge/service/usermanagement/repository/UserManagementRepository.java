@@ -8,15 +8,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
-import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.DeleteUserParams;
-import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
-import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.RetrieveUserByIdParams;
-import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.*;
+import uk.gov.dft.bluebadge.service.usermanagement.repository.mapper.UserManagementMapper;
 
 /** Provides CRUD operations on UserEntity entity + user management. */
 @SuppressWarnings("WeakerAccess")
 @Component
-public class UserManagementRepository {
+public class UserManagementRepository implements UserManagementMapper {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(UserManagementRepository.class);
   private final SqlSession sqlSession;
@@ -28,13 +26,13 @@ public class UserManagementRepository {
   /**
    * Retrieve a single UserEntity by id.
    *
-   * @param params userId and localAuthorityPK of UserEntity to select.
+   * @param params userUuid and localAuthorityPK of UserEntity to select.
    * @return The retrieved UserEntity.
    */
-  public Optional<UserEntity> retrieveUserById(RetrieveUserByIdParams params) {
+  public Optional<UserEntity> retrieveUserByUuid(UuidAuthorityCodeParams params) {
     Assert.notNull(params, "params cannot be null");
-    Assert.notNull(params.getUserId(), "params.userId cannot be null");
-    UserEntity userEntity = this.sqlSession.selectOne("retrieveUserById", params);
+    Assert.notNull(params.getUuid(), "params.uuid cannot be null");
+    UserEntity userEntity = this.sqlSession.selectOne("retrieveUserByUuid", params);
     if (null == userEntity) {
       LOGGER.info("Attempt to retrieve UserEntity params:{} that does not exist.", params);
     }
@@ -64,9 +62,9 @@ public class UserManagementRepository {
     Assert.notNull(user, "updateUser called with null entity to update");
     int result = sqlSession.update("updateUser", user);
     if (0 == result) {
-      LOGGER.info("Attempt to update UserEntity id: {} that does not exist.", user.getId());
+      LOGGER.info("Attempt to update UserEntity id: {} that does not exist.", user.getUuid());
     } else {
-      LOGGER.debug("Updated UserEntity id: {}.", user.getId());
+      LOGGER.debug("Updated UserEntity id: {}.", user.getUuid());
     }
     return result;
   }
@@ -74,6 +72,7 @@ public class UserManagementRepository {
   public int updateEmailLinkToInvalid(String uuid) {
     return sqlSession.update("updateEmailLinkToInvalid", uuid);
   }
+
   /**
    * Update Password a UserEntity.
    *
@@ -84,9 +83,9 @@ public class UserManagementRepository {
     Assert.notNull(user, "updatePassword called with null entity to update");
     int result = sqlSession.update("updatePassword", user);
     if (0 == result) {
-      LOGGER.info("Attempt to update UserEntity id: {} that does not exist.", user.getId());
+      LOGGER.info("Attempt to update UserEntity id: {} that does not exist.", user.getUuid());
     } else {
-      LOGGER.debug("Updated UserEntity id: {}.", user.getId());
+      LOGGER.debug("Updated UserEntity id: {}.", user.getUuid());
     }
     return result;
   }
@@ -113,21 +112,20 @@ public class UserManagementRepository {
    * Create a UserEntity.
    *
    * @param user UserEntity to create.
-   * @return Insert count.
    */
   public void createUser(UserEntity user) {
     Assert.notNull(user, "createUser called with null entity to update");
-    LOGGER.info("Created UserEntity id: {}.", user.getId());
+    LOGGER.info("Created UserEntity id: {}.", user.getUuid());
     sqlSession.insert("createUser", user);
   }
 
   /**
    * Delete a UserEntity.
    *
-   * @param params userId and local authority.
+   * @param params userUuid and local authority.
    * @return Delete count
    */
-  public int deleteUser(DeleteUserParams params) {
+  public int deleteUser(UuidAuthorityCodeParams params) {
     int result = sqlSession.delete("deleteUser", params);
     if (0 == result) {
       LOGGER.info("Attempt to delete UserEntity params: {} that did not exist.", params);
@@ -151,7 +149,7 @@ public class UserManagementRepository {
     sqlSession.insert("createEmailLink", emailLink);
   }
 
-  public int updateUserToInactive(Integer id) {
-    return sqlSession.update("updateUserToInactive", id);
+  public int updateUserToInactive(UuidAuthorityCodeParams params) {
+    return sqlSession.update("updateUserToInactive", params);
   }
 }
