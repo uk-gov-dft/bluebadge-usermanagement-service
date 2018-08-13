@@ -37,12 +37,14 @@ import uk.gov.dft.bluebadge.service.usermanagement.service.referencedata.Referen
 @Slf4j
 public class UserManagementService {
 
+  public static final String LOCAL_AUTHORITY_SHORT_CODE = "localAuthorityShortCode";
+  public static final String EMAIL_ADDRESS = "emailAddress";
   private final UserManagementRepository userManagementRepository;
   private final MessageApiClient messageApiClient;
   private final String laWebappEmailLinkURI;
   private final SecurityUtils securityUtils;
   private final PasswordEncoder passwordEncoder;
-  private ReferenceDataService referenceDataService;
+  private final ReferenceDataService referenceDataService;
 
   @Autowired
   UserManagementService(
@@ -287,10 +289,10 @@ public class UserManagementService {
     List<ErrorErrors> errorsList = new ArrayList<>();
 
     // Validate authority short code valid
-    if(!referenceDataService.isValidLocalAuthorityCode(userEntity.getAuthorityCode())){
+    if (!referenceDataService.isValidLocalAuthorityCode(userEntity.getAuthorityCode())) {
       ErrorErrors error = new ErrorErrors();
       error
-          .field("localAuthorityShortCode")
+          .field(LOCAL_AUTHORITY_SHORT_CODE)
           .message("Invalid.user.localAuthorityShortCode")
           .reason("Could not find local authority for short code " + userEntity.getAuthorityCode());
 
@@ -300,7 +302,7 @@ public class UserManagementService {
     if (userManagementRepository.emailAddressAlreadyUsed(userEntity)) {
       ErrorErrors error = new ErrorErrors();
       error
-          .field("emailAddress")
+          .field(EMAIL_ADDRESS)
           .message("AlreadyExists.user.emailAddress")
           .reason("Email Address already used.");
 

@@ -27,7 +27,6 @@ CREATE TABLE usermanagement_unittest.roles (
 
 
 CREATE SEQUENCE usermanagement_unittest.roles_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -48,7 +47,6 @@ CREATE TABLE usermanagement_unittest.users (
 );
 
 CREATE SEQUENCE usermanagement_unittest.users_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -92,6 +90,8 @@ ALTER TABLE ONLY usermanagement_unittest.users
 
 
 SET search_path TO usermanagement_unittest;
+
+-- End of temporary schema
 
 
 DELETE FROM users WHERE email_address = 'createuservalid@dft.gov.uk';
