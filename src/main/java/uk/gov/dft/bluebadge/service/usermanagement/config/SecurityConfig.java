@@ -9,6 +9,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.provider.token.RemoteTokenServices;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import uk.gov.dft.bluebadge.common.security.BBAccessTokenConverter;
+import uk.gov.dft.bluebadge.common.security.SecurityUtils;
 
 @Configuration
 @EnableResourceServer
@@ -30,7 +33,21 @@ public class SecurityConfig {
     tokenService.setCheckTokenEndpointUrl(authServerUrl + "/oauth/check_token");
     tokenService.setClientId(clientId);
     tokenService.setClientSecret(clientSecret);
+    tokenService.setAccessTokenConverter(jwtAccessTokenConverter());
     return tokenService;
+  }
+
+  @Bean
+  public JwtAccessTokenConverter jwtAccessTokenConverter() {
+    JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
+    converter.setAccessTokenConverter(accessTokenConverter());
+    return converter;
+  }
+
+  @Bean
+  public BBAccessTokenConverter accessTokenConverter() {
+    BBAccessTokenConverter converter = new BBAccessTokenConverter();
+    return converter;
   }
 
   @Bean
@@ -42,5 +59,10 @@ public class SecurityConfig {
   @Bean
   public static PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder(BCRYPT_WORK_FACTOR);
+  }
+
+  @Bean
+  public SecurityUtils securityUtils() {
+    return new SecurityUtils();
   }
 }

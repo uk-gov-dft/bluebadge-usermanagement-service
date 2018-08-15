@@ -2,7 +2,10 @@ package uk.gov.dft.bluebadge.service.usermanagement.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +20,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import uk.gov.dft.bluebadge.common.security.SecurityUtils;
-import uk.gov.dft.bluebadge.common.security.model.LocalAuthority;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.Password;
 import uk.gov.dft.bluebadge.service.client.messageservice.MessageApiClient;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.NewUserRequest;
@@ -33,27 +35,9 @@ import uk.gov.dft.bluebadge.service.usermanagement.service.referencedata.Referen
 
 public class UserManagementServiceTest {
   private static final UUID DEFAULT_USER_UUID = UUID.randomUUID();
-  private static final int DEFAULT_LOCAL_AUTHORITY_ID = 2;
   private static final String DEFAULT_LOCAL_AUTHORITY_SHORT_CODE = "MANC";
-  private static final LocalAuthority DEFAULT_LOCAL_AUTHORITY =
-      LocalAuthority.builder()
-          .id(DEFAULT_LOCAL_AUTHORITY_ID)
-          .shortCode(DEFAULT_LOCAL_AUTHORITY_SHORT_CODE)
-          .build();
-  private static final int OTHER_LOCAL_AUTHORITY_ID = 99;
   private static final String OTHER_LOCAL_AUTHORITY_SHORT_CODE = "BRI";
-  private static final LocalAuthority OTHER_LOCAL_AUTHORITY =
-      LocalAuthority.builder()
-          .id(OTHER_LOCAL_AUTHORITY_ID)
-          .shortCode(OTHER_LOCAL_AUTHORITY_SHORT_CODE)
-          .build();
-  private static final int ANOTHER_LOCAL_AUTHORITY_ID = 1;
   private static final String ANOTHER_LOCAL_AUTHORITY_SHORT_CODE = "MANC";
-  private static final LocalAuthority ANOTHER_LOCAL_AUTHORITY =
-      LocalAuthority.builder()
-          .id(ANOTHER_LOCAL_AUTHORITY_ID)
-          .shortCode(ANOTHER_LOCAL_AUTHORITY_SHORT_CODE)
-          .build();
 
   private static final UuidAuthorityCodeParams DEFAULT_RETRIEVE_BY_USER_ID_PARAMS =
       UuidAuthorityCodeParams.builder()
@@ -90,7 +74,8 @@ public class UserManagementServiceTest {
             securityUtils,
             passwordEncoder,
             referenceDataService);
-    when(securityUtils.getCurrentLocalAuthority()).thenReturn(DEFAULT_LOCAL_AUTHORITY);
+    when(securityUtils.getCurrentLocalAuthorityShortCode())
+        .thenReturn(DEFAULT_LOCAL_AUTHORITY_SHORT_CODE);
 
     user1 = new UserEntity();
     user1.setName("test");
@@ -102,7 +87,8 @@ public class UserManagementServiceTest {
   @Test
   public void createUser_all_ok() {
 
-    when(securityUtils.getCurrentLocalAuthority()).thenReturn(OTHER_LOCAL_AUTHORITY);
+    when(securityUtils.getCurrentLocalAuthorityShortCode())
+        .thenReturn(OTHER_LOCAL_AUTHORITY_SHORT_CODE);
     when(repository.emailAddressAlreadyUsed(user1)).thenReturn(false);
     when(referenceDataService.getLocalAuthorityName(OTHER_LOCAL_AUTHORITY_SHORT_CODE))
         .thenReturn("Manchester");
@@ -129,7 +115,8 @@ public class UserManagementServiceTest {
 
   @Test(expected = BadRequestException.class)
   public void createUser_existsButInDifferentLocalAuthority() {
-    when(securityUtils.getCurrentLocalAuthority()).thenReturn(ANOTHER_LOCAL_AUTHORITY);
+    when(securityUtils.getCurrentLocalAuthorityShortCode())
+        .thenReturn(ANOTHER_LOCAL_AUTHORITY_SHORT_CODE);
     when(repository.emailAddressAlreadyUsed(user1)).thenReturn(false);
 
     service.createUser(user1);
@@ -218,7 +205,8 @@ public class UserManagementServiceTest {
 
   @Test(expected = NotFoundException.class)
   public void retrieveUserById_existsButInDifferentLocalAuthority() {
-    when(securityUtils.getCurrentLocalAuthority()).thenReturn(OTHER_LOCAL_AUTHORITY);
+    when(securityUtils.getCurrentLocalAuthorityShortCode())
+        .thenReturn(OTHER_LOCAL_AUTHORITY_SHORT_CODE);
 
     UserEntity user = new UserEntity();
     when(repository.retrieveUserByUuid(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS))
@@ -239,7 +227,8 @@ public class UserManagementServiceTest {
 
   @Test
   public void updateUser_ok() {
-    when(securityUtils.getCurrentLocalAuthority()).thenReturn(ANOTHER_LOCAL_AUTHORITY);
+    when(securityUtils.getCurrentLocalAuthorityShortCode())
+        .thenReturn(ANOTHER_LOCAL_AUTHORITY_SHORT_CODE);
 
     UserEntity user = new UserEntity();
     user.setUuid(DEFAULT_USER_UUID);
@@ -264,7 +253,8 @@ public class UserManagementServiceTest {
   @Test(expected = NotFoundException.class)
   public void updateUser_no_user() {
     when(referenceDataService.isValidLocalAuthorityCode(any())).thenReturn(true);
-    when(securityUtils.getCurrentLocalAuthority()).thenReturn(ANOTHER_LOCAL_AUTHORITY);
+    when(securityUtils.getCurrentLocalAuthorityShortCode())
+        .thenReturn(ANOTHER_LOCAL_AUTHORITY_SHORT_CODE);
     UserEntity user = new UserEntity();
     user.setUuid(DEFAULT_USER_UUID);
     user.setAuthorityCode(DEFAULT_LOCAL_AUTHORITY_SHORT_CODE);
@@ -277,7 +267,8 @@ public class UserManagementServiceTest {
 
   @Test(expected = BadRequestException.class)
   public void updateUser_existsButInDifferentLocalAuthority() {
-    when(securityUtils.getCurrentLocalAuthority()).thenReturn(OTHER_LOCAL_AUTHORITY);
+    when(securityUtils.getCurrentLocalAuthorityShortCode())
+        .thenReturn(OTHER_LOCAL_AUTHORITY_SHORT_CODE);
 
     UserEntity user = new UserEntity();
     user.setUuid(DEFAULT_USER_UUID);

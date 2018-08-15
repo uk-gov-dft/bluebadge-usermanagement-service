@@ -275,7 +275,7 @@ public class UserManagementService {
   }
 
   private UuidAuthorityCodeParams getUuidAuthorityCodeParams(UUID userUuid) {
-    String localAuthority = securityUtils.getCurrentLocalAuthority().getShortCode();
+    String localAuthority = securityUtils.getCurrentLocalAuthorityShortCode();
     return UuidAuthorityCodeParams.builder().uuid(userUuid).authorityCode(localAuthority).build();
   }
 
@@ -321,7 +321,7 @@ public class UserManagementService {
   private List<ErrorErrors> localAuthorityValidateUser(UserEntity userEntity) {
     List<ErrorErrors> errorsList = null;
 
-    String localAuthority = securityUtils.getCurrentLocalAuthority().getShortCode();
+    String localAuthority = securityUtils.getCurrentLocalAuthorityShortCode();
     if (!localAuthority.equals(userEntity.getAuthorityCode())) {
       ErrorErrors error = new ErrorErrors();
       error

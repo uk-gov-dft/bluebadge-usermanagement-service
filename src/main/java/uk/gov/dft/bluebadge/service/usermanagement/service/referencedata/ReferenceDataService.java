@@ -1,15 +1,14 @@
 package uk.gov.dft.bluebadge.service.usermanagement.service.referencedata;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 import uk.gov.dft.bluebadge.service.client.referencedataservice.ReferenceDataApiClient;
 import uk.gov.dft.bluebadge.service.client.referencedataservice.model.ReferenceData;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Component
 @Slf4j
