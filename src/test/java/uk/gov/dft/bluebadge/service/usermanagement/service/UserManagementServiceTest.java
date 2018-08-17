@@ -1,12 +1,14 @@
 package uk.gov.dft.bluebadge.service.usermanagement.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Java6Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +21,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import uk.gov.dft.bluebadge.common.security.BBPrincipal;
 import uk.gov.dft.bluebadge.common.security.SecurityUtils;
+import uk.gov.dft.bluebadge.common.util.TestBBPrincipal;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.Password;
 import uk.gov.dft.bluebadge.service.client.messageservice.MessageApiClient;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.NewUserRequest;
@@ -223,6 +227,42 @@ public class UserManagementServiceTest {
 
     // When retrieved then NotFoundException
     service.retrieveUserById(DEFAULT_USER_UUID);
+  }
+
+  @Test
+  public void retrieveCurrentUser_ok() {
+    BBPrincipal authenticatedUser = TestBBPrincipal.user().emailAddress("bob@bob.com").build();
+    when(securityUtils.getCurrentAuth()).thenReturn(authenticatedUser);
+    UserEntity user = new UserEntity();
+    ArgumentCaptor<UserEntity> userEntityArgumentCaptor = ArgumentCaptor.forClass(UserEntity.class);
+    when(repository.findUsers(userEntityArgumentCaptor.capture()))
+        .thenReturn(ImmutableList.of(user));
+
+    assertThat(service.retrieveCurrentUser()).isSameAs(user);
+    assertThat(userEntityArgumentCaptor.getValue().getEmailAddress()).isEqualTo("bob@bob.com");
+  }
+
+  @Test
+  public void retrieveCurrentUser_authenticationNotUser() {
+    BBPrincipal authenticatedUser = TestBBPrincipal.clientCreds().build();
+    when(securityUtils.getCurrentAuth()).thenReturn(authenticatedUser);
+
+    try {
+      service.retrieveCurrentUser();
+      fail("No exception.");
+    } catch (BadRequestException bre) {
+    }
+
+    verify(repository, never()).findUsers(any());
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void retrieveCurrentUser_emailNotFoundThenNotFoundException() {
+    BBPrincipal authenticatedUser = TestBBPrincipal.user().emailAddress("unknown@bob.com").build();
+    when(securityUtils.getCurrentAuth()).thenReturn(authenticatedUser);
+    when(repository.findUsers(any())).thenReturn(new ArrayList<UserEntity>());
+
+    service.retrieveCurrentUser();
   }
 
   @Test

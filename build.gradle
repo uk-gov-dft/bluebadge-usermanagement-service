@@ -76,8 +76,16 @@ tasks.withType(Pmd) {
     }
 }
 
+configurations.all {
+    resolutionStrategy {
+        // don't cache changing modules at all
+        cacheChangingModulesFor 0, 'seconds'
+    }
+}
+
 dependencies {
-    compile group: 'uk.gov.dft.bluebadge', name: 'bluebadge-common', version: '0.4.1-SNAPSHOT', changing: true
+    ext.commonVersion = '0.4.1-SNAPSHOT'
+    compile group: 'uk.gov.dft.bluebadge', name: 'bluebadge-common', version: "${commonVersion}", changing: true
 
     compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.9.5'
     compile('org.springframework.boot:spring-boot-starter-web')
@@ -100,6 +108,7 @@ dependencies {
     runtime group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.3'
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile group: 'uk.gov.dft.bluebadge', name: 'bluebadge-common', version: "${commonVersion}", classifier: 'tests', changing: true
     testCompileOnly ('org.projectlombok:lombok:1.16.22')
 
 }
