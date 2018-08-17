@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -125,7 +124,6 @@ public class UsersApiControllerImpl implements UsersApi {
   /**
    * Get a list of Users for a given Local Authority id.
    *
-   * @param authorityShortCode The Local Authority id.
    * @return List of Users
    */
   @Override
@@ -133,16 +131,10 @@ public class UsersApiControllerImpl implements UsersApi {
       @ApiParam(value = "Name or email address fragment to filter on.")
           @Valid
           @RequestParam(value = "name", required = false)
-          Optional<String> name,
-      @NotNull
-          @ApiParam(value = "To Be Removed. LA id will passed in token", required = true)
-          @Valid
-          @RequestParam(value = "authorityShortCode")
-          String authorityShortCode) {
+          Optional<String> name) {
 
-    log.info("Finding users for authority {}, with filter:{}", authorityShortCode, name);
-    List<UserEntity> userEntityList =
-        service.retrieveUsersByAuthorityCode(authorityShortCode, name.orElse(null));
+    log.debug("Finding users with filter:{}", name);
+    List<UserEntity> userEntityList = service.findUsers(name.orElse(null));
 
     return ResponseEntity.ok(
         new UsersResponse().data(userConverter.convertToModelList(userEntityList)));

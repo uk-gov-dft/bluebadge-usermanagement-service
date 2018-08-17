@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,12 +147,7 @@ public interface UsersApi {
       @ApiParam(value = "Name or email address fragment to filter on.")
           @Valid
           @RequestParam(value = "name", required = false)
-          Optional<String> name,
-      @NotNull
-          @ApiParam(value = "To Be Removed. LA id will passed in token", required = true)
-          @Valid
-          @RequestParam(value = "authorityShortCode", required = true)
-          String authorityShortCode) {
+          Optional<String> name) {
     if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
       if (getAcceptHeader().get().contains("application/json")) {
         try {
