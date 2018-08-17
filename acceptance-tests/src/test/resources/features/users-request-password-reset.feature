@@ -1,4 +1,4 @@
-@users-find
+@users-request***REMOVED***-reset
 Feature: Verify users retrieval
 
   Background:
