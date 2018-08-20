@@ -13,7 +13,16 @@ blue-badge:
       contextpath: /uk-gov-dft/message-service/1.0.0
   la-webapp:
     email-link-uri: https://la-webapp.${bb_env}.does.not.exist/set***REMOVED***/
-
+    
+  referencedataservice:
+    servicehost:
+      host: reference-service.${bb_env}.does.not.exist
+      port: 443
+      scheme: https
+      connectiontimeout: 6000
+      requesttimeout: 6000
+      contextpath: /uk-gov-dft/reference-data-service/1.0.0
+      
 logging:
   level:
     root: ${APP_LOGGING_LEVEL:-INFO}
