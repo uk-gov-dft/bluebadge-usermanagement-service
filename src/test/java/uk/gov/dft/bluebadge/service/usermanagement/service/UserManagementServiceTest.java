@@ -435,10 +435,10 @@ public class UserManagementServiceTest {
   }
 
   @Test
-  public void retrieveUsersByAuthorityId() {
+  public void findUsersTest() {
     List<UserEntity> userList = new ArrayList<>();
     when(repository.findUsers(any())).thenReturn(userList);
-    service.retrieveUsersByAuthorityCode(DEFAULT_LOCAL_AUTHORITY_SHORT_CODE, "abc");
+    service.findUsers("abc");
   }
 
   @Test
