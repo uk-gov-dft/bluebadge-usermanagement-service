@@ -17,12 +17,6 @@
           "type" : "string",
           "required" : false,
           "description" : "Name or email address fragment to filter on."
-        }, {
-          "in" : "query",
-          "name" : "authorityShortCode",
-          "type" : "string",
-          "required" : true,
-          "description" : "To Be Removed. LA id will passed in token"
         } ],
         "summary" : "List of all Users",
         "operationId" : "findUsers",
@@ -285,7 +279,7 @@
           "format" : "email",
           "description" : "email address.",
           "example" : "rob.worthington@norealserver.com",
-          "pattern" : ".+\\@.+",
+          "pattern" : "^\\S+\\@\\S+",
           "maxLength" : 200
         },
         "localAuthorityShortCode" : {

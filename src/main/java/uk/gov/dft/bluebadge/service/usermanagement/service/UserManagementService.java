@@ -177,12 +177,12 @@ public class UserManagementService {
     }
   }
 
-  public List<UserEntity> retrieveUsersByAuthorityCode(String authorityCode, String nameFilter) {
+  public List<UserEntity> findUsers(String nameFilter) {
     if (null != nameFilter) {
       nameFilter = "%" + nameFilter + "%";
     }
     UserEntity queryParams = new UserEntity();
-    queryParams.setAuthorityCode(authorityCode);
+    queryParams.setAuthorityCode(securityUtils.getCurrentLocalAuthorityShortCode());
     queryParams.setName(nameFilter);
     queryParams.setEmailAddress(nameFilter);
     return userManagementRepository.findUsers(queryParams);
