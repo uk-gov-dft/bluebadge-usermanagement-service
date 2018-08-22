@@ -147,6 +147,34 @@
         }
       }
     },
+    "/users/me" : {
+      "get" : {
+        "tags" : [ "Users" ],
+        "operationId" : "retrieveCurrentUser",
+        "summary" : "Retrieve the current authenticated user",
+        "description" : "Retrieves the user details of currently authenticated user, determined by the access token",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "schema" : {
+              "$ref" : "#/definitions/UserResponse"
+            }
+          },
+          "400" : {
+            "description" : "Access token relates to a LA API client credentials.",
+            "schema" : {
+              "$ref" : "#/definitions/CommonResponse"
+            }
+          },
+          "404" : {
+            "description" : "User not found.",
+            "schema" : {
+              "$ref" : "#/definitions/CommonResponse"
+            }
+          }
+        }
+      }
+    },
     "/users/{uuid}" : {
       "parameters" : [ {
         "in" : "path",

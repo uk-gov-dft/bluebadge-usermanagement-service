@@ -104,6 +104,16 @@ public class UsersApiControllerImpl implements UsersApi {
     return ResponseEntity.ok(userResponse);
   }
 
+  @Override
+  public ResponseEntity<UserResponse> retrieveCurrentUser() {
+    UserResponse userResponse = new UserResponse();
+
+    UserEntity userEntity = service.retrieveCurrentUser();
+    userResponse.setData(userConverter.convertToModel(userEntity));
+
+    return ResponseEntity.ok(userResponse);
+  }
+
   /**
    * Creates User.
    *

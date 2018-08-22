@@ -199,6 +199,51 @@ public interface UsersApi {
   }
 
   @ApiOperation(
+    value = "Retrieve the current authenticated user",
+    nickname = "retrieveCurrentUser",
+    notes =
+        "Retrieves the user details of currently authenticated user, determined by the access token",
+    response = UserResponse.class,
+    tags = {
+      "Users",
+    }
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(code = 200, message = "OK", response = UserResponse.class),
+      @ApiResponse(
+        code = 400,
+        message = "Access token relates to a LA API client credentials.",
+        response = CommonResponse.class
+      ),
+      @ApiResponse(code = 404, message = "User not found.", response = CommonResponse.class)
+    }
+  )
+  @RequestMapping(
+    value = "/users/me",
+    produces = {"application/json"},
+    method = RequestMethod.GET
+  )
+  default ResponseEntity<UserResponse> retrieveCurrentUser() {
+    if (getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
+      if (getAcceptHeader().get().contains("application/json")) {
+        try {
+          return new ResponseEntity<>(
+              getObjectMapper().get().readValue("\"\"", UserResponse.class),
+              HttpStatus.NOT_IMPLEMENTED);
+        } catch (IOException e) {
+          log.error("Couldn't serialize response for content type application/json", e);
+          return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+      }
+    } else {
+      log.warn(
+          "ObjectMapper or HttpServletRequest not configured in default UsersApi interface so no example is generated");
+    }
+    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+  }
+
+  @ApiOperation(
     value = "Retrieve a specific user",
     nickname = "retrieveUser",
     notes = "Retrieve a user and their roles",
