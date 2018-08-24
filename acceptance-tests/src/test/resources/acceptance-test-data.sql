@@ -33,3 +33,8 @@ VALUES(-8, 'get test', 'brummieuser@dft.gov.uk', 'BIRM', 2, '$2a$11$l8Y6fw6mOmj3
 
 INSERT INTO usermanagement.email_link(user_id, uuid) VALUES (-1, '4175e31c-9c0c-41c0-9afb-40dc0a89b9c5');
 INSERT INTO usermanagement.email_link(user_id, uuid, is_active) VALUES (-1, '4175e31c-0000-41c0-9afb-40dc0a89b9c5', false);
+
+delete from usermanagement.client_credentials where client_id = '***REMOVED***';
+insert into usermanagement.client_credentials (client_id, client_secret, local_authority_short_code, active, creation_timestamp, expiry_timestamp) VALUES
+  ('***REMOVED***', '$2a$11$Wh8v9Q4PXN7omFzCMq0db.6wyLBHDg6RyImPEMak3VyStdAwzaL.a', 'ABERD', true, now(), date('now') + interval '1 year')
+;
