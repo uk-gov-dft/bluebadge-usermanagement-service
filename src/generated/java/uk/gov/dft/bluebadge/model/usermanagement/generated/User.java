@@ -88,7 +88,7 @@ public class User {
     value = "email address."
   )
   @NotNull
-  @Pattern(regexp = ".+\\@.+")
+  @Pattern(regexp = "^\\S+\\@\\S+")
   @Size(max = 200)
   public String getEmailAddress() {
     return emailAddress;

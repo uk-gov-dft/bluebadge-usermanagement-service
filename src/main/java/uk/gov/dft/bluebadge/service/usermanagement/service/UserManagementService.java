@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import uk.gov.dft.bluebadge.common.api.model.ErrorErrors;
 import uk.gov.dft.bluebadge.common.security.SecurityUtils;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.Password;
@@ -176,12 +177,12 @@ public class UserManagementService {
     }
   }
 
-  public List<UserEntity> retrieveUsersByAuthorityCode(String authorityCode, String nameFilter) {
+  public List<UserEntity> findUsers(String nameFilter) {
     if (null != nameFilter) {
       nameFilter = "%" + nameFilter + "%";
     }
     UserEntity queryParams = new UserEntity();
-    queryParams.setAuthorityCode(authorityCode);
+    queryParams.setAuthorityCode(securityUtils.getCurrentLocalAuthorityShortCode());
     queryParams.setName(nameFilter);
     queryParams.setEmailAddress(nameFilter);
     return userManagementRepository.findUsers(queryParams);
@@ -272,6 +273,26 @@ public class UserManagementService {
       throw new NotFoundException("user", RETRIEVE);
     }
     return userEntity.get();
+  }
+
+  public UserEntity retrieveCurrentUser() {
+    String emailAddress = securityUtils.getCurrentAuth().getEmailAddress();
+    if (StringUtils.isEmpty(emailAddress)) {
+      ErrorErrors error = new ErrorErrors();
+      error.setField("access token");
+      error.setMessage("Access token not associated with a user.");
+      error.setReason("No email address associated with the access token");
+      throw new BadRequestException(error);
+    }
+
+    UserEntity searchParams = new UserEntity();
+    searchParams.setEmailAddress(emailAddress);
+    searchParams.setName(UUID.randomUUID().toString());
+    return userManagementRepository
+        .findUsers(searchParams)
+        .stream()
+        .findFirst()
+        .orElseThrow(() -> new NotFoundException("user", RETRIEVE));
   }
 
   private UuidAuthorityCodeParams getUuidAuthorityCodeParams(UUID userUuid) {

@@ -17,12 +17,6 @@
           "type" : "string",
           "required" : false,
           "description" : "Name or email address fragment to filter on."
-        }, {
-          "in" : "query",
-          "name" : "authorityShortCode",
-          "type" : "string",
-          "required" : true,
-          "description" : "To Be Removed. LA id will passed in token"
         } ],
         "summary" : "List of all Users",
         "operationId" : "findUsers",
@@ -153,6 +147,34 @@
         }
       }
     },
+    "/users/me" : {
+      "get" : {
+        "tags" : [ "Users" ],
+        "operationId" : "retrieveCurrentUser",
+        "summary" : "Retrieve the current authenticated user",
+        "description" : "Retrieves the user details of currently authenticated user, determined by the access token",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "schema" : {
+              "$ref" : "#/definitions/UserResponse"
+            }
+          },
+          "400" : {
+            "description" : "Access token relates to a LA API client credentials.",
+            "schema" : {
+              "$ref" : "#/definitions/CommonResponse"
+            }
+          },
+          "404" : {
+            "description" : "User not found.",
+            "schema" : {
+              "$ref" : "#/definitions/CommonResponse"
+            }
+          }
+        }
+      }
+    },
     "/users/{uuid}" : {
       "parameters" : [ {
         "in" : "path",
@@ -257,7 +279,7 @@
           "format" : "email",
           "description" : "email address.",
           "example" : "rob.worthington@norealserver.com",
-          "pattern" : ".+\\@.+",
+          "pattern" : "^\\S+\\@\\S+",
           "maxLength" : 200
         },
         "localAuthorityShortCode" : {

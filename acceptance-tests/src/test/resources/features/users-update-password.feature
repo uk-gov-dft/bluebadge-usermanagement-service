@@ -1,5 +1,5 @@
-@users-patch
-Feature: Verify users update
+@users-update***REMOVED***
+Feature: Verify users update password
 
   Background:
     * url baseUrl
