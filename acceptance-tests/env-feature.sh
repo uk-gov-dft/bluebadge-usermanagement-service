@@ -10,6 +10,8 @@ REPOS=(
     'applications-service::AP_VERSION'
 )
 
+export GITHUB_TOKEN=$(cat ~/.ssh/github_token)
+
 echo "Fetching versions..."
 for index in "${REPOS[@]}" ; do
     KEY="${index%%::*}"
