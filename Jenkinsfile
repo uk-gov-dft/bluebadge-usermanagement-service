@@ -18,7 +18,6 @@ node {
         }
         try {
             sh './gradlew clean build bootJar createDatabaseSchemaZip artifactoryPublish artifactoryDeploy --refresh-dependencies'
-            // sh 'bash scripts/upload-artifacts.sh'
         }
         finally {
             junit '**/TEST*.xml'
@@ -41,6 +40,24 @@ node {
             def qg = waitForQualityGate()
             if (qg.status != 'OK') {
                 error "Pipeline aborted due to quality gate failure: ${qg.status}"
+            }
+        }
+    }
+    stage("Acceptance Tests") {
+        node('Functional') {
+            git(
+               url: "${REPONAME}",
+               credentialsId: 'dft-buildbot-valtech',
+               branch: "${BRANCH_NAME}"
+            )
+
+            timeout(time: 10, unit: 'MINUTES') {
+                try {
+                    sh 'bash -c "echo $PATH && cd acceptance-tests && ./run-regression.sh"'
+                }
+                finally {
+                    junit '**/TEST*.xml'
+                }
             }
         }
     }
