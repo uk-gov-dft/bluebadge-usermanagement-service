@@ -56,6 +56,7 @@ node {
                     sh 'bash -c "echo $PATH && cd acceptance-tests && ./run-regression.sh"'
                 }
                 finally {
+                    archiveArtifacts allowEmptyArchive: true, artifacts: '**/docker.log'
                     junit '**/TEST*.xml'
                 }
             }
