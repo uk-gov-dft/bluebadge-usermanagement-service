@@ -7,7 +7,7 @@ DELETE FROM usermanagement.email_link where user_id IN
 DELETE FROM usermanagement.users WHERE email_address = 'createuservalid@dft.gov.uk';
 DELETE FROM usermanagement.users WHERE id < 0;
 INSERT INTO usermanagement.users (id, name, email_address, local_authority_short_code, role_id, password, user_uuid)
-VALUES(-1, 'Bruce Wayne', 'abc@DFT.gov.uk', 'ABERD', 2, '$2a$11$l8Y6fw6mOmj39naJfQtgvu1KITnSBDURsP7kCHWsJXthM.atfzNWC',
+VALUES(-1, 'Bruce Wayne', 'abc@dft.gov.uk', 'ABERD', 2, '$2a$11$l8Y6fw6mOmj39naJfQtgvu1KITnSBDURsP7kCHWsJXthM.atfzNWC',
 'cc4fbb98-3963-41ef-9c75-a9651b2fe27c'::UUID);
 INSERT INTO usermanagement.users (id, name, email_address, local_authority_short_code, role_id, password, user_uuid)
 VALUES(-2, 'Sampath somethingdifferent', 'def@dft.gov.uk', 'ABERD', 2, '$2a$11$YgiL6XFOoFLHjlFRxZNGr.n4bFKZaRNkAIRHaqDxIWRfAagCPJvMK',
