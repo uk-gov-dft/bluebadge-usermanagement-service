@@ -1,5 +1,5 @@
 @authentication-user
-Feature: Authenticate with the authorisation service
+Feature: Authenticate with the authorisation service using the password grant
 
   Background:
     * url authServerUrl
