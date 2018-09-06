@@ -200,8 +200,9 @@ public class UserManagementServiceTest {
   public void retrieveUserById_ok() {
     // Given the user exists
     UserEntity user = new UserEntity();
-    when(repository.retrieveUserByUuid(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS))
-        .thenReturn(Optional.of(user));
+    UuidAuthorityCodeParams authorityCodeParams =
+        UuidAuthorityCodeParams.builder().uuid(DEFAULT_USER_UUID).build();
+    when(repository.retrieveUserByUuid(authorityCodeParams)).thenReturn(Optional.of(user));
 
     // When retrieving the user then the user is returned
     Assert.assertEquals(user, service.retrieveUserById(DEFAULT_USER_UUID));
@@ -464,7 +465,10 @@ public class UserManagementServiceTest {
 
   @Test
   public void deleteUser() {
-    when(repository.deleteUser(DEFAULT_DELETE_USER_PARAMS)).thenReturn(1);
+    UuidAuthorityCodeParams authorityCodeParams =
+        UuidAuthorityCodeParams.builder().uuid(DEFAULT_USER_UUID).build();
+
+    when(repository.deleteUser(authorityCodeParams)).thenReturn(1);
     service.deleteUser(DEFAULT_USER_UUID);
   }
 
