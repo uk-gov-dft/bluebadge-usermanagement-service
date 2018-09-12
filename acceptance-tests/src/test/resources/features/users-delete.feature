@@ -7,7 +7,7 @@ Feature: Verify users Delete
     * def DbUtils = Java.type('uk.gov.service.bluebadge.test.utils.DbUtils')
     * def db = new DbUtils(dbConfig)
     * def setup = callonce db.runScript('acceptance-test-data.sql')
-    * def result = callonce read('./oauth2.feature')
+    * def result = callonce read('./oauth2-user.feature')
     * header Authorization = 'Bearer ' + result.accessToken
 
   Scenario: Verify delete not exists
@@ -15,7 +15,7 @@ Feature: Verify users Delete
     When method DELETE
     Then status 404
 
-  Scenario: Verify delete OK.
+  Scenario: Verify delete success.
     Given path 'users/e9ec670a-1c2d-449a-be92-4493cbf4838e'
     When method DELETE
     Then status 200
@@ -23,4 +23,4 @@ Feature: Verify users Delete
   Scenario: Verify delete user in different local authority than current user's
     Given path 'users/9bdc58aa-7026-4a7c-9d57-805c3d96cecb'
     When method DELETE
-    Then status 404
+    Then status 403
