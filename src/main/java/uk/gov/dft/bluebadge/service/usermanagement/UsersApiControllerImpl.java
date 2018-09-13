@@ -10,6 +10,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -91,6 +93,8 @@ public class UsersApiControllerImpl implements UsersApi {
    * @return The User wrapped in a UserResponse
    */
   @Override
+  @PreAuthorize("hasAuthority('PERM_VIEW_USER_DETAILS')")
+  @PostAuthorize("@securityUtils.isAuthorisedLA(returnObject.body.data.localAuthorityShortCode)")
   public ResponseEntity<UserResponse> retrieveUser(
       @Pattern(regexp = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
           @ApiParam(value = "UUID of the user.", required = true)
@@ -121,6 +125,8 @@ public class UsersApiControllerImpl implements UsersApi {
    * @return The created user with id populated.
    */
   @Override
+  @PreAuthorize(
+      "hasAuthority('PERM_CREATE_USER') and @securityUtils.isAuthorisedLA(#user.localAuthorityShortCode)")
   public ResponseEntity<UserResponse> createUser(@ApiParam() @Valid @RequestBody User user) {
     user.setUuid(UUID.randomUUID().toString());
     UserEntity entity = userConverter.convertToEntity(user);
@@ -166,6 +172,7 @@ public class UsersApiControllerImpl implements UsersApi {
   }
 
   @Override
+  @PreAuthorize("hasAuthority('PERM_DELETE_USER') and @userSecurity.isAuthorised(#uuid)")
   public ResponseEntity<Void> deleteUser(
       @Pattern(regexp = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
           @ApiParam(value = "UUID of the user.", required = true)
@@ -177,6 +184,7 @@ public class UsersApiControllerImpl implements UsersApi {
   }
 
   @Override
+  @PreAuthorize("hasAuthority('PERM_RESET_USER_PASSWORD') and @userSecurity.isAuthorised(#uuid)")
   public ResponseEntity<Void> requestPasswordReset(
       @Pattern(regexp = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
           @ApiParam(value = "Uuid of the user.", required = true)

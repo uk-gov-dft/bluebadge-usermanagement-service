@@ -7,7 +7,7 @@ Feature: Verify users create
     * def DbUtils = Java.type('uk.gov.service.bluebadge.test.utils.DbUtils')
     * def db = new DbUtils(dbConfig)
     * def setup = callonce db.runScript('acceptance-test-data.sql')
-    * def result = callonce read('./oauth2.feature')
+    * def result = callonce read('./oauth2-user.feature')
     * header Authorization = 'Bearer ' + result.accessToken
 
   Scenario: Create User Missing email and name as only spaces
@@ -36,8 +36,7 @@ Feature: Verify users create
     Given path 'users'
     And request { name:"asdfgh", emailAddress:"abcnobodydifferentlocalauthority@dft.gov.uk", localAuthorityShortCode: "MANC", roleId: 2 }
     When method POST
-    Then status 400
-    And match $.error.errors contains {field:"localAuthority", reason:"#notnull", message:"NotSameAsCurrentUsers.user.localAuthority", location:"#null", locationType:"#null"}
+    Then status 403
 
   Scenario: Create user invalid name format
     Given path 'users'
