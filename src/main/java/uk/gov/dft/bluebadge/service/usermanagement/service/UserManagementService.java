@@ -146,6 +146,7 @@ public class UserManagementService {
             .uuid(UUID.randomUUID().toString())
             .userUuid(userEntity.getUuid())
             .build();
+
     userManagementRepository.createEmailLink(emailLink);
     return emailLink;
   }

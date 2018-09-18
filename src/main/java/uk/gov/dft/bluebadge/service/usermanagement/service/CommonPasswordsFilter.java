@@ -2,8 +2,8 @@ package uk.gov.dft.bluebadge.service.usermanagement.service;
 
 import org.springframework.stereotype.Component;
 import uk.gov.dft.bluebadge.common.api.model.ErrorErrors;
-import uk.gov.dft.bluebadge.common.service.exception.BadRequestException;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepository;
+import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
 
 @Component
 public class CommonPasswordsFilter {
@@ -32,5 +32,4 @@ public class CommonPasswordsFilter {
 
     return error;
   }
-  
 }

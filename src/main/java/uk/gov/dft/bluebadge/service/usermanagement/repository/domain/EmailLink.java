@@ -10,10 +10,10 @@ import org.apache.ibatis.type.Alias;
 @Data
 @Builder
 public class EmailLink {
-  @NonNull private final String webappUri;
-  @NonNull private final String uuid;
-  @NonNull private final UUID userUuid;
-  private final Boolean isActive;
+  @NonNull private String webappUri;
+  @NonNull private String uuid;
+  @NonNull private UUID userUuid;
+  private Boolean isActive;
 
   public String getLink() {
     return webappUri + uuid;
