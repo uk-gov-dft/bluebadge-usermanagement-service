@@ -63,6 +63,7 @@ public class UserManagementServiceTest {
   @Mock private MessageApiClient messageApiClient;
   @Mock private SecurityUtils securityUtils;
   @Mock private ReferenceDataService referenceDataService;
+  @Mock private CommonPasswordsFilter filter;
 
   private UserEntity user1;
   private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -77,7 +78,8 @@ public class UserManagementServiceTest {
             WEBAPP_URI,
             securityUtils,
             passwordEncoder,
-            referenceDataService);
+            referenceDataService,
+            filter);
     when(securityUtils.getCurrentLocalAuthorityShortCode())
         .thenReturn(DEFAULT_LOCAL_AUTHORITY_SHORT_CODE);
 
@@ -364,6 +366,7 @@ public class UserManagementServiceTest {
     userEntity.setName("Jane Test");
     userEntity.setEmailAddress("janetest@email.com");
 
+    when(filter.isPasswordEligible(any())).thenReturn(true);
     when(repository.updatePassword(any())).thenReturn(1);
     when(repository.updateEmailLinkToInvalid(uuid.toString())).thenReturn(1);
     when(repository.retrieveEmailLinkWithUuid(uuid.toString())).thenReturn(link);
@@ -413,6 +416,7 @@ public class UserManagementServiceTest {
             .isActive(false)
             .build();
 
+    when(filter.isPasswordEligible(any())).thenReturn(true);
     when(repository.retrieveEmailLinkWithUuid(uuid.toString())).thenReturn(link);
 
     // When update password requested
@@ -432,6 +436,7 @@ public class UserManagementServiceTest {
      ***REMOVED***);
     String uuid = UUID.randomUUID().toString();
 
+    when(filter.isPasswordEligible(any())).thenReturn(true);
     when(repository.retrieveEmailLinkWithUuid(uuid)).thenReturn(null);
 
     // When update password requested
@@ -451,6 +456,7 @@ public class UserManagementServiceTest {
      ***REMOVED***);
     String uuid = UUID.randomUUID().toString();
 
+    when(filter.isPasswordEligible(any())).thenReturn(true);
     // When update password requested
     service.updatePassword(uuid, password);
 

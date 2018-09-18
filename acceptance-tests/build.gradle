@@ -16,6 +16,10 @@ repositories {
 
 apply plugin: 'java'
 apply plugin: 'idea'
+if (project != rootProject) {
+    apply plugin: 'eclipse'
+    eclipse.project.name = (rootProject.name + project.path).replaceAll(':', '-')
+}
 
 dependencies {
     //	Acceptance test

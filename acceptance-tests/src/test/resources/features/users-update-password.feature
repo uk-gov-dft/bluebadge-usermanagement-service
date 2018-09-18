@@ -38,6 +38,7 @@ Feature: Verify users update password
 
   Scenario: Invalid password confirm
     Given path 'user/password/4175e31c-9c0c-41c0-9afb-40dc0a89b9c5'
+    #And request { ***REMOVED***}
     And request { ***REMOVED***}
     When method PATCH
     Then status 400
@@ -47,3 +48,9 @@ Feature: Verify users update password
     And request { ***REMOVED***}
     When method PATCH
     Then status 400
+    
+  Scenario: Password blacklisted
+    Given path 'user/password/4175e31c-9c0c-41c0-9afb-40dc0a89b9c5'
+    And request { ***REMOVED***}
+    When method PATCH
+    Then status 400    
