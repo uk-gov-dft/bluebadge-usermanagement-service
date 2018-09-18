@@ -8,8 +8,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
-import uk.gov.dft.bluebadge.common.service.exception.BadRequestException;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepository;
+import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
 
 public class CommonPasswordsFilterTest {
 
