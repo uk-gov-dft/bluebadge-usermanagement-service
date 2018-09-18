@@ -305,8 +305,7 @@ public class UserManagementService {
   }
 
   private UuidAuthorityCodeParams getUuidAuthorityCodeParams(UUID userUuid) {
-    String localAuthority = securityUtils.getCurrentLocalAuthorityShortCode();
-    return UuidAuthorityCodeParams.builder().uuid(userUuid).authorityCode(localAuthority).build();
+    return UuidAuthorityCodeParams.builder().uuid(userUuid).build();
   }
 
   /**
