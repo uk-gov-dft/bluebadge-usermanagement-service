@@ -21,10 +21,6 @@ CREATE TABLE passwords_blacklist (
     id VARCHAR(50) PRIMARY KEY
 );
 
-CREATE UNIQUE INDEX password_idx ON passwords_blacklist (id);
-
 -- //@UNDO
 -- SQL to undo the change goes here.
 DROP TABLE IF EXISTS passwords_blacklist CASCADE;
-
-DROP INDEX IF EXISTS password_idx CASCADE;

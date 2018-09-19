@@ -1,7 +1,5 @@
 package uk.gov.dft.bluebadge.service.usermanagement.service;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -18,11 +16,11 @@ public class CommonPasswordsFilterTest {
 
   private static final String PASSWORD = "password";
 
-  @Test
+  @Test(expected = Test.None.class /* no exception expected */)
   public void test_password_unique_enough() {
     when(repository.isPasswordBlacklisted(PASSWORD)).thenReturn(false);
 
-    assertTrue(filter.isPasswordEligible(PASSWORD));
+    filter.validatePasswordBlacklisted(PASSWORD);
 
     verify(repository, times(1)).isPasswordBlacklisted(PASSWORD);
   }
@@ -31,7 +29,7 @@ public class CommonPasswordsFilterTest {
   public void test_password_is_common() {
     when(repository.isPasswordBlacklisted(PASSWORD)).thenReturn(true);
 
-    assertFalse(filter.isPasswordEligible(PASSWORD));
+    filter.validatePasswordBlacklisted(PASSWORD);
 
     verify(repository, times(1)).isPasswordBlacklisted(PASSWORD);
   }

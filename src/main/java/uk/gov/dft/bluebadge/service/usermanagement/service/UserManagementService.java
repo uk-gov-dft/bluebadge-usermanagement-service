@@ -221,9 +221,7 @@ public class UserManagementService {
 
     log.debug("Updating password for guid:{}", uuid);
 
-    if (!passwordFilter.isPasswordEligible(passwords.getPassword())) {
-      log.debug("Password is blacklisted: {}", passwords.getPassword());
-    }
+    passwordFilter.validatePasswordBlacklisted(passwords.getPassword());
 
     String password = passwords.getPassword();
     String passwordConfirm = passwords.getPasswordConfirm();
