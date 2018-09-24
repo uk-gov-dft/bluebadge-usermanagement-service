@@ -1,6 +1,8 @@
 package uk.gov.dft.bluebadge.service.usermanagement.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -333,6 +335,16 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     int i = userManagementRepository.updateUserToInactive(params);
     assertThat(i).isEqualTo(1);
     // Currently no way of retrieving the inactive flag
+  }
+
+  @Test
+  public void passwordIsBlacklisted() {
+    assertTrue(userManagementRepository.isPasswordBlacklisted("password"));
+  }
+
+  @Test
+  public void passwordIsUniqueEnough() {
+    assertFalse(userManagementRepository.isPasswordBlacklisted("S0r0kTysy@ch0b3z'j@n;"));
   }
 
   private UserEntity checkDefaultUser(Optional<UserEntity> maybeUserEntity) {
