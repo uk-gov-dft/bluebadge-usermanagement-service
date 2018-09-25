@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import uk.gov.dft.bluebadge.common.api.model.CommonResponse;
+import uk.gov.dft.bluebadge.common.api.model.ErrorErrors;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.Password;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.User;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.UserResponse;
@@ -27,6 +28,7 @@ import uk.gov.dft.bluebadge.service.usermanagement.converter.UserConverter;
 import uk.gov.dft.bluebadge.service.usermanagement.generated.controller.UsersApi;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.UserManagementService;
+import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.ServiceException;
 
@@ -166,10 +168,17 @@ public class UsersApiControllerImpl implements UsersApi {
           @PathVariable("uuid")
           String uuid,
       @ApiParam() @Valid @RequestBody User user) {
+    if (!uuid.equals(user.getUuid())) {
+      ErrorErrors error = new ErrorErrors();
+      error
+          .field("uuid")
+          .message("Invalid user uuid")
+          .reason("Model uuid and path variable uuid do not match.");
+      throw new BadRequestException(error);
+    }
     UserEntity entity = userConverter.convertToEntity(user);
-    UserResponse userResponse = new UserResponse();
-
     service.updateUser(entity);
+    UserResponse userResponse = new UserResponse();
     userResponse.setData(userConverter.convertToModel(entity));
     return ResponseEntity.ok(userResponse);
   }

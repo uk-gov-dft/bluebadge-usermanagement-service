@@ -7,7 +7,7 @@ Feature: Verify users update
     * def DbUtils = Java.type('uk.gov.service.bluebadge.test.utils.DbUtils')
     * def db = new DbUtils(dbConfig)
     * def setup = callonce db.runScript('acceptance-test-data.sql')
-    * def result = callonce read('./oauth2.feature')
+    * def result = callonce read('./oauth2-user.feature')
     * header Authorization = 'Bearer ' + result.accessToken
 
   Scenario: Update User Missing email and name as only spaces
@@ -77,3 +77,15 @@ Feature: Verify users update
     And request {uuid: "2bcb82f8-3eba-4184-8753-ce011b39b5b7888", name:"Delete Me", emailAddress:"updatemeNewemail@dft.gov.uk", localAuthorityShortCode: "ABERD", roleId: 1 }
     When method PUT
     Then status 400
+
+  Scenario: Update User different valid uuids in param and body
+    Given path 'users/b3f15ef4-3b71-47a8-9a5d-133de079ec4c'
+    And request {uuid: "1dd704ed-4538-45e4-af10-e00fab8e27f1", name:"Delete Me", emailAddress:"updatemeNewemail@dft.gov.uk", localAuthorityShortCode: "ABERD", roleId: 1 }
+    When method PUT
+    Then status 400
+
+  Scenario: Update User from a different LA
+    Given path 'users/e64a4715-6d52-47fa-a563-2ec134478317'
+    And request {uuid: "e64a4715-6d52-47fa-a563-2ec134478317", name:"Delete Me", emailAddress:"updatemeNewemail@dft.gov.uk", localAuthorityShortCode: "ABERD", roleId: 1 }
+    When method PUT
+    Then status 403
