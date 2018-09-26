@@ -129,7 +129,7 @@ public class UserManagementService {
         .fullName(ue.getName())
         .passwordLink(el.getLink())
         .localAuthority(ue.getAuthorityCode() == null
-            ? "DFT" : referenceDataService.getLocalAuthorityName(ue.getAuthorityCode()))
+            ? "DfT" : referenceDataService.getLocalAuthorityName(ue.getAuthorityCode()))
         .build();
   }
 
