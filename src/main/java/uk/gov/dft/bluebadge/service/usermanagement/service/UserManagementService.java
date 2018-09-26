@@ -46,6 +46,7 @@ public class UserManagementService {
   private final SecurityUtils securityUtils;
   private final PasswordEncoder passwordEncoder;
   private final ReferenceDataService referenceDataService;
+  private final CommonPasswordsFilter passwordFilter;
 
   @Autowired
   UserManagementService(
@@ -54,13 +55,15 @@ public class UserManagementService {
       @Value("${blue-badge.la-webapp.email-link-uri}") String laWebappEmailLinkURI,
       SecurityUtils securityUtils,
       PasswordEncoder passwordEncoder,
-      ReferenceDataService referenceDataService) {
+      ReferenceDataService referenceDataService,
+      CommonPasswordsFilter passwordFilter) {
     this.userManagementRepository = repository;
     this.messageApiClient = messageApiClient;
     this.laWebappEmailLinkURI = laWebappEmailLinkURI;
     this.securityUtils = securityUtils;
     this.passwordEncoder = passwordEncoder;
     this.referenceDataService = referenceDataService;
+    this.passwordFilter = passwordFilter;
   }
 
   public UserEntity retrieveUserById(UUID userUuid) {
@@ -143,6 +146,7 @@ public class UserManagementService {
             .uuid(UUID.randomUUID().toString())
             .userUuid(userEntity.getUuid())
             .build();
+
     userManagementRepository.createEmailLink(emailLink);
     return emailLink;
   }
@@ -216,6 +220,9 @@ public class UserManagementService {
   public void updatePassword(String uuid, Password passwords) {
 
     log.debug("Updating password for guid:{}", uuid);
+
+    passwordFilter.validatePasswordBlacklisted(passwords.getPassword());
+
     String password = passwords.getPassword();
     String passwordConfirm = passwords.getPasswordConfirm();
 

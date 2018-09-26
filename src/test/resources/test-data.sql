@@ -91,6 +91,10 @@ ALTER TABLE ONLY usermanagement_unittest.users
 
 SET search_path TO usermanagement_unittest;
 
+CREATE TABLE usermanagement_unittest.passwords_blacklist (id VARCHAR(50) PRIMARY KEY);
+
+CREATE UNIQUE INDEX password_idx ON usermanagement_unittest.passwords_blacklist (id);
+
 -- End of temporary schema
 
 
@@ -115,3 +119,7 @@ VALUES(-5, 'delete test', 'deleteme@dft.gov.uk', 'BIRM', 2, '$2a$11$l8Y6fw6mOmj3
 
 INSERT INTO email_link (user_id, uuid, created_on, is_active)
 VALUES (-1, '7d75652a-4e84-41e2-bd82-e5b5933b81da', '2018-07-10 09:37:07.119029', true);
+
+INSERT INTO passwords_blacklist (id) 
+VALUES (' ***REMOVED***);
+

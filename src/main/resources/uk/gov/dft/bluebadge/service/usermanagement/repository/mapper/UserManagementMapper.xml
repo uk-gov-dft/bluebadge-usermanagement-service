@@ -137,5 +137,13 @@
             AND local_authority_short_code = #{authorityCode}
         </if>
     </delete>
+    
+    <select id=" ***REMOVED***>
+        SELECT EXISTS(
+          SELECT 1 FROM passwords_blacklist
+          WHERE id = #{password}
+        )
+    </select>
+    
 
 </mapper>
