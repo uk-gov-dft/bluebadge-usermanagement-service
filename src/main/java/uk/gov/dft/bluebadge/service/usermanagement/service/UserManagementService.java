@@ -27,7 +27,6 @@ import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetReq
 import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetSuccessRequest;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
-import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.LocalAuthorityEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UuidAuthorityCodeParams;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
@@ -131,8 +130,10 @@ public class UserManagementService {
         .emailAddress(ue.getEmailAddress())
         .fullName(ue.getName())
         .passwordLink(el.getLink())
-        .localAuthority(ue.getAuthorityCode() == null
-            ? "DfT" : referenceDataService.getLocalAuthorityName(ue.getAuthorityCode()))
+        .localAuthority(
+            ue.getAuthorityCode() == null
+                ? "DfT"
+                : referenceDataService.getLocalAuthorityName(ue.getAuthorityCode()))
         .build();
   }
 

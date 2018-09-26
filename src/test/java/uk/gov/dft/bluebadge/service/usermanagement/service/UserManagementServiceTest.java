@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import uk.gov.dft.bluebadge.common.security.Role;
 import uk.gov.dft.bluebadge.common.security.SecurityUtils;
 import uk.gov.dft.bluebadge.common.security.model.BBPrincipal;
 import uk.gov.dft.bluebadge.common.util.TestBBPrincipal;
@@ -142,6 +143,7 @@ public class UserManagementServiceTest {
     user.setName("test");
     user.setUuid(UUID.randomUUID());
     user.setEmailAddress("ggg");
+    user.setRoleId(Role.LA_ADMIN.getRoleId());
 
     when(repository.emailAddressAlreadyUsed(user)).thenReturn(true);
     when(messageApiClient.sendEmailLinkMessage(any(PasswordResetRequest.class)))
@@ -335,6 +337,7 @@ public class UserManagementServiceTest {
   @Test(expected = BadRequestException.class)
   public void updateUser_alreadyExists() {
     UserEntity user = new UserEntity();
+    user.setRoleId(Role.LA_ADMIN.getRoleId());
 
     // Given the user is valid
     when(repository.updateUser(user)).thenReturn(1);
