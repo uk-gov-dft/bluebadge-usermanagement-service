@@ -54,7 +54,7 @@ Feature: Verify users create
 
   Scenario: Create User All valid
     Given path 'users'
-    And request { name:"Delete Me", emailAddress:"createuservalid@dft.gov.uk", localAuthorityShortCode: "ABERD", roleId: 2 }
+    And request { name:"Delete Me", emailAddress:"um_createuservalid@dft.gov.uk", localAuthorityShortCode: "ABERD", roleId: 2 }
     When method POST
     Then status 200
     And match $.data contains {uuid:"#notnull"}

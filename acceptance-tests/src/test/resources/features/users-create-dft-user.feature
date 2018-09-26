@@ -6,7 +6,7 @@ Feature: Verify users create - creating a DfT User
     * def dbConfig = { username: 'developer',  ***REMOVED*** }
     * def DbUtils = Java.type('uk.gov.service.bluebadge.test.utils.DbUtils')
     * def db = new DbUtils(dbConfig)
-    * def setup = callonce db.runScript('acceptance-test-data.sql')
+    * def setup = call db.runScript('acceptance-test-data.sql')
     * def result = callonce read('./oauth2-dft-user.feature')
     * header Authorization = 'Bearer ' + result.accessToken
 
@@ -48,14 +48,14 @@ Feature: Verify users create - creating a DfT User
 
   Scenario: Create User with local authority id different from current users's
     Given path 'users'
-    And request { name:"asdfgh", emailAddress:"differentlocalauthority@dft.gov.uk", localAuthorityShortCode: "MANC", roleId: 2 }
+    And request { name:"asdfgh", emailAddress:"um_createuservalid@dft.gov.uk", localAuthorityShortCode: "MANC", roleId: 2 }
     When method POST
     Then status 200
     And match $.data contains {uuid:"#notnull"}
 
   Scenario: Create User Dft User
     Given path 'users'
-    And request { name:"Delete Me", emailAddress:"createuservalid@dft.gov.uk", roleId: 1 }
+    And request { name:"Delete Me", emailAddress:"um_createuservalid@dft.gov.uk", roleId: 1 }
     When method POST
     Then status 200
     And match $.data contains {uuid:"#notnull"}

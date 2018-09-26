@@ -3,8 +3,8 @@ SET search_path TO usermanagement;
 
 DELETE FROM usermanagement.email_link WHERE user_id BETWEEN -30 and 0;
 DELETE FROM usermanagement.email_link where user_id IN
-  (SELECT user_id FROM users WHERE email_address = 'createuservalid@dft.gov.uk');
-DELETE FROM usermanagement.users WHERE email_address = 'createuservalid@dft.gov.uk';
+  (SELECT user_id FROM users WHERE email_address = 'um_createuservalid@dft.gov.uk');
+DELETE FROM usermanagement.users WHERE email_address = 'um_createuservalid@dft.gov.uk';
 DELETE FROM usermanagement.users WHERE id BETWEEN -30 and 0;
 INSERT INTO usermanagement.users (id, name, email_address, local_authority_short_code, role_id, password, user_uuid)
 VALUES(-1, 'Bruce Wayne', 'um_abc@dft.gov.uk', 'ABERD', 2, '$2a$11$l8Y6fw6mOmj39naJfQtgvu1KITnSBDURsP7kCHWsJXthM.atfzNWC',
