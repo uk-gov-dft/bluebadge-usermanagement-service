@@ -32,4 +32,6 @@ public interface UserManagementMapper {
   int updateEmailLinkToInvalid(String uuid);
 
   int updateUserToInactive(UuidAuthorityCodeParams params);
+
+  public boolean isPasswordBlacklisted(String password);
 }

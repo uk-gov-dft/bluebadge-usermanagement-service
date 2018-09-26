@@ -152,4 +152,8 @@ public class UserManagementRepository implements UserManagementMapper {
   public int updateUserToInactive(UuidAuthorityCodeParams params) {
     return sqlSession.update("updateUserToInactive", params);
   }
+
+  public boolean isPasswordBlacklisted(String password) {
+    return sqlSession.selectOne("passwordBlacklisted", password);
+  }
 }
