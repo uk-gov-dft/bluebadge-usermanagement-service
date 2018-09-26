@@ -27,7 +27,7 @@ Feature: Verify users create - creating a DfT User
 
   Scenario: Create User All valid except email already exists
     Given path 'users'
-    And request { name:"asdfgh", emailAddress:"abcnobody@dft.gov.uk", localAuthorityShortCode: "ABERD", roleId: 2 }
+    And request { name:"asdfgh", emailAddress:"um_abcnobody@dft.gov.uk", localAuthorityShortCode: "ABERD", roleId: 2 }
     When method POST
     Then status 400
     And match $.error.errors contains {field:"emailAddress", reason:"#notnull", message:"AlreadyExists.user.emailAddress", location:"#null", locationType:"#null"}
