@@ -19,7 +19,7 @@
 update usermanagement.roles set description = 'DfT Administrator' where id = 1;
 update usermanagement.roles set description = 'Administrator' where id = 2;
 update usermanagement.roles set description = 'Editor' where id = 3;
-update usermanagement.roles set description = 'View Only' where id = 4;
+update usermanagement.roles set description = 'View only' where id = 4;
 
 
 
