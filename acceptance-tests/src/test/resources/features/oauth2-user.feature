@@ -10,7 +10,7 @@ Feature: Authenticate with the authorisation service using the password grant
     * header Authorization = call read('classpath:basic-auth.js') { username: 'bb_la_web_app_id',  ***REMOVED*** }
     * form field grant_type = 'password'
     * form field clientId = 'bb_la_web_app_id'
-    * form field username = 'abc@dft.gov.uk'
+    * form field username = 'um_abc@dft.gov.uk'
     * form field  ***REMOVED***
     * method post
     * status 200

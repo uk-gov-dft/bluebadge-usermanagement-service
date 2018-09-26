@@ -1,35 +1,35 @@
 SET search_path TO usermanagement;
 
 
-DELETE FROM usermanagement.email_link WHERE user_id < 0;
+DELETE FROM usermanagement.email_link WHERE user_id BETWEEN -30 and 0;
 DELETE FROM usermanagement.email_link where user_id IN
   (SELECT user_id FROM users WHERE email_address = 'createuservalid@dft.gov.uk');
 DELETE FROM usermanagement.users WHERE email_address = 'createuservalid@dft.gov.uk';
 DELETE FROM usermanagement.users WHERE id BETWEEN -30 and 0;
 INSERT INTO usermanagement.users (id, name, email_address, local_authority_short_code, role_id, password, user_uuid)
-VALUES(-1, 'Bruce Wayne', 'abc@dft.gov.uk', 'ABERD', 2, '$2a$11$l8Y6fw6mOmj39naJfQtgvu1KITnSBDURsP7kCHWsJXthM.atfzNWC',
-'cc4fbb98-3963-41ef-9c75-a9651b2fe27c'::UUID);
+VALUES(-1, 'Bruce Wayne', 'um_abc@dft.gov.uk', 'ABERD', 2, '$2a$11$l8Y6fw6mOmj39naJfQtgvu1KITnSBDURsP7kCHWsJXthM.atfzNWC',
+'3bfe600b-4425-40cd-ad81-d75bbe16ee13'::UUID);
 INSERT INTO usermanagement.users (id, name, email_address, local_authority_short_code, role_id, password, user_uuid)
-VALUES(-2, 'Sampath somethingdifferent', 'def@dft.gov.uk', 'ABERD', 2, '$2a$11$YgiL6XFOoFLHjlFRxZNGr.n4bFKZaRNkAIRHaqDxIWRfAagCPJvMK',
-'411cfa59-df4b-440f-92e5-37073de4529f'::UUID);
+VALUES(-2, 'Sampath somethingdifferent', 'um_def@dft.gov.uk', 'ABERD', 2, '$2a$11$YgiL6XFOoFLHjlFRxZNGr.n4bFKZaRNkAIRHaqDxIWRfAagCPJvMK',
+'c1c9ad2b-b7e9-4dcf-af21-95030205bda1'::UUID);
 INSERT INTO usermanagement.users (id, name, email_address, local_authority_short_code, role_id, password, user_uuid)
-VALUES(-3, 'nobody', 'abcnobody@dft.gov.uk', 'ABERD', 2, '$2a$11$l8Y6fw6mOmj39naJfQtgvu1KITnSBDURsP7kCHWsJXthM.atfzNWC',
-'79b3faa0-d3e7-464d-8dd2-684ffb0b6ff8'::UUID);
+VALUES(-3, 'nobody', 'um_abcnobody@dft.gov.uk', 'ABERD', 2, '$2a$11$l8Y6fw6mOmj39naJfQtgvu1KITnSBDURsP7kCHWsJXthM.atfzNWC',
+'5513ffb3-04f2-4fad-a8d2-2f01e46590f8'::UUID);
 INSERT INTO usermanagement.users (id, name, email_address, local_authority_short_code, role_id, password, user_uuid)
-VALUES(-4, 'update test', 'updateme@dft.gov.uk', 'ABERD', 2, '$2a$11$l8Y6fw6mOmj39naJfQtgvu1KITnSBDURsP7kCHWsJXthM.atfzNWC',
-'9cb7a2f9-9e03-4277-9725-67fabb21847f'::UUID);
+VALUES(-4, 'update test', 'um_updateme@dft.gov.uk', 'ABERD', 2, '$2a$11$l8Y6fw6mOmj39naJfQtgvu1KITnSBDURsP7kCHWsJXthM.atfzNWC',
+'9619e6a0-1e9e-4217-92b1-21f33b4b4762'::UUID);
 INSERT INTO usermanagement.users (id, name, email_address, local_authority_short_code, role_id, password, user_uuid)
-VALUES(-5, 'delete test', 'deleteme@dft.gov.uk', 'ABERD', 2, '$2a$11$l8Y6fw6mOmj39naJfQtgvu1KITnSBDURsP7kCHWsJXthM.atfzNWC',
-'e9ec670a-1c2d-449a-be92-4493cbf4838e'::UUID);
+VALUES(-5, 'delete test', 'um_deleteme@dft.gov.uk', 'ABERD', 2, '$2a$11$l8Y6fw6mOmj39naJfQtgvu1KITnSBDURsP7kCHWsJXthM.atfzNWC',
+'34c40459-5b73-402c-96e1-94235b178771'::UUID);
 INSERT INTO usermanagement.users (id, name, email_address, local_authority_short_code, role_id, password, user_uuid)
-VALUES(-6, 'delete test', 'otherlocalauthority@dft.gov.uk', 'BIRM', 2, '$2a$11$l8Y6fw6mOmj39naJfQtgvu1KITnSBDURsP7kCHWsJXthM.atfzNWC',
-'9bdc58aa-7026-4a7c-9d57-805c3d96cecb'::UUID);
+VALUES(-6, 'delete test', 'um_otherlocalauthority@dft.gov.uk', 'BIRM', 2, '$2a$11$l8Y6fw6mOmj39naJfQtgvu1KITnSBDURsP7kCHWsJXthM.atfzNWC',
+'dcf8f6f5-f424-4caf-a415-4476bc264909'::UUID);
 INSERT INTO usermanagement.users (id, name, email_address, local_authority_short_code, role_id, password, user_uuid)
-VALUES(-7, 'get test', 'gettest@dft.gov.uk', 'ABERD', 2, '$2a$11$l8Y6fw6mOmj39naJfQtgvu1KITnSBDURsP7kCHWsJXthM.atfzNWC',
-'c16fd9da-f823-4d37-a289-6b0d411c111c'::UUID);
+VALUES(-7, 'get test', 'um_gettest@dft.gov.uk', 'ABERD', 2, '$2a$11$l8Y6fw6mOmj39naJfQtgvu1KITnSBDURsP7kCHWsJXthM.atfzNWC',
+'cf541b4c-ec03-4820-9bff-f3b0017f06c3'::UUID);
 INSERT INTO usermanagement.users (id, name, email_address, local_authority_short_code, role_id, password, user_uuid)
-VALUES(-8, 'get test', 'brummieuser@dft.gov.uk', 'BIRM', 2, '$2a$11$l8Y6fw6mOmj39naJfQtgvu1KITnSBDURsP7kCHWsJXthM.atfzNWC',
-'c16fd9da-f823-4d37-a289-6b0d411c111d'::UUID);
+VALUES(-8, 'get test', 'um_brummieuser@dft.gov.uk', 'BIRM', 2, '$2a$11$l8Y6fw6mOmj39naJfQtgvu1KITnSBDURsP7kCHWsJXthM.atfzNWC',
+'214ae20f-c402-44c6-8ec2-bab7c498507b'::UUID);
 
 INSERT INTO usermanagement.users (id, name, email_address, local_authority_short_code, role_id, password, user_uuid)
 VALUES(-20, 'Dr. Pamela Lillian Isley', 'um_dft_test_user@dft.gov.uk', null, 1, '$2a$11$l8Y6fw6mOmj39naJfQtgvu1KITnSBDURsP7kCHWsJXthM.atfzNWC',
