@@ -107,6 +107,7 @@
         SET
         password = #{password}
         , is_active = true
+        , login_fail_count = 0
         WHERE user_uuid = #{uuid,javaType=java.util.UUID,jdbcType=OTHER,typeHandler=uk.gov.dft.bluebadge.common.repository.UuidTypeHandler}
     </update>
 
