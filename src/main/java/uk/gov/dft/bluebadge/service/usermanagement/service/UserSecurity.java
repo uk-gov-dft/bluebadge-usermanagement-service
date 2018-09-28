@@ -19,6 +19,6 @@ public class UserSecurity {
 
   public boolean isAuthorised(UUID userUuid) {
     UserEntity userEntity = userManagementService.retrieveUserById(userUuid);
-    return securityUtils.isAuthorisedLA(userEntity.getAuthorityCode());
+    return securityUtils.isAuthorisedLACode(userEntity.getAuthorityCode());
   }
 }

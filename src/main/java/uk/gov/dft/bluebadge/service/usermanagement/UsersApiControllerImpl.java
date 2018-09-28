@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import uk.gov.dft.bluebadge.common.api.model.CommonResponse;
+import uk.gov.dft.bluebadge.common.api.model.ErrorErrors;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.Password;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.User;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.UserResponse;
@@ -27,6 +28,7 @@ import uk.gov.dft.bluebadge.service.usermanagement.converter.UserConverter;
 import uk.gov.dft.bluebadge.service.usermanagement.generated.controller.UsersApi;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.UserManagementService;
+import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.ServiceException;
 
@@ -94,7 +96,8 @@ public class UsersApiControllerImpl implements UsersApi {
    */
   @Override
   @PreAuthorize("hasAuthority('PERM_VIEW_USER_DETAILS')")
-  @PostAuthorize("@securityUtils.isAuthorisedLA(returnObject.body.data.localAuthorityShortCode)")
+  @PostAuthorize(
+      "@securityUtils.isAuthorisedLACode(returnObject.body.data.localAuthorityShortCode)")
   public ResponseEntity<UserResponse> retrieveUser(
       @Pattern(regexp = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
           @ApiParam(value = "UUID of the user.", required = true)
@@ -126,7 +129,7 @@ public class UsersApiControllerImpl implements UsersApi {
    */
   @Override
   @PreAuthorize(
-      "hasAuthority('PERM_CREATE_USER') and @securityUtils.isAuthorisedLA(#user.localAuthorityShortCode)")
+      "hasAuthority('PERM_CREATE_USER') and @securityUtils.isAuthorisedLACode(#user.localAuthorityShortCode)")
   public ResponseEntity<UserResponse> createUser(@ApiParam() @Valid @RequestBody User user) {
     user.setUuid(UUID.randomUUID().toString());
     UserEntity entity = userConverter.convertToEntity(user);
@@ -143,6 +146,7 @@ public class UsersApiControllerImpl implements UsersApi {
    * @return List of Users
    */
   @Override
+  @PreAuthorize("hasAuthority('PERM_FIND_USERS')")
   public ResponseEntity<UsersResponse> findUsers(
       @ApiParam(value = "Name or email address fragment to filter on.")
           @Valid
@@ -157,16 +161,24 @@ public class UsersApiControllerImpl implements UsersApi {
   }
 
   @Override
+  @PreAuthorize("hasAuthority('PERM_UPDATE_USER') and @userSecurity.isAuthorised(#uuid)")
   public ResponseEntity<UserResponse> updateUser(
       @Pattern(regexp = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
           @ApiParam(value = "UUID of the user.", required = true)
           @PathVariable("uuid")
           String uuid,
       @ApiParam() @Valid @RequestBody User user) {
+    if (!uuid.equals(user.getUuid())) {
+      ErrorErrors error = new ErrorErrors();
+      error
+          .field("uuid")
+          .message("Invalid user uuid")
+          .reason("Model uuid and path variable uuid do not match.");
+      throw new BadRequestException(error);
+    }
     UserEntity entity = userConverter.convertToEntity(user);
-    UserResponse userResponse = new UserResponse();
-
     service.updateUser(entity);
+    UserResponse userResponse = new UserResponse();
     userResponse.setData(userConverter.convertToModel(entity));
     return ResponseEntity.ok(userResponse);
   }

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import uk.gov.dft.bluebadge.common.api.model.ErrorErrors;
+import uk.gov.dft.bluebadge.common.security.Role;
 import uk.gov.dft.bluebadge.common.security.SecurityUtils;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.Password;
 import uk.gov.dft.bluebadge.service.client.messageservice.MessageApiClient;
@@ -26,7 +27,6 @@ import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetReq
 import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetSuccessRequest;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
-import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.LocalAuthorityEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UuidAuthorityCodeParams;
 import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
@@ -126,16 +126,14 @@ public class UserManagementService {
   }
 
   private NewUserRequest buildNewUserRequestDetails(UserEntity ue, EmailLink el) {
-    LocalAuthorityEntity localAuthority =
-        LocalAuthorityEntity.builder()
-            .code(ue.getAuthorityCode())
-            .name(referenceDataService.getLocalAuthorityName(ue.getAuthorityCode()))
-            .build();
     return NewUserRequest.builder()
         .emailAddress(ue.getEmailAddress())
         .fullName(ue.getName())
         .passwordLink(el.getLink())
-        .localAuthority(localAuthority.getName())
+        .localAuthority(
+            ue.getAuthorityCode() == null
+                ? "DfT"
+                : referenceDataService.getLocalAuthorityName(ue.getAuthorityCode()))
         .build();
   }
 
@@ -316,7 +314,19 @@ public class UserManagementService {
     List<ErrorErrors> errorsList = new ArrayList<>();
 
     // Validate authority short code valid
-    if (!referenceDataService.isValidLocalAuthorityCode(userEntity.getAuthorityCode())) {
+    if (null == userEntity.getAuthorityCode()) {
+      if (Role.DFT_ADMIN.getRoleId() != userEntity.getRoleId()) {
+        ErrorErrors error = new ErrorErrors();
+        error
+            .field(LOCAL_AUTHORITY_SHORT_CODE)
+            .message("NotNull.user.localAuthorityShortCode")
+            .reason(
+                "Local authority is mandatory for permission: "
+                    + Role.getById(userEntity.getRoleId()));
+
+        errorsList.add(error);
+      }
+    } else if (!referenceDataService.isValidLocalAuthorityCode(userEntity.getAuthorityCode())) {
       ErrorErrors error = new ErrorErrors();
       error
           .field(LOCAL_AUTHORITY_SHORT_CODE)
@@ -349,7 +359,7 @@ public class UserManagementService {
     List<ErrorErrors> errorsList = null;
 
     String localAuthority = securityUtils.getCurrentLocalAuthorityShortCode();
-    if (!localAuthority.equals(userEntity.getAuthorityCode())) {
+    if (localAuthority != null && !localAuthority.equals(userEntity.getAuthorityCode())) {
       ErrorErrors error = new ErrorErrors();
       error
           .field("localAuthority")

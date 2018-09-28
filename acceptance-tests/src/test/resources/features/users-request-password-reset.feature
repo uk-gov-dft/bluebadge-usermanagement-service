@@ -11,7 +11,7 @@ Feature: Verify create password reset
     * header Authorization = 'Bearer ' + result.accessToken
 
   Scenario: Verify ok request password email
-    Given path 'users/cc4fbb98-3963-41ef-9c75-a9651b2fe27c/passwordReset'
+    Given path 'users/3bfe600b-4425-40cd-ad81-d75bbe16ee13/passwordReset'
     When method GET
     Then status 200
 
@@ -21,6 +21,6 @@ Feature: Verify create password reset
     Then status 404
 
   Scenario: Verify user exists but in another local authority different from current user's, password reset
-    Given path 'users/9bdc58aa-7026-4a7c-9d57-805c3d96cecb/passwordReset'
+    Given path 'users/dcf8f6f5-f424-4caf-a415-4476bc264909/passwordReset'
     When method GET
     Then status 403
