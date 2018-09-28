@@ -16,11 +16,11 @@ Feature: Verify users Delete
     Then status 404
 
   Scenario: Verify delete success.
-    Given path 'users/e9ec670a-1c2d-449a-be92-4493cbf4838e'
+    Given path 'users/34c40459-5b73-402c-96e1-94235b178771'
     When method DELETE
     Then status 200
 
   Scenario: Verify delete user in different local authority than current user's
-    Given path 'users/9bdc58aa-7026-4a7c-9d57-805c3d96cecb'
+    Given path 'users/dcf8f6f5-f424-4caf-a415-4476bc264909'
     When method DELETE
     Then status 403

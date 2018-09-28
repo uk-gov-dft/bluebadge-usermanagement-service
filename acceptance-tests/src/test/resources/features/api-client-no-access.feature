@@ -30,7 +30,7 @@ Feature: Verify API users do not have access to any user management services
     When method GET
     Then status 403
   Scenario: Retrieve user denied
-    Given path 'users/e9ec670a-1c2d-449a-be92-4493cbf4838e'
+    Given path 'users/34c40459-5b73-402c-96e1-94235b178771'
     When method GET
     Then status 403
 
@@ -43,6 +43,22 @@ Feature: Verify API users do not have access to any user management services
     When method DELETE
     Then status 403
   Scenario: Delete user denied
-    Given path 'users/e9ec670a-1c2d-449a-be92-4493cbf4838e'
+    Given path 'users/34c40459-5b73-402c-96e1-94235b178771'
     When method DELETE
+    Then status 403
+
+  Scenario: Update invalid user denied
+    Given path 'users/blah'
+    And request {uuid: "608ad765-9404-42c2-b56b-7bf1544220d1", name:"blah", emailAddress:"um_blah@blah.com", localAuthorityShortCode: "ABERD", roleId: 1 }
+    When method PUT
+    Then status 403
+  Scenario: Update unknown user denied
+    Given path 'users/bc6b7d6b-6cf2-454c-832c-763a93bf46ad'
+    And request {uuid: "608ad765-9404-42c2-b56b-7bf1544220d1", name:"blah", emailAddress:"um_blah@blah.com", localAuthorityShortCode: "ABERD", roleId: 1 }
+    When method PUT
+    Then status 403
+  Scenario: Update user denied
+    Given path 'users/e64a4715-6d52-47fa-a563-2ec134478317'
+    And request {uuid: "e64a4715-6d52-47fa-a563-2ec134478317", name:"blah", emailAddress:"um_blah@blah.com", localAuthorityShortCode: "ABERD", roleId: 1 }
+    When method PUT
     Then status 403

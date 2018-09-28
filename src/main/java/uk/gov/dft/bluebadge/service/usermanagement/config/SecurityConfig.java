@@ -58,8 +58,7 @@ public class SecurityConfig extends ResourceServerConfigurerAdapter {
 
   @Bean
   public BBAccessTokenConverter accessTokenConverter() {
-    BBAccessTokenConverter converter = new BBAccessTokenConverter();
-    return converter;
+    return new BBAccessTokenConverter();
   }
 
   @Bean
