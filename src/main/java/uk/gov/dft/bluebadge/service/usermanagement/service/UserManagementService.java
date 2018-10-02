@@ -112,9 +112,7 @@ public class UserManagementService {
     EmailLink emailLink = createEmailLink(userEntity);
     GenericMessageRequest messageDetails = messageDetailsFunc.apply(userEntity, emailLink);
     messageApiClient.sendEmailLinkMessage(messageDetails);
-    userManagementRepository.updateUserToInactive(
-        UuidAuthorityCodeParams.builder().uuid(userEntity.getUuid()).build());
-    log.debug("Successfully changed password for user:{}", userEntity.getUuid());
+    log.debug("Successfully sent  ***REMOVED***, userEntity.getUuid());
   }
 
   private PasswordResetRequest buildPasswordRequestDetails(UserEntity ue, EmailLink el) {

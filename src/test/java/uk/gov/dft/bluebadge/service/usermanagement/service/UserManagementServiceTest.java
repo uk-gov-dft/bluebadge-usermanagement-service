@@ -113,7 +113,7 @@ public class UserManagementServiceTest {
     // And password reset email is created
     verify(messageApiClient, times(1)).sendEmailLinkMessage(any(NewUserRequest.class));
     // And user is set inactive
-    verify(repository, times(1)).updateUserToInactive(any());
+    verify(repository, never()).updateUserToInactive(any());
     // And email_link is created
     verify(repository, times(1)).createEmailLink(any(EmailLink.class));
 
@@ -189,7 +189,7 @@ public class UserManagementServiceTest {
     assertThat( ***REMOVED***);
 
     // And user is set inactive
-    verify(repository).updateUserToInactive(any());
+    verify(repository, never()).updateUserToInactive(any());
     // And email_link is created
     verify(repository).createEmailLink(any(EmailLink.class));
   }
