@@ -89,7 +89,7 @@ public class User {
   )
   @NotNull
   @Pattern(regexp = "^\\S+\\@\\S+")
-  @Size(max = 200)
+  @Size(max = 100)
   public String getEmailAddress() {
     return emailAddress;
   }
