@@ -1,9 +1,11 @@
 package uk.gov.dft.bluebadge.service.usermanagement.service;
 
+import static java.time.temporal.ChronoUnit.HOURS;
 import static uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException.Operation.DELETE;
 import static uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException.Operation.RETRIEVE;
 import static uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException.Operation.UPDATE;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -40,6 +42,7 @@ public class UserManagementService {
 
   public static final String LOCAL_AUTHORITY_SHORT_CODE = "localAuthorityShortCode";
   public static final String EMAIL_ADDRESS = "emailAddress";
+  public static final Long LINK_TIMEOUT_HOURS = 24L;
   private final UserManagementRepository userManagementRepository;
   private final MessageApiClient messageApiClient;
   private final String laWebappEmailLinkURI;
@@ -233,15 +236,19 @@ public class UserManagementService {
 
     EmailLink link = this.userManagementRepository.retrieveEmailLinkWithUuid(uuid);
 
-    if (link == null || !link.getIsActive()) {
+    if (link == null
+        || !link.getIsActive()
+        || link.getCreatedOn().isBefore(Instant.now().minus(LINK_TIMEOUT_HOURS, HOURS))) {
       ErrorErrors error = new ErrorErrors();
       error.setField("password");
-      if (link == null) {
-        error.setMessage("Invalid.uuid");
-      } else {
-        error.setMessage("Inactive.uuid");
-      }
       error.setReason("uuid is not valid");
+      if (link == null) {
+        error.setMessage("email.link.invalid.uuid");
+      } else if (!link.getIsActive()) {
+        error.setMessage("email.link.inactive.uuid");
+      } else {
+        error.setMessage("email.link.expired.uuid");
+      }
       throw new BadRequestException(error);
     }
 
