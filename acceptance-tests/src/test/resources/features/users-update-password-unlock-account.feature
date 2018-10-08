@@ -6,7 +6,6 @@ Feature: Verify users update password unlocks a locked account
     * def DbUtils = Java.type('uk.gov.service.bluebadge.test.utils.DbUtils')
     * def db = new DbUtils(dbConfig)
     * def setup = callonce db.runScript('acceptance-test-data.sql')
-    * def result = callonce read('./oauth2.feature')
     * def lawebapp_auth = callonce read('./oauth2-lawebapp.feature')
 
   Scenario: locked user account is unlocked after password reset
