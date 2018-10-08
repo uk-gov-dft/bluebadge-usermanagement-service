@@ -1,5 +1,6 @@
 package uk.gov.dft.bluebadge.service.usermanagement.service;
 
+import static java.time.temporal.ChronoUnit.HOURS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Java6Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -366,6 +368,7 @@ public class UserManagementServiceTest {
             .userUuid(DEFAULT_USER_UUID)
             .uuid(uuid.toString())
             .isActive(true)
+            .createdOn(Instant.now())
             .build();
     UserEntity userEntity = new UserEntity();
     userEntity.setName("Jane Test");
@@ -406,7 +409,7 @@ public class UserManagementServiceTest {
     assertThat( ***REMOVED***);
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void updatePassword_linkInactive() {
     // Given the new password is valid
     Password password = new Password();
@@ -424,8 +427,18 @@ public class UserManagementServiceTest {
     doNothing().when(filter).validatePasswordBlacklisted(any(String.class));
     when(repository.retrieveEmailLinkWithUuid(uuid.toString())).thenReturn(link);
 
-    // When update password requested
-    service.updatePassword(uuid.toString(), password);
+    try {
+      // When update password requested
+      service.updatePassword(uuid.toString(), password);
+      fail("No exception thrown");
+    } catch (BadRequestException e) {
+      assertThat(e.getResponse()).isNotNull();
+      assertThat(e.getResponse().getBody()).isNotNull();
+      assertThat(e.getResponse().getBody().getError()).isNotNull();
+      assertThat(e.getResponse().getBody().getError().getErrors())
+          .extracting("message")
+          .containsOnly("email.link.inactive.uuid");
+    }
 
     // Then the email link is set inactive
     verify(repository, never()).updateEmailLinkToInvalid(uuid.toString());
@@ -433,7 +446,45 @@ public class UserManagementServiceTest {
     verify(repository, never()).updatePassword(any());
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
+  public void updatePassword_linkExpired() {
+    // Given the new password is valid
+    Password password = new Password();
+     ***REMOVED***);
+     ***REMOVED***);
+    UUID uuid = UUID.randomUUID();
+    EmailLink link =
+        EmailLink.builder()
+            .webappUri(WEBAPP_URI)
+            .userUuid(DEFAULT_USER_UUID)
+            .uuid(uuid.toString())
+            .isActive(true)
+            .createdOn(Instant.now().minus(25L, HOURS))
+            .build();
+
+    doNothing().when(filter).validatePasswordBlacklisted(any(String.class));
+    when(repository.retrieveEmailLinkWithUuid(uuid.toString())).thenReturn(link);
+
+    try {
+      // When update password requested
+      service.updatePassword(uuid.toString(), password);
+      fail("No exception thrown");
+    } catch (BadRequestException e) {
+      assertThat(e.getResponse()).isNotNull();
+      assertThat(e.getResponse().getBody()).isNotNull();
+      assertThat(e.getResponse().getBody().getError()).isNotNull();
+      assertThat(e.getResponse().getBody().getError().getErrors())
+          .extracting("message")
+          .containsOnly("email.link.expired.uuid");
+    }
+
+    // Then the email link is set inactive
+    verify(repository, never()).updateEmailLinkToInvalid(uuid.toString());
+    // And the password is stored
+    verify(repository, never()).updatePassword(any());
+  }
+
+  @Test
   public void updatePassword_linkDoesNotExist() {
     // Given the new password is valid
     Password password = new Password();
@@ -444,8 +495,18 @@ public class UserManagementServiceTest {
     doNothing().when(filter).validatePasswordBlacklisted(any(String.class));
     when(repository.retrieveEmailLinkWithUuid(uuid)).thenReturn(null);
 
-    // When update password requested
-    service.updatePassword(uuid, password);
+    try {
+      // When update password requested
+      service.updatePassword(uuid.toString(), password);
+      fail("No exception thrown");
+    } catch (BadRequestException e) {
+      assertThat(e.getResponse()).isNotNull();
+      assertThat(e.getResponse().getBody()).isNotNull();
+      assertThat(e.getResponse().getBody().getError()).isNotNull();
+      assertThat(e.getResponse().getBody().getError().getErrors())
+          .extracting("message")
+          .containsOnly("email.link.invalid.uuid");
+    }
 
     // Then the email link is not set inactive
     verify(repository, never()).updateEmailLinkToInvalid(uuid);

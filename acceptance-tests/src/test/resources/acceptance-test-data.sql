@@ -32,7 +32,9 @@ INSERT INTO usermanagement.email_link(user_id, uuid) VALUES
   ,(-9, '65c5ba53-876d-4b28-831d-70d8dec875fa')
   ,(-10, '3c4f4b6c-d3c8-4627-817f-90df4fd31ff7')
 ;
-INSERT INTO usermanagement.email_link(user_id, uuid, is_active) VALUES (-1, '4175e31c-0000-41c0-9afb-40dc0a89b9c5', false);
+INSERT INTO usermanagement.email_link(user_id, uuid, is_active, created_on) VALUES
+  (-1, '4175e31c-0000-41c0-9afb-40dc0a89b9c5', false, now())
+  ,(-1, 'b81aa7df-5d2e-48d9-9740-08b661884c2f', true, now() - INTERVAL '25 HOUR');
 
 delete from usermanagement.client_credentials where client_id = '***REMOVED***';
 insert into usermanagement.client_credentials (client_id, client_secret, local_authority_short_code, active, creation_timestamp, expiry_timestamp) VALUES

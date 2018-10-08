@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
 import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
