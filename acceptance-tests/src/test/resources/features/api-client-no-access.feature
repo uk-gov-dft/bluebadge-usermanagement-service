@@ -62,3 +62,8 @@ Feature: Verify API users do not have access to any user management services
     And request {uuid: "e64a4715-6d52-47fa-a563-2ec134478317", name:"blah", emailAddress:"um_blah@blah.com", localAuthorityShortCode: "ABERD", roleId: 1 }
     When method PUT
     Then status 403
+
+  Scenario: Verify all other end points are blocked
+    Given path 'something'
+    When method GET
+    Then status 403

@@ -7,6 +7,7 @@ Feature: Verify users update password unlocks a locked account
     * def db = new DbUtils(dbConfig)
     * def setup = callonce db.runScript('acceptance-test-data.sql')
     * def result = callonce read('./oauth2.feature')
+    * def lawebapp_auth = callonce read('./oauth2-lawebapp.feature')
 
   Scenario: locked user account is unlocked after password reset
     * url authServerUrl
@@ -20,7 +21,7 @@ Feature: Verify users update password unlocks a locked account
     * status 400
     And match $.error_description == 'User account is locked'
     * url baseUrl
-    * header Authorization = 'Bearer ' + result.accessToken
+    * header Authorization = 'Bearer ' + lawebapp_auth.accessToken
     Given path 'user/password/65c5ba53-876d-4b28-831d-70d8dec875fa'
     And request { ***REMOVED***}
     When method PATCH
@@ -47,7 +48,7 @@ Feature: Verify users update password unlocks a locked account
     * status 400
     And match $.error_description == 'User account is locked'
     * url baseUrl
-    * header Authorization = 'Bearer ' + result.accessToken
+    * header Authorization = 'Bearer ' + lawebapp_auth.accessToken
     Given path 'user/password/3c4f4b6c-d3c8-4627-817f-90df4fd31ff7'
     And request { ***REMOVED***}
     When method PATCH

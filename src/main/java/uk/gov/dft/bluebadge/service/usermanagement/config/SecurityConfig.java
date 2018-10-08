@@ -20,6 +20,7 @@ import uk.gov.dft.bluebadge.common.security.SecurityUtils;
 @EnableResourceServer
 public class SecurityConfig extends ResourceServerConfigurerAdapter {
   public static final int BCRYPT_WORK_FACTOR = 11;
+  public static final String OAUTH_2_HAS_SCOPE_LA_WEB_APP = "#oauth2.hasScope('la-webapp')";
 
   @Value("${blue-badge.auth-server.url}")
   private String authServerUrl;
@@ -33,10 +34,14 @@ public class SecurityConfig extends ResourceServerConfigurerAdapter {
   @Override
   public void configure(HttpSecurity http) throws Exception {
     http.authorizeRequests()
-        .antMatchers("/users")
+        .antMatchers("/users/me")
+        .fullyAuthenticated()
+        .antMatchers("/users", "/users/**")
         .hasAuthority(Permissions.VIEW_USER_DETAILS.getPermissionName())
+        .antMatchers("/user", "/user/**")
+        .access(OAUTH_2_HAS_SCOPE_LA_WEB_APP)
         .anyRequest()
-        .fullyAuthenticated();
+        .denyAll();
   }
 
   @Bean
