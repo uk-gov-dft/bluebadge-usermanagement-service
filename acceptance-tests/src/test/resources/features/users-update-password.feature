@@ -7,7 +7,7 @@ Feature: Verify users update password
     * def DbUtils = Java.type('uk.gov.service.bluebadge.test.utils.DbUtils')
     * def db = new DbUtils(dbConfig)
     * def setup = callonce db.runScript('acceptance-test-data.sql')
-    * def result = callonce read('./oauth2.feature')
+    * def result = callonce read('./oauth2-lawebapp.feature')
     * header Authorization = 'Bearer ' + result.accessToken
 
   Scenario: Update password
