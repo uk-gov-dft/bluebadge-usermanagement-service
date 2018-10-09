@@ -12,7 +12,7 @@ blue-badge:
       requesttimeout: 6000
       contextpath: /uk-gov-dft/message-service/1.0.0
   la-webapp:
-    email-link-uri: https://la-webapp.${bb_env}.${url}/set***REMOVED***/
+    email-link-uri: https://${email_link_uri}.${url}/set***REMOVED***/
     
   referencedataservice:
     servicehost:
