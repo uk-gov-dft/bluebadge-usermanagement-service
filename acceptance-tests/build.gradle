@@ -1,17 +1,21 @@
 buildscript {
     repositories {
         mavenCentral()
-        jcenter()
+        maven {
+            url 'https://artifactory.does.not.exist/artifactory/gradle-release'
+        }
     }
 
     dependencies {
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4+"
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.7.3"
     }
 }
 
 repositories {
     mavenCentral()
-    jcenter()
+    maven {
+        url 'https://artifactory.does.not.exist/artifactory/gradle-release'
+    }
 }
 
 apply plugin: 'java'
