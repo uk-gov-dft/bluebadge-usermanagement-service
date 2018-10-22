@@ -21,3 +21,4 @@ target
 # We do not want to accidentally commit and push it.
 src/main/resources/application.properties
 **/dev-env*
+tmp/
