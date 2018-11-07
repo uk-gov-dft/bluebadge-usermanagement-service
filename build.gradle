@@ -82,6 +82,7 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-security')
     compile('org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.0.1.RELEASE')
     compile('org.springframework.boot:spring-boot-starter-actuator')
+    compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-sleuth', version: '2.0.1.RELEASE'
     compile('org.postgresql:postgresql:42.2.2')
     compile('org.apache.commons:commons-lang3:3.7')
     compileOnly ('org.projectlombok:lombok:1.16.22')
