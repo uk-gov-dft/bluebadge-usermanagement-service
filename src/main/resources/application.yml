@@ -24,9 +24,8 @@ blue-badge:
 
 logging:
   level:
-    root: ${APP_LOGGING_LEVEL:-INFO}
-    uk.gov.dft.bluebadge.service: ${APP_LOGGING_LEVEL:-INFO}
-    org.springframework.security: INFO
+    root: ${APP_LOGGING_LEVEL:INFO}
+    uk.gov.dft.bluebadge.service: ${APP_LOGGING_LEVEL:DEBUG}
 
 management:
   server:
