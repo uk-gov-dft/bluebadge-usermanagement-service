@@ -12,6 +12,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.provider.token.RemoteTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.web.client.RestTemplate;
 import uk.gov.dft.bluebadge.common.security.BBAccessTokenConverter;
 import uk.gov.dft.bluebadge.common.security.Permissions;
 import uk.gov.dft.bluebadge.common.security.SecurityUtils;
@@ -51,7 +52,13 @@ public class SecurityConfig extends ResourceServerConfigurerAdapter {
     tokenService.setClientId(clientId);
     tokenService.setClientSecret(clientSecret);
     tokenService.setAccessTokenConverter(jwtAccessTokenConverter());
+    tokenService.setRestTemplate(authRestTemplate());
     return tokenService;
+  }
+
+  @Bean
+  public RestTemplate authRestTemplate() {
+    return new RestTemplate();
   }
 
   @Bean
