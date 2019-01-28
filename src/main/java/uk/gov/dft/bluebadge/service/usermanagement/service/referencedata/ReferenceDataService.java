@@ -45,7 +45,7 @@ public class ReferenceDataService {
         }
       }
       if (authorities.isEmpty()) {
-        log.error("No LA reference data found.");
+        log.warn("No LA reference data found.");
         isLoaded.set(false);
       }
     }
