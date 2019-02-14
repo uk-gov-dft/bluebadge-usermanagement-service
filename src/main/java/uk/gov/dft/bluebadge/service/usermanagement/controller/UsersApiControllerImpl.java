@@ -1,4 +1,4 @@
-package uk.gov.dft.bluebadge.service.usermanagement;
+package uk.gov.dft.bluebadge.service.usermanagement.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiParam;
