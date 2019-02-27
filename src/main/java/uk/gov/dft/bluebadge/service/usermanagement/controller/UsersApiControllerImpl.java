@@ -14,12 +14,11 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import uk.gov.dft.bluebadge.common.api.model.CommonResponse;
 import uk.gov.dft.bluebadge.common.api.model.ErrorErrors;
+import uk.gov.dft.bluebadge.common.service.exception.BadRequestException;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.Password;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.User;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.UserResponse;
@@ -28,9 +27,6 @@ import uk.gov.dft.bluebadge.service.usermanagement.converter.UserConverter;
 import uk.gov.dft.bluebadge.service.usermanagement.generated.controller.UsersApi;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.service.UserManagementService;
-import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
-import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException;
-import uk.gov.dft.bluebadge.service.usermanagement.service.exception.ServiceException;
 
 @Controller
 public class UsersApiControllerImpl implements UsersApi {
@@ -47,18 +43,6 @@ public class UsersApiControllerImpl implements UsersApi {
     this.objectMapper = objectMapper;
     this.request = request;
     this.service = service;
-  }
-
-  @SuppressWarnings("unused")
-  @ExceptionHandler({ServiceException.class})
-  public ResponseEntity<CommonResponse> handleServiceException(ServiceException e) {
-    return e.getResponse();
-  }
-
-  @SuppressWarnings("unused")
-  @ExceptionHandler
-  public ResponseEntity handleNotFoundException(NotFoundException e) {
-    return ResponseEntity.notFound().build();
   }
 
   @Override

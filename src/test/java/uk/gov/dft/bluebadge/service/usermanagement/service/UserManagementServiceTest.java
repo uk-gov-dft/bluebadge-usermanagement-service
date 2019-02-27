@@ -27,6 +27,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import uk.gov.dft.bluebadge.common.security.Role;
 import uk.gov.dft.bluebadge.common.security.SecurityUtils;
 import uk.gov.dft.bluebadge.common.security.model.BBPrincipal;
+import uk.gov.dft.bluebadge.common.service.exception.BadRequestException;
+import uk.gov.dft.bluebadge.common.service.exception.NotFoundException;
 import uk.gov.dft.bluebadge.common.util.TestBBPrincipal;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.Password;
 import uk.gov.dft.bluebadge.service.client.messageservice.MessageApiClient;
@@ -37,8 +39,6 @@ import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepo
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UuidAuthorityCodeParams;
-import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
-import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.referencedata.ReferenceDataService;
 
 public class UserManagementServiceTest {
