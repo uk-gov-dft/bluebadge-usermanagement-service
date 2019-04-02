@@ -19,3 +19,4 @@ VERSION-computed
 target
 **/dev-env*
 tmp/
+run-regression-script.sh

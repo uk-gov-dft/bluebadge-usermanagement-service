@@ -1,9 +1,9 @@
 package uk.gov.dft.bluebadge.service.usermanagement.service;
 
 import static java.time.temporal.ChronoUnit.HOURS;
-import static uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException.Operation.DELETE;
-import static uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException.Operation.RETRIEVE;
-import static uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException.Operation.UPDATE;
+import static uk.gov.dft.bluebadge.common.service.exception.NotFoundException.Operation.DELETE;
+import static uk.gov.dft.bluebadge.common.service.exception.NotFoundException.Operation.RETRIEVE;
+import static uk.gov.dft.bluebadge.common.service.exception.NotFoundException.Operation.UPDATE;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -21,6 +21,8 @@ import org.springframework.util.StringUtils;
 import uk.gov.dft.bluebadge.common.api.model.ErrorErrors;
 import uk.gov.dft.bluebadge.common.security.Role;
 import uk.gov.dft.bluebadge.common.security.SecurityUtils;
+import uk.gov.dft.bluebadge.common.service.exception.BadRequestException;
+import uk.gov.dft.bluebadge.common.service.exception.NotFoundException;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.Password;
 import uk.gov.dft.bluebadge.service.client.messageservice.MessageApiClient;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.GenericMessageRequest;
@@ -31,8 +33,6 @@ import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepo
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UuidAuthorityCodeParams;
-import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
-import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.referencedata.ReferenceDataService;
 
 @Service
