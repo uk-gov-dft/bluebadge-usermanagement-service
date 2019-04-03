@@ -1,9 +1,11 @@
 package uk.gov.dft.bluebadge.service.usermanagement.service;
 
-import static uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException.Operation.DELETE;
-import static uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException.Operation.RETRIEVE;
-import static uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException.Operation.UPDATE;
+import static java.time.temporal.ChronoUnit.HOURS;
+import static uk.gov.dft.bluebadge.common.service.exception.NotFoundException.Operation.DELETE;
+import static uk.gov.dft.bluebadge.common.service.exception.NotFoundException.Operation.RETRIEVE;
+import static uk.gov.dft.bluebadge.common.service.exception.NotFoundException.Operation.UPDATE;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +19,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import uk.gov.dft.bluebadge.common.api.model.ErrorErrors;
+import uk.gov.dft.bluebadge.common.security.Role;
 import uk.gov.dft.bluebadge.common.security.SecurityUtils;
+import uk.gov.dft.bluebadge.common.service.exception.BadRequestException;
+import uk.gov.dft.bluebadge.common.service.exception.NotFoundException;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.Password;
 import uk.gov.dft.bluebadge.service.client.messageservice.MessageApiClient;
 import uk.gov.dft.bluebadge.service.client.messageservice.model.GenericMessageRequest;
@@ -26,11 +31,8 @@ import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetReq
 import uk.gov.dft.bluebadge.service.client.messageservice.model.PasswordResetSuccessRequest;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepository;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
-import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.LocalAuthorityEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UuidAuthorityCodeParams;
-import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
-import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.referencedata.ReferenceDataService;
 
 @Service
@@ -40,12 +42,14 @@ public class UserManagementService {
 
   public static final String LOCAL_AUTHORITY_SHORT_CODE = "localAuthorityShortCode";
   public static final String EMAIL_ADDRESS = "emailAddress";
+  public static final Long LINK_TIMEOUT_HOURS = 24L;
   private final UserManagementRepository userManagementRepository;
   private final MessageApiClient messageApiClient;
   private final String laWebappEmailLinkURI;
   private final SecurityUtils securityUtils;
   private final PasswordEncoder passwordEncoder;
   private final ReferenceDataService referenceDataService;
+  private final CommonPasswordsFilter passwordFilter;
 
   @Autowired
   UserManagementService(
@@ -54,13 +58,15 @@ public class UserManagementService {
       @Value("${blue-badge.la-webapp.email-link-uri}") String laWebappEmailLinkURI,
       SecurityUtils securityUtils,
       PasswordEncoder passwordEncoder,
-      ReferenceDataService referenceDataService) {
+      ReferenceDataService referenceDataService,
+      CommonPasswordsFilter passwordFilter) {
     this.userManagementRepository = repository;
     this.messageApiClient = messageApiClient;
     this.laWebappEmailLinkURI = laWebappEmailLinkURI;
     this.securityUtils = securityUtils;
     this.passwordEncoder = passwordEncoder;
     this.referenceDataService = referenceDataService;
+    this.passwordFilter = passwordFilter;
   }
 
   public UserEntity retrieveUserById(UUID userUuid) {
@@ -109,9 +115,7 @@ public class UserManagementService {
     EmailLink emailLink = createEmailLink(userEntity);
     GenericMessageRequest messageDetails = messageDetailsFunc.apply(userEntity, emailLink);
     messageApiClient.sendEmailLinkMessage(messageDetails);
-    userManagementRepository.updateUserToInactive(
-        UuidAuthorityCodeParams.builder().uuid(userEntity.getUuid()).build());
-    log.debug("Successfully changed password for user:{}", userEntity.getUuid());
+    log.debug("Successfully sent  ***REMOVED***, userEntity.getUuid());
   }
 
   private PasswordResetRequest buildPasswordRequestDetails(UserEntity ue, EmailLink el) {
@@ -123,16 +127,14 @@ public class UserManagementService {
   }
 
   private NewUserRequest buildNewUserRequestDetails(UserEntity ue, EmailLink el) {
-    LocalAuthorityEntity localAuthority =
-        LocalAuthorityEntity.builder()
-            .code(ue.getAuthorityCode())
-            .name(referenceDataService.getLocalAuthorityName(ue.getAuthorityCode()))
-            .build();
     return NewUserRequest.builder()
         .emailAddress(ue.getEmailAddress())
         .fullName(ue.getName())
         .passwordLink(el.getLink())
-        .localAuthority(localAuthority.getName())
+        .localAuthority(
+            ue.getAuthorityCode() == null
+                ? "DfT"
+                : referenceDataService.getLocalAuthorityName(ue.getAuthorityCode()))
         .build();
   }
 
@@ -143,6 +145,7 @@ public class UserManagementService {
             .uuid(UUID.randomUUID().toString())
             .userUuid(userEntity.getUuid())
             .build();
+
     userManagementRepository.createEmailLink(emailLink);
     return emailLink;
   }
@@ -216,6 +219,9 @@ public class UserManagementService {
   public void updatePassword(String uuid, Password passwords) {
 
     log.debug("Updating password for guid:{}", uuid);
+
+    passwordFilter.validatePasswordBlacklisted(passwords.getPassword());
+
     String password = passwords.getPassword();
     String passwordConfirm = passwords.getPasswordConfirm();
 
@@ -230,15 +236,19 @@ public class UserManagementService {
 
     EmailLink link = this.userManagementRepository.retrieveEmailLinkWithUuid(uuid);
 
-    if (link == null || !link.getIsActive()) {
+    if (link == null
+        || !link.getIsActive()
+        || link.getCreatedOn().isBefore(Instant.now().minus(LINK_TIMEOUT_HOURS, HOURS))) {
       ErrorErrors error = new ErrorErrors();
       error.setField("password");
-      if (link == null) {
-        error.setMessage("Invalid.uuid");
-      } else {
-        error.setMessage("Inactive.uuid");
-      }
       error.setReason("uuid is not valid");
+      if (link == null) {
+        error.setMessage("email.link.invalid.uuid");
+      } else if (!link.getIsActive()) {
+        error.setMessage("email.link.inactive.uuid");
+      } else {
+        error.setMessage("email.link.expired.uuid");
+      }
       throw new BadRequestException(error);
     }
 
@@ -296,8 +306,7 @@ public class UserManagementService {
   }
 
   private UuidAuthorityCodeParams getUuidAuthorityCodeParams(UUID userUuid) {
-    String localAuthority = securityUtils.getCurrentLocalAuthorityShortCode();
-    return UuidAuthorityCodeParams.builder().uuid(userUuid).authorityCode(localAuthority).build();
+    return UuidAuthorityCodeParams.builder().uuid(userUuid).build();
   }
 
   /**
@@ -310,7 +319,19 @@ public class UserManagementService {
     List<ErrorErrors> errorsList = new ArrayList<>();
 
     // Validate authority short code valid
-    if (!referenceDataService.isValidLocalAuthorityCode(userEntity.getAuthorityCode())) {
+    if (null == userEntity.getAuthorityCode()) {
+      if (Role.DFT_ADMIN.getRoleId() != userEntity.getRoleId()) {
+        ErrorErrors error = new ErrorErrors();
+        error
+            .field(LOCAL_AUTHORITY_SHORT_CODE)
+            .message("NotNull.user.localAuthorityShortCode")
+            .reason(
+                "Local authority is mandatory for permission: "
+                    + Role.getById(userEntity.getRoleId()));
+
+        errorsList.add(error);
+      }
+    } else if (!referenceDataService.isValidLocalAuthorityCode(userEntity.getAuthorityCode())) {
       ErrorErrors error = new ErrorErrors();
       error
           .field(LOCAL_AUTHORITY_SHORT_CODE)
@@ -343,7 +364,7 @@ public class UserManagementService {
     List<ErrorErrors> errorsList = null;
 
     String localAuthority = securityUtils.getCurrentLocalAuthorityShortCode();
-    if (!localAuthority.equals(userEntity.getAuthorityCode())) {
+    if (localAuthority != null && !localAuthority.equals(userEntity.getAuthorityCode())) {
       ErrorErrors error = new ErrorErrors();
       error
           .field("localAuthority")

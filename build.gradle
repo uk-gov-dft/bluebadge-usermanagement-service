@@ -2,12 +2,11 @@ import groovy.json.JsonSlurper
 
 buildscript {
     ext {
-        springBootVersion = '2.0.2.RELEASE'
+        springBootVersion = '2.1.0.RELEASE'
     }
 
     repositories {
         mavenCentral()
-        jcenter()
         maven {
             url 'https://artifactory.does.not.exist/artifactory/gradle-release'
         }
@@ -15,7 +14,8 @@ buildscript {
 
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4+"
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.7.3"
+        classpath 'org.owasp:dependency-check-gradle:3.3.1'
     }
 }
 
@@ -32,9 +32,8 @@ apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
-apply plugin: 'checkstyle'
 apply plugin: 'jacoco'
-apply plugin: 'pmd'
+apply plugin: 'org.owasp.dependencycheck'
 
 group = 'uk.gov.dft.bluebadge'
 version = getTheVersion()
@@ -42,9 +41,11 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
-    jcenter()
     maven {
         url 'https://artifactory.does.not.exist/artifactory/gradle-dev-local'
+    }
+    maven {
+        url 'https://artifactory.does.not.exist/artifactory/gradle-release'
     }
 }
 
@@ -62,28 +63,16 @@ sourceSets {
     }
 }
 
-tasks.withType(FindBugs) {
-    reports {
-        xml.enabled = false
-        html.enabled = true
-    }
-}
-tasks.withType(Pmd) {
-    reports {
-        xml.enabled = false
-        html.enabled = true
-    }
-}
-
 configurations.all {
     resolutionStrategy {
         // don't cache changing modules at all
         cacheChangingModulesFor 0, 'seconds'
     }
+    exclude group: 'commons-logging', module: 'commons-logging'
 }
 
 dependencies {
-    ext.commonVersion = '0.4.2-SNAPSHOT'
+    ext.commonVersion = '0.7.3-SNAPSHOT'
     compile group: 'uk.gov.dft.bluebadge', name: 'bluebadge-common', version: "${commonVersion}", changing: true
 
     compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.9.5'
@@ -91,8 +80,9 @@ dependencies {
     compile("org.mybatis.spring.boot:mybatis-spring-boot-starter:1.3.2")
     compile('org.springframework.boot:spring-boot-starter-aop')
     compile('org.springframework.boot:spring-boot-starter-security')
-    compile('org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.0.1.RELEASE')
+    compile('org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.1.2.RELEASE')
     compile('org.springframework.boot:spring-boot-starter-actuator')
+    compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-sleuth', version: '2.0.1.RELEASE'
     compile('org.postgresql:postgresql:42.2.2')
     compile('org.apache.commons:commons-lang3:3.7')
     compileOnly ('org.projectlombok:lombok:1.16.22')
@@ -102,6 +92,7 @@ dependencies {
     compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.8.0'
 
     runtime('org.springframework.boot:spring-boot-devtools')
+    runtime group: 'net.logstash.logback', name: 'logstash-logback-encoder', version: '5.2'
     runtime group: 'ch.qos.logback.contrib', name: 'logback-json-classic', version: '0.1.5'
     runtime group: 'ch.qos.logback.contrib', name: 'logback-jackson', version: '0.1.5'
     runtime group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.3'
@@ -128,27 +119,24 @@ publishing {
 }
 
 def getTheVersion() {
-    def version = rootProject.file('VERSION').text.trim()
-    def versionSuffix = "Unknown"
-    try {
-        def workingDir = new File("${project.projectDir}")
-        def result = 'git rev-parse --abbrev-ref HEAD'.execute(null, workingDir)
-        result.waitFor()
-        if (result.exitValue() == 0) {
-            def gitBranch = result.text.trim().replaceAll('/','_')
-            if (gitBranch == 'develop') {
-                gitBranch = 'SNAPSHOT'
-            }
-            if (gitBranch == 'master') {
-                versionSuffix = ''
-            } else {
-                versionSuffix = '-' + gitBranch
-            }
-
+    def workingDir = new File("${project.projectDir}")
+    def version = 'git describe --abbrev=0'.execute(null, workingDir)
+    version.waitFor()
+    def versionSuffix = "UnknownA"
+    def result = 'git rev-parse --abbrev-ref HEAD'.execute(null, workingDir)
+    result.waitFor()
+    if (result.exitValue() == 0) {
+        def gitBranch = result.text.trim().replaceAll('/','_')
+        if (gitBranch == 'master') {
+            versionSuffix = ''
+        } else if (gitBranch == 'develop') {
+            versionSuffix = '-SNAPSHOT'
+        } else {
+            versionSuffix = '-' + gitBranch
         }
-    } catch (e) {
+
     }
-    return version + versionSuffix
+    return "${version.text.trim()}${versionSuffix}"
 }
 
 allprojects {
@@ -164,9 +152,8 @@ allprojects {
 
     repositories {
         mavenCentral()
-        jcenter()
         maven {
-            url 'https://artifactory.does.not.exist/artifactory/gradle-release-dev'
+            url 'https://artifactory.does.not.exist/artifactory/gradle-release'
         }
     }
 }
@@ -196,10 +183,6 @@ artifactory {
         }
     }
 
-}
-
-checkstyle {
-    toolVersion "8.9"
 }
 
 jacoco {
@@ -270,6 +253,7 @@ task outputComputedVersion {
     def computedVersion = new File('VERSION-computed')
     computedVersion.delete()
     computedVersion.write(getTheVersion())
+    println(getTheVersion())
 }
 
 

@@ -7,7 +7,7 @@ Feature: Verify users create
     * def DbUtils = Java.type('uk.gov.service.bluebadge.test.utils.DbUtils')
     * def db = new DbUtils(dbConfig)
     * def setup = callonce db.runScript('acceptance-test-data.sql')
-    * def result = callonce read('./oauth2.feature')
+    * def result = callonce read('./oauth2-user.feature')
     * header Authorization = 'Bearer ' + result.accessToken
 
   Scenario: Create User Missing email and name as only spaces
@@ -27,7 +27,7 @@ Feature: Verify users create
 
   Scenario: Create User All valid except email already exists
     Given path 'users'
-    And request { name:"asdfgh", emailAddress:"abcnobody@dft.gov.uk", localAuthorityShortCode: "ABERD", roleId: 2 }
+    And request { name:"asdfgh", emailAddress:"um_abcnobody@dft.gov.uk", localAuthorityShortCode: "ABERD", roleId: 2 }
     When method POST
     Then status 400
     And match $.error.errors contains {field:"emailAddress", reason:"#notnull", message:"AlreadyExists.user.emailAddress", location:"#null", locationType:"#null"}
@@ -36,8 +36,7 @@ Feature: Verify users create
     Given path 'users'
     And request { name:"asdfgh", emailAddress:"abcnobodydifferentlocalauthority@dft.gov.uk", localAuthorityShortCode: "MANC", roleId: 2 }
     When method POST
-    Then status 400
-    And match $.error.errors contains {field:"localAuthority", reason:"#notnull", message:"NotSameAsCurrentUsers.user.localAuthority", location:"#null", locationType:"#null"}
+    Then status 403
 
   Scenario: Create user invalid name format
     Given path 'users'
@@ -55,7 +54,7 @@ Feature: Verify users create
 
   Scenario: Create User All valid
     Given path 'users'
-    And request { name:"Delete Me", emailAddress:"createuservalid@dft.gov.uk", localAuthorityShortCode: "ABERD", roleId: 2 }
+    And request { name:"Delete Me", emailAddress:"um_createuservalid@dft.gov.uk", localAuthorityShortCode: "ABERD", roleId: 2 }
     When method POST
     Then status 200
     And match $.data contains {uuid:"#notnull"}

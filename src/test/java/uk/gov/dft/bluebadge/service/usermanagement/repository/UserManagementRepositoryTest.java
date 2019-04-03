@@ -1,6 +1,8 @@
 package uk.gov.dft.bluebadge.service.usermanagement.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -8,10 +10,12 @@ import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlGroup;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.dft.bluebadge.common.security.Role;
 import uk.gov.dft.bluebadge.service.ApplicationContextTests;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.*;
 
@@ -20,7 +24,7 @@ import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.*;
 @Transactional
 public class UserManagementRepositoryTest extends ApplicationContextTests {
   private static final UUID DEFAULT_USER_UUID =
-      UUID.fromString("0093daf9-2782-47f8-93dc-bdf073204d6c");
+      UUID.fromString("bbadbec7-d4b0-4a81-a3bb-a487ae4da81a");
   private static final String DEFAULT_LOCAL_AUTHORITY_CODE = "BIRM";
   private static final String OTHER_LOCAL_AUTHORITY_CODE = "MANC";
   private static final UuidAuthorityCodeParams DEFAULT_RETRIEVE_BY_USER_ID_PARAMS =
@@ -39,6 +43,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
   private static final String DEFAULT_USER_EMAIL_LINK_UUID = "7d75652a-4e84-41e2-bd82-e5b5933b81da";
 
   @Autowired private UserManagementRepository userManagementRepository;
+  @Autowired private JdbcTemplate jdbcTemplate;
 
   @Test
   public void retrieveUserById_exists() {
@@ -126,7 +131,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
               "jane" + id + "@jane.com",
               OTHER_LOCAL_AUTHORITY_CODE,
               2,
-              "LA Admin");
+              Role.LA_ADMIN.getPrettyName());
       userManagementRepository.createUser(userEntity);
       userEntityList.add(userEntity);
     }
@@ -178,11 +183,21 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
 
   @Test
   public void updatePassword() {
+    Integer failureCount =
+        jdbcTemplate.queryForObject(
+            "select login_fail_count from users where id = -751", Integer.class);
+    assertThat(failureCount).isEqualTo(2);
+
     UserEntity userEntity =
         userManagementRepository.retrieveUserByUuid(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS).get();
     userEntity.setPassword("newPassword");
     int i = userManagementRepository.updatePassword(userEntity);
     assertThat(i).isEqualTo(1);
+
+    failureCount =
+        jdbcTemplate.queryForObject(
+            "select login_fail_count from users where id = -751", Integer.class);
+    assertThat(failureCount).isEqualTo(0);
   }
 
   @Test
@@ -258,7 +273,7 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     assertThat(updatedUser.getEmailAddress()).isEqualTo("jane@jane.com");
     assertThat(updatedUser.getAuthorityCode()).isEqualTo(OTHER_LOCAL_AUTHORITY_CODE);
     assertThat(updatedUser.getRoleId()).isEqualTo(2);
-    assertThat(updatedUser.getRoleName()).isEqualTo("LA Admin");
+    assertThat(updatedUser.getRoleName()).isEqualTo(Role.LA_ADMIN.getPrettyName());
     // Password should never be retrieved
     assertThat(updatedUser.getPassword()).isNull();
   }
@@ -335,16 +350,26 @@ public class UserManagementRepositoryTest extends ApplicationContextTests {
     // Currently no way of retrieving the inactive flag
   }
 
+  @Test
+  public void passwordIsBlacklisted() {
+    assertTrue(userManagementRepository.isPasswordBlacklisted("password"));
+  }
+
+  @Test
+  public void passwordIsUniqueEnough() {
+    assertFalse(userManagementRepository.isPasswordBlacklisted("S0r0kTysy@ch0b3z'j@n;"));
+  }
+
   private UserEntity checkDefaultUser(Optional<UserEntity> maybeUserEntity) {
     assertThat(maybeUserEntity).isNotNull();
     assertThat(maybeUserEntity.isPresent()).isTrue();
     UserEntity userEntity = maybeUserEntity.get();
     assertThat(userEntity.getUuid()).isEqualTo(DEFAULT_USER_UUID);
     assertThat(userEntity.getName()).isEqualTo("Sampath");
-    assertThat(userEntity.getEmailAddress()).isEqualTo("abc@dft.gov.uk");
+    assertThat(userEntity.getEmailAddress()).isEqualTo("um_unit_abc@dft.gov.uk");
     assertThat(userEntity.getAuthorityCode()).isEqualTo(DEFAULT_LOCAL_AUTHORITY_CODE);
     assertThat(userEntity.getRoleId()).isEqualTo(2);
-    assertThat(userEntity.getRoleName()).isEqualTo("LA Admin");
+    assertThat(userEntity.getRoleName()).isEqualTo(Role.LA_ADMIN.getPrettyName());
     return userEntity;
   }
 

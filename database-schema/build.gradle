@@ -11,6 +11,10 @@ buildscript {
 }
 
 apply plugin: "migrations"
+if (project != rootProject) {
+    apply plugin: 'eclipse'
+    eclipse.project.name = (rootProject.name + project.path).replaceAll(':', '-')
+}
 
 dependencies {
     migrationsDriver 'org.postgresql:postgresql:42.2.2'

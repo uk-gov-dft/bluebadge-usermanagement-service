@@ -1,5 +1,6 @@
 package uk.gov.dft.bluebadge.service.usermanagement.repository.domain;
 
+import java.time.Instant;
 import java.util.UUID;
 import lombok.Builder;
 import lombok.Data;
@@ -14,6 +15,7 @@ public class EmailLink {
   @NonNull private final String uuid;
   @NonNull private final UUID userUuid;
   private final Boolean isActive;
+  private final Instant createdOn;
 
   public String getLink() {
     return webappUri + uuid;

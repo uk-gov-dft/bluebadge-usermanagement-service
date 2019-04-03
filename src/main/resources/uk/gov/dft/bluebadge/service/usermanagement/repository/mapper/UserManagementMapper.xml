@@ -74,12 +74,14 @@
                 typeHandler="uk.gov.dft.bluebadge.common.repository.UuidTypeHandler"/>
         <result property="isActive"    column="isActive"     />
         <result property="uuid" column="uuid" />
+        <result property="createdOn" column="created_on" />
     </resultMap>
 
     <select id="retrieveEmailLinkWithUuid" parameterType="String" resultMap="emailLinkMap">
         SELECT u.user_uuid AS userUuid,
         el.is_active AS isActive,
-        el.uuid
+        el.uuid,
+        el.created_on
         FROM email_link el INNER JOIN users u ON el.user_id = u.id
         WHERE el.uuid = #{uuid}
     </select>
@@ -107,6 +109,7 @@
         SET
         password = #{password}
         , is_active = true
+        , login_fail_count = 0
         WHERE user_uuid = #{uuid,javaType=java.util.UUID,jdbcType=OTHER,typeHandler=uk.gov.dft.bluebadge.common.repository.UuidTypeHandler}
     </update>
 
@@ -137,5 +140,13 @@
             AND local_authority_short_code = #{authorityCode}
         </if>
     </delete>
+    
+    <select id=" ***REMOVED***>
+        SELECT EXISTS(
+          SELECT 1 FROM passwords_blacklist
+          WHERE id = #{password}
+        )
+    </select>
+    
 
 </mapper>

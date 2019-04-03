@@ -1,14 +1,17 @@
 package uk.gov.dft.bluebadge.service.usermanagement.service;
 
+import static java.time.temporal.ChronoUnit.HOURS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Java6Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,8 +24,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import uk.gov.dft.bluebadge.common.security.Role;
 import uk.gov.dft.bluebadge.common.security.SecurityUtils;
 import uk.gov.dft.bluebadge.common.security.model.BBPrincipal;
+import uk.gov.dft.bluebadge.common.service.exception.BadRequestException;
+import uk.gov.dft.bluebadge.common.service.exception.NotFoundException;
 import uk.gov.dft.bluebadge.common.util.TestBBPrincipal;
 import uk.gov.dft.bluebadge.model.usermanagement.generated.Password;
 import uk.gov.dft.bluebadge.service.client.messageservice.MessageApiClient;
@@ -33,8 +39,6 @@ import uk.gov.dft.bluebadge.service.usermanagement.repository.UserManagementRepo
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.EmailLink;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UserEntity;
 import uk.gov.dft.bluebadge.service.usermanagement.repository.domain.UuidAuthorityCodeParams;
-import uk.gov.dft.bluebadge.service.usermanagement.service.exception.BadRequestException;
-import uk.gov.dft.bluebadge.service.usermanagement.service.exception.NotFoundException;
 import uk.gov.dft.bluebadge.service.usermanagement.service.referencedata.ReferenceDataService;
 
 public class UserManagementServiceTest {
@@ -63,6 +67,7 @@ public class UserManagementServiceTest {
   @Mock private MessageApiClient messageApiClient;
   @Mock private SecurityUtils securityUtils;
   @Mock private ReferenceDataService referenceDataService;
+  @Mock private CommonPasswordsFilter filter;
 
   private UserEntity user1;
   private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -77,7 +82,8 @@ public class UserManagementServiceTest {
             WEBAPP_URI,
             securityUtils,
             passwordEncoder,
-            referenceDataService);
+            referenceDataService,
+            filter);
     when(securityUtils.getCurrentLocalAuthorityShortCode())
         .thenReturn(DEFAULT_LOCAL_AUTHORITY_SHORT_CODE);
 
@@ -109,7 +115,7 @@ public class UserManagementServiceTest {
     // And password reset email is created
     verify(messageApiClient, times(1)).sendEmailLinkMessage(any(NewUserRequest.class));
     // And user is set inactive
-    verify(repository, times(1)).updateUserToInactive(any());
+    verify(repository, never()).updateUserToInactive(any());
     // And email_link is created
     verify(repository, times(1)).createEmailLink(any(EmailLink.class));
 
@@ -139,6 +145,7 @@ public class UserManagementServiceTest {
     user.setName("test");
     user.setUuid(UUID.randomUUID());
     user.setEmailAddress("ggg");
+    user.setRoleId(Role.LA_ADMIN.getRoleId());
 
     when(repository.emailAddressAlreadyUsed(user)).thenReturn(true);
     when(messageApiClient.sendEmailLinkMessage(any(PasswordResetRequest.class)))
@@ -184,7 +191,7 @@ public class UserManagementServiceTest {
     assertThat( ***REMOVED***);
 
     // And user is set inactive
-    verify(repository).updateUserToInactive(any());
+    verify(repository, never()).updateUserToInactive(any());
     // And email_link is created
     verify(repository).createEmailLink(any(EmailLink.class));
   }
@@ -200,8 +207,9 @@ public class UserManagementServiceTest {
   public void retrieveUserById_ok() {
     // Given the user exists
     UserEntity user = new UserEntity();
-    when(repository.retrieveUserByUuid(DEFAULT_RETRIEVE_BY_USER_ID_PARAMS))
-        .thenReturn(Optional.of(user));
+    UuidAuthorityCodeParams authorityCodeParams =
+        UuidAuthorityCodeParams.builder().uuid(DEFAULT_USER_UUID).build();
+    when(repository.retrieveUserByUuid(authorityCodeParams)).thenReturn(Optional.of(user));
 
     // When retrieving the user then the user is returned
     Assert.assertEquals(user, service.retrieveUserById(DEFAULT_USER_UUID));
@@ -331,6 +339,7 @@ public class UserManagementServiceTest {
   @Test(expected = BadRequestException.class)
   public void updateUser_alreadyExists() {
     UserEntity user = new UserEntity();
+    user.setRoleId(Role.LA_ADMIN.getRoleId());
 
     // Given the user is valid
     when(repository.updateUser(user)).thenReturn(1);
@@ -359,11 +368,13 @@ public class UserManagementServiceTest {
             .userUuid(DEFAULT_USER_UUID)
             .uuid(uuid.toString())
             .isActive(true)
+            .createdOn(Instant.now())
             .build();
     UserEntity userEntity = new UserEntity();
     userEntity.setName("Jane Test");
     userEntity.setEmailAddress("janetest@email.com");
 
+    doNothing().when(filter).validatePasswordBlacklisted(any(String.class));
     when(repository.updatePassword(any())).thenReturn(1);
     when(repository.updateEmailLinkToInvalid(uuid.toString())).thenReturn(1);
     when(repository.retrieveEmailLinkWithUuid(uuid.toString())).thenReturn(link);
@@ -398,7 +409,7 @@ public class UserManagementServiceTest {
     assertThat( ***REMOVED***);
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void updatePassword_linkInactive() {
     // Given the new password is valid
     Password password = new Password();
@@ -413,10 +424,21 @@ public class UserManagementServiceTest {
             .isActive(false)
             .build();
 
+    doNothing().when(filter).validatePasswordBlacklisted(any(String.class));
     when(repository.retrieveEmailLinkWithUuid(uuid.toString())).thenReturn(link);
 
-    // When update password requested
-    service.updatePassword(uuid.toString(), password);
+    try {
+      // When update password requested
+      service.updatePassword(uuid.toString(), password);
+      fail("No exception thrown");
+    } catch (BadRequestException e) {
+      assertThat(e.getResponse()).isNotNull();
+      assertThat(e.getResponse().getBody()).isNotNull();
+      assertThat(e.getResponse().getBody().getError()).isNotNull();
+      assertThat(e.getResponse().getBody().getError().getErrors())
+          .extracting("message")
+          .containsOnly("email.link.inactive.uuid");
+    }
 
     // Then the email link is set inactive
     verify(repository, never()).updateEmailLinkToInvalid(uuid.toString());
@@ -424,7 +446,45 @@ public class UserManagementServiceTest {
     verify(repository, never()).updatePassword(any());
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
+  public void updatePassword_linkExpired() {
+    // Given the new password is valid
+    Password password = new Password();
+     ***REMOVED***);
+     ***REMOVED***);
+    UUID uuid = UUID.randomUUID();
+    EmailLink link =
+        EmailLink.builder()
+            .webappUri(WEBAPP_URI)
+            .userUuid(DEFAULT_USER_UUID)
+            .uuid(uuid.toString())
+            .isActive(true)
+            .createdOn(Instant.now().minus(25L, HOURS))
+            .build();
+
+    doNothing().when(filter).validatePasswordBlacklisted(any(String.class));
+    when(repository.retrieveEmailLinkWithUuid(uuid.toString())).thenReturn(link);
+
+    try {
+      // When update password requested
+      service.updatePassword(uuid.toString(), password);
+      fail("No exception thrown");
+    } catch (BadRequestException e) {
+      assertThat(e.getResponse()).isNotNull();
+      assertThat(e.getResponse().getBody()).isNotNull();
+      assertThat(e.getResponse().getBody().getError()).isNotNull();
+      assertThat(e.getResponse().getBody().getError().getErrors())
+          .extracting("message")
+          .containsOnly("email.link.expired.uuid");
+    }
+
+    // Then the email link is set inactive
+    verify(repository, never()).updateEmailLinkToInvalid(uuid.toString());
+    // And the password is stored
+    verify(repository, never()).updatePassword(any());
+  }
+
+  @Test
   public void updatePassword_linkDoesNotExist() {
     // Given the new password is valid
     Password password = new Password();
@@ -432,10 +492,21 @@ public class UserManagementServiceTest {
      ***REMOVED***);
     String uuid = UUID.randomUUID().toString();
 
+    doNothing().when(filter).validatePasswordBlacklisted(any(String.class));
     when(repository.retrieveEmailLinkWithUuid(uuid)).thenReturn(null);
 
-    // When update password requested
-    service.updatePassword(uuid, password);
+    try {
+      // When update password requested
+      service.updatePassword(uuid.toString(), password);
+      fail("No exception thrown");
+    } catch (BadRequestException e) {
+      assertThat(e.getResponse()).isNotNull();
+      assertThat(e.getResponse().getBody()).isNotNull();
+      assertThat(e.getResponse().getBody().getError()).isNotNull();
+      assertThat(e.getResponse().getBody().getError().getErrors())
+          .extracting("message")
+          .containsOnly("email.link.invalid.uuid");
+    }
 
     // Then the email link is not set inactive
     verify(repository, never()).updateEmailLinkToInvalid(uuid);
@@ -451,6 +522,7 @@ public class UserManagementServiceTest {
      ***REMOVED***);
     String uuid = UUID.randomUUID().toString();
 
+    doNothing().when(filter).validatePasswordBlacklisted(any(String.class));
     // When update password requested
     service.updatePassword(uuid, password);
 
@@ -464,7 +536,10 @@ public class UserManagementServiceTest {
 
   @Test
   public void deleteUser() {
-    when(repository.deleteUser(DEFAULT_DELETE_USER_PARAMS)).thenReturn(1);
+    UuidAuthorityCodeParams authorityCodeParams =
+        UuidAuthorityCodeParams.builder().uuid(DEFAULT_USER_UUID).build();
+
+    when(repository.deleteUser(authorityCodeParams)).thenReturn(1);
     service.deleteUser(DEFAULT_USER_UUID);
   }
 

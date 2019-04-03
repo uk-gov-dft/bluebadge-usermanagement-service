@@ -12,12 +12,13 @@ blue-badge:
 logging:
   level:
     root: ${APP_LOGGING_LEVEL:-INFO}
-    sample.mybatis.mapper: WARN
     uk.gov.dft.bluebadge.service: ${APP_LOGGING_LEVEL:-DEBUG}
 
 spring:
+  main:
+    banner-mode: "off"
   datasource:
-    url: jdbc:postgresql://postgresql:5432/bb_dev?currentSchema=usermanagement
+    url: jdbc:postgresql://postgresql:5432/bb_dev?currentSchema=usermanagement&sslmode=require
 
 
 
