@@ -6,7 +6,7 @@ blue-badge:
       host: api.${bb_env}.${url}
       port: 443
       scheme: https
-      contextpath: /messages1
+      contextpath: /
   la-webapp:
     email-link-uri: https://la-webapp.${bb_env}.${url}/set***REMOVED***/
     
@@ -15,7 +15,7 @@ blue-badge:
       host: api.${bb_env}.${url}
       port: 443
       scheme: https
-      contextpath: /reference-data1
+      contextpath: /
       
 logging:
   level:
