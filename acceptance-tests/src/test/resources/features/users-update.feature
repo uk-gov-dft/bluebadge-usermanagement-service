@@ -9,6 +9,7 @@ Feature: Verify users update
     * def setup = callonce db.runScript('acceptance-test-data.sql')
     * def result = callonce read('./oauth2-user.feature')
     * header Authorization = 'Bearer ' + result.accessToken
+    * header Accept = jsonVersionHeader
 
   Scenario: Update User Missing email and name as only spaces
     Given path 'users/3bfe600b-4425-40cd-ad81-d75bbe16ee13'

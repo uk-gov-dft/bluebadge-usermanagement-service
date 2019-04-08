@@ -9,6 +9,7 @@ Feature: Verify create password reset
     * def setup = callonce db.runScript('acceptance-test-data.sql')
     * def result = callonce read('./oauth2-user.feature')
     * header Authorization = 'Bearer ' + result.accessToken
+    * header Accept = jsonVersionHeader
 
   #passing request {uuid: "3bfe600b-4425-40cd-ad81-d75bbe16ee13"} only to satisfy karate framework
   Scenario: Verify ok request password email

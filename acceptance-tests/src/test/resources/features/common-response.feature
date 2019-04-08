@@ -9,6 +9,7 @@ Feature: Verify bad requests return a common response wrapping errors
     * def setup = callonce db.runScript('acceptance-test-data.sql')
     * def result = callonce read('./oauth2-user.feature')
     * header Authorization = 'Bearer ' + result.accessToken
+    * header Accept = jsonVersionHeader
 
   Scenario: Verify invalid bean validation value in body
     Given path 'users'

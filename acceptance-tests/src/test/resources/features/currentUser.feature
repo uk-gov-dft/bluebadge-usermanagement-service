@@ -9,6 +9,7 @@ Feature: Verify current users retrieval, using the access token
     * def setup = callonce db.runScript('acceptance-test-data.sql')
     * def result = callonce read('./oauth2-user.feature')
     * header Authorization = 'Bearer ' + result.accessToken
+    * header Accept = jsonVersionHeader
 
   Scenario: Verify retrieved user is the current authenticated user
     Given path 'users/me'

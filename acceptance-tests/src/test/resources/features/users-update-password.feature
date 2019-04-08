@@ -9,6 +9,7 @@ Feature: Verify users update password
     * def setup = callonce db.runScript('acceptance-test-data.sql')
     * def result = callonce read('./oauth2-lawebapp.feature')
     * header Authorization = 'Bearer ' + result.accessToken
+    * header Accept = jsonVersionHeader
 
   Scenario: Update password
     Given path 'user/password/4175e31c-9c0c-41c0-9afb-40dc0a89b9c5'

@@ -9,6 +9,7 @@ Feature: Verify users Delete
     * def setup = callonce db.runScript('acceptance-test-data.sql')
     * def result = callonce read('./oauth2-user.feature')
     * header Authorization = 'Bearer ' + result.accessToken
+    * header Accept = jsonVersionHeader
 
   Scenario: Verify delete not exists
     Given path 'users/5ec6e1f7-fa22-47e4-9034-8f4a7eb773a5'
