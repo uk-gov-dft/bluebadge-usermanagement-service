@@ -8,7 +8,7 @@ blue-badge:
       scheme: https
       contextpath: /
   la-webapp:
-    email-link-uri: https://la-webapp.${bb_env}.${url}/set***REMOVED***/
+    email-link-uri: https://${email_link_uri}.${url}/set***REMOVED***/
     
   referencedataservice:
     servicehost:
