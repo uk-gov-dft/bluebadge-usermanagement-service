@@ -1,48 +1,40 @@
 blue-badge:
   auth-server:
-    url: https://authorisation-service.${bb_env}.${url}/bb_auth
-    client-id: bb_user_management_id
-     ***REMOVED***
+    url: https://api.${bb_env}.${url}/bb_auth
   messageservice:
     servicehost:
-      host: messaging-service.${bb_env}.${url}
+      host: api.${bb_env}.${url}
       port: 443
       scheme: https
-      connectiontimeout: 6000
-      requesttimeout: 6000
-      contextpath: /uk-gov-dft/message-service/1.0.0
+      contextpath: /
   la-webapp:
     email-link-uri: https://${email_link_uri}.${url}/set***REMOVED***/
     
   referencedataservice:
     servicehost:
-      host: reference-service.${bb_env}.${url}
+      host: api.${bb_env}.${url}
       port: 443
       scheme: https
-      connectiontimeout: 6000
-      requesttimeout: 6000
-      contextpath: /uk-gov-dft/reference-data-service/1.0.0
+      contextpath: /
       
+logging:
+  level:
+    root: ${APP_LOGGING_LEVEL:INFO}
+    sample.mybatis.mapper: WARN
+    uk.gov.dft.bluebadge.service: ${APP_LOGGING_LEVEL:DEBUG}
+    org.springframework.security: INFO
 
 management:
   server:
-    port: ${bb_health:-8081}
-    servlet:
-      context-path: /manage
-  endpoints:
-    web:
-      exposure:
-        include: '*'
+    port: ${bb_health:8081}
 
 spring:
   main:
     banner-mode: "off"
   datasource:
      ***REMOVED***
-    username: ${bb_db_username:-developer}
-    url: jdbc:postgresql://${RDS_HOSTNAME}:5432/${bb_database:-bb_dev}?currentSchema=usermanagement&sslmode=verify-full
+    username: ${bb_db_username}
+    url: jdbc:postgresql://${RDS_HOSTNAME}:5432/${bb_database}?currentSchema=usermanagement&sslmode=verify-full
 
 server:
-  port: ${bb_port:-8080}
-  servlet:
-    context-path: /uk-gov-dft/user-management-service/1.0.0
+  port: ${bb_port:8080}
