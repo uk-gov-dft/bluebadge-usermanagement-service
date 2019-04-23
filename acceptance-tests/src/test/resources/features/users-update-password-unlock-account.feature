@@ -12,6 +12,7 @@ Feature: Verify users update password unlocks a locked account
     * url authServerUrl
     * path 'oauth/token'
     * header Authorization = call read('classpath:basic-auth.js') { username: 'bb_la_web_app_id',  ***REMOVED*** }
+    * header Accept = jsonVersionHeader
     * form field grant_type = 'password'
     * form field clientId = 'bb_la_web_app_id'
     * form field username = 'um_locked@dft.gov.uk'
@@ -21,6 +22,7 @@ Feature: Verify users update password unlocks a locked account
     And match $.error_description == 'User account is locked'
     * url baseUrl
     * header Authorization = 'Bearer ' + lawebapp_auth.accessToken
+    * header Accept = jsonVersionHeader
     Given path 'user/password/65c5ba53-876d-4b28-831d-70d8dec875fa'
     And request { ***REMOVED***}
     When method PATCH
@@ -28,6 +30,7 @@ Feature: Verify users update password unlocks a locked account
     * url authServerUrl
     Given path 'oauth/token'
     * header Authorization = call read('classpath:basic-auth.js') { username: 'bb_la_web_app_id',  ***REMOVED*** }
+    * header Accept = jsonVersionHeader
     * form field grant_type = 'password'
     * form field clientId = 'bb_la_web_app_id'
     * form field username = 'um_locked@dft.gov.uk'
@@ -39,6 +42,7 @@ Feature: Verify users update password unlocks a locked account
     * url authServerUrl
     * path 'oauth/token'
     * header Authorization = call read('classpath:basic-auth.js') { username: 'bb_la_web_app_id',  ***REMOVED*** }
+    * header Accept = jsonVersionHeader
     * form field grant_type = 'password'
     * form field clientId = 'bb_la_web_app_id'
     * form field username = 'um_inactive@dft.gov.uk'
@@ -48,6 +52,7 @@ Feature: Verify users update password unlocks a locked account
     And match $.error_description == 'User account is locked'
     * url baseUrl
     * header Authorization = 'Bearer ' + lawebapp_auth.accessToken
+    * header Accept = jsonVersionHeader
     Given path 'user/password/3c4f4b6c-d3c8-4627-817f-90df4fd31ff7'
     And request { ***REMOVED***}
     When method PATCH
@@ -55,6 +60,7 @@ Feature: Verify users update password unlocks a locked account
     * url authServerUrl
     Given path 'oauth/token'
     * header Authorization = call read('classpath:basic-auth.js') { username: 'bb_la_web_app_id',  ***REMOVED*** }
+    * header Accept = jsonVersionHeader
     * form field grant_type = 'password'
     * form field clientId = 'bb_la_web_app_id'
     * form field username = 'um_inactive@dft.gov.uk'

@@ -11,6 +11,7 @@ blue-badge:
       connectiontimeout: 6000
       requesttimeout: 6000
       contextpath: /uk-gov-dft/message-service/1.0.0
+      versionaccept: application/vnd.bluebadge-api.v1+json
   la-webapp:
     email-link-uri: http://localhost:8080/set***REMOVED***/
   reference-data-service:
@@ -21,6 +22,7 @@ blue-badge:
       connectiontimeout: 6000
       requesttimeout: 6000
       contextpath: /uk-gov-dft/reference-data-service/1.0.0
+      versionaccept: application/vnd.bluebadge-api.v1+json
 
 logging:
   level:

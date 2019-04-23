@@ -9,6 +9,7 @@ Feature: Verify API users do not have access to any user management services
     * def setup = callonce db.runScript('acceptance-test-data.sql')
     * def result = callonce read('./oauth2.feature')
     * header Authorization = 'Bearer ' + result.accessToken
+    * header Accept = jsonVersionHeader
 
   Scenario: Create User denied
     Given path 'users'
